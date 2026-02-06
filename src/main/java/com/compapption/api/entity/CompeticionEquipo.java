@@ -1,21 +1,37 @@
 package com.compapption.api.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
-@Table
+@Table(name = "competicion_equipo", uniqueConstraints = @UniqueConstraint(columnNames  = {"competicion_id", "equipo_id"}))
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CompeticionEquipo {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "competicion_id", nullable = false)
+    private Competicion competicion;
 
-    public Long getId() {
-        return id;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipo_id", nullable = false)
+    private Equipo equipo;
+
+    @CreationTimestamp
+    @Column(name = "fecha_inscripcion", updatable = false)
+    private LocalDateTime fechaInscripcion;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean activo = true;
 }

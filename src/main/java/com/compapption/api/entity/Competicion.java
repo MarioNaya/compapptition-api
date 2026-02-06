@@ -70,6 +70,18 @@ public class Competicion {
     @OneToMany(mappedBy = "competicion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CompeticionEquipo> equipos = new HashSet<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "competicion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Evento> eventos = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "competicion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Clasificacion> clasificaciones = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "competicion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UsuarioRolCompeticion> usuariosRol = new HashSet<>();
+
     public enum EstadoCompeticion{
         BORRADOR,
         ACTIVA,
