@@ -37,6 +37,10 @@ public class Competicion {
     private Usuario creador;
 
     @Builder.Default
+    @Column(nullable = false)
+    private Boolean publica = true;
+
+    @Builder.Default
     @Column(name = "inscripcion_abierta", nullable = false)
     private boolean inscripcionAbierta = true;
 
