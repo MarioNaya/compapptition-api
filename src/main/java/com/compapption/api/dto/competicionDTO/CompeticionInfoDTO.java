@@ -1,4 +1,4 @@
-package com.compapption.api.dto.CompeticionDTO;
+package com.compapption.api.dto.competicionDTO;
 
 import com.compapption.api.entity.Competicion;
 import lombok.AllArgsConstructor;

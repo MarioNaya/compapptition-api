@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,13 +33,13 @@ public interface InvitacionRepository extends JpaRepository<Invitacion, Long> {
     @Query("SELECT i FROM Invitacion i " +
             "WHERE i.emisor.id = :emisorId")
     List<Invitacion> findByEmisorId(
-            @Param("emisorid") Long emisorId
+            @Param("emisorId") Long emisorId
     );
 
     @Query("SELECT i FROM Invitacion i " +
             "WHERE i.competicion.id = :competicionId")
     List<Invitacion> findByCompeticionId(
-            @Param("competiconId") Long competicionId
+            @Param("competicionId") Long competicionId
     );
 
     @Modifying

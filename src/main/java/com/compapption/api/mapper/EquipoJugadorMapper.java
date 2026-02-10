@@ -1,12 +1,11 @@
 package com.compapption.api.mapper;
 
-import com.compapption.api.dto.JugadorDTO.JugadorSimpleDTO;
+import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
 import com.compapption.api.entity.EquipoJugador;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;

@@ -1,8 +1,8 @@
 package com.compapption.api.mapper;
 
-import com.compapption.api.dto.CompeticionDTO.CompeticionDetalleDTO;
-import com.compapption.api.dto.CompeticionDTO.CompeticionInfoDTO;
-import com.compapption.api.dto.CompeticionDTO.CompeticionSimpleDTO;
+import com.compapption.api.dto.competicionDTO.CompeticionDetalleDTO;
+import com.compapption.api.dto.competicionDTO.CompeticionInfoDTO;
+import com.compapption.api.dto.competicionDTO.CompeticionSimpleDTO;
 import com.compapption.api.entity.Competicion;
 import com.compapption.api.entity.ConfiguracionCompeticion;
 import org.mapstruct.*;

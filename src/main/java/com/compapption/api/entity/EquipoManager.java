@@ -33,5 +33,5 @@ public class EquipoManager {
 
     @CreationTimestamp
     @Column(name = "fecha_asignacion", updatable = false)
-    private LocalDateTime fechaAsigacion;
+    private LocalDateTime fechaAsignacion;
 }

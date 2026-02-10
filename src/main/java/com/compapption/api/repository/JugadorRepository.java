@@ -47,6 +47,6 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
             "LEFT JOIN FETCH e.tipoEstadistica " +
             "WHERE j.id = :id")
     Optional<Jugador> findByIdWithEstadisticas(
-            @Param("Id") Long id
+            @Param("id") Long id
     );
 }

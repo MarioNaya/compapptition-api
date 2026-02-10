@@ -44,6 +44,9 @@ public class LogModificacion {
     private String datosAnteriores;
 
     @Column(name = "datos_nuevos", columnDefinition = "JSON")
+    private String datosNuevos;
+
+    @Column(name = "ip_address", length = 50)
     private String ipAddress;
 
     @CreationTimestamp

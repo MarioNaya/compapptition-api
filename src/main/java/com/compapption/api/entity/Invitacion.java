@@ -20,7 +20,7 @@ public class Invitacion {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destinatario_id")
+    @JoinColumn(name = "emisor_id")
     private Usuario emisor;
 
     @Column(name = "destinatario_email", nullable = false, length = 100)

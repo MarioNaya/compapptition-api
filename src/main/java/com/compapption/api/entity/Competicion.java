@@ -57,7 +57,7 @@ public class Competicion {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private EstadoCompeticion estado;
+    private EstadoCompeticion estado = EstadoCompeticion.BORRADOR;
 
     @CreationTimestamp
     @Column(name = "fecha_creacion")

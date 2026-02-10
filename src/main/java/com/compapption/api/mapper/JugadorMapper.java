@@ -1,7 +1,7 @@
 package com.compapption.api.mapper;
 
-import com.compapption.api.dto.JugadorDTO.JugadorDetalleDTO;
-import com.compapption.api.dto.JugadorDTO.JugadorSimpleDTO;
+import com.compapption.api.dto.jugadorDTO.JugadorDetalleDTO;
+import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
 import com.compapption.api.entity.Jugador;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;

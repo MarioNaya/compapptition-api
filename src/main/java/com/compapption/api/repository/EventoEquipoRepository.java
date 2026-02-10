@@ -1,7 +1,6 @@
 package com.compapption.api.repository;
 
 import com.compapption.api.entity.EventoEquipo;
-import jdk.jfr.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,7 +25,7 @@ public interface EventoEquipoRepository extends JpaRepository<EventoEquipo, Long
     );
 
     @Query("SELECT ee FROM EventoEquipo ee " +
-            "WHERE ee.evento.id = :eventoid " +
+            "WHERE ee.evento.id = :eventoId " +
             "AND ee.esLocal = true")
     Optional<EventoEquipo> findLocalByEventoId(
             @Param("eventoId") Long eventoId
@@ -36,7 +35,7 @@ public interface EventoEquipoRepository extends JpaRepository<EventoEquipo, Long
             "WHERE ee.evento.id = :eventoId " +
             "AND ee.esLocal = false")
     Optional<EventoEquipo> findVisitanteByEventoId(
-            @Param("eventoid") Long eventoId
+            @Param("eventoId") Long eventoId
     );
 
     void deleteByEventoId(Long eventoId);

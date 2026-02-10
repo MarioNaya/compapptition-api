@@ -1,6 +1,6 @@
 package com.compapption.api.dto.equipoDTO;
 
-import com.compapption.api.dto.JugadorDTO.JugadorSimpleDTO;
+import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
 import com.compapption.api.entity.Equipo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

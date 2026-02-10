@@ -50,7 +50,7 @@ public class Equipo {
     private Set<EquipoManager> managers = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "Equipo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Clasificacion> clasificaciones = new HashSet<>();
 
     public enum TipoEquipo {

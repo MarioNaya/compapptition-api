@@ -1,4 +1,4 @@
-package com.compapption.api.dto.CompeticionDTO;
+package com.compapption.api.dto.competicionDTO;
 
 import com.compapption.api.entity.Competicion;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CompeticionSimpleDTO {
 
-    private String id;
+    private Long id;
     private String nombre;
     private String deporteNombre;
     private Competicion.EstadoCompeticion estado;

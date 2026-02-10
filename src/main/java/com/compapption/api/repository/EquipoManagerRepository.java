@@ -20,7 +20,7 @@ public interface EquipoManagerRepository extends JpaRepository<EquipoManager, Lo
 
     @Query("SELECT em FROM EquipoManager em " +
             "LEFT JOIN FETCH em.usuario " +
-            "WHERE em.equipo.id = :equipoid " +
+            "WHERE em.equipo.id = :equipoId " +
             "AND em.competicion.id = :competicionId")
     List<EquipoManager> findByEquipoIdAndCompeticionId(
             @Param("equipoId") Long equipoId,

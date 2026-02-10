@@ -26,7 +26,7 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
 
     @Query("SELECT DISTINCT c FROM Competicion c " +
             "JOIN c.usuariosRol ur " +
-            "WHERE ur.usuario.id = :usuarioid")
+            "WHERE ur.usuario.id = :usuarioId")
     List<Competicion> findByUsuarioParticipante(
             @Param("usuarioId") Long usuarioId
     );
