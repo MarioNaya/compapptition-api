@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface EstadisticaJugadorEvento extends JpaRepository<EstadisticaJugadorEvento, Long> {
+public interface EstadisticaJugadorEventoRepository extends JpaRepository<EstadisticaJugadorEventoRepository, Long> {
 
     @Query("SELECT e FROM EstadisticaJugadorEvento e " +
             "LEFT JOIN FETCH e.jugador " +
             "LEFT JOIN FETCH e.tipoEstadistica " +
             "WHERE e.evento.id = :eventoId")
-    List<EstadisticaJugadorEvento> findByEventoId(
+    List<EstadisticaJugadorEventoRepository> findByEventoId(
             @Param("eventoId") Long eventoId
     );
 
@@ -23,11 +23,11 @@ public interface EstadisticaJugadorEvento extends JpaRepository<EstadisticaJugad
             "LEFT JOIN FETCH e.evento " +
             "LEFT JOIN FETCH e.tipoEstadistica " +
             "WHERE e.jugador.id = :jugadorId")
-    List<EstadisticaJugadorEvento> findByJugadorId(
+    List<EstadisticaJugadorEventoRepository> findByJugadorId(
             @Param("jugadorId") Long jugadorId
     );
 
-    Optional<EstadisticaJugadorEvento> findByEventoIdAndJugadorIdAndTipoEstadisticaId(
+    Optional<EstadisticaJugadorEventoRepository> findByEventoIdAndJugadorIdAndTipoEstadisticaId(
             Long eventoId,
             Long jugadorId,
             Long tipoEstadisticaId
@@ -35,7 +35,7 @@ public interface EstadisticaJugadorEvento extends JpaRepository<EstadisticaJugad
 
     @Query("SELECT e FROM EstadisticaJugadorEvento e " +
             "WHERE e.evento.id = :eventoId AND e.jugador.id = :jugadorId")
-    List<EstadisticaJugadorEvento> findByEventoIdAndJugadorId(
+    List<EstadisticaJugadorEventoRepository> findByEventoIdAndJugadorId(
             @Param("eventoId") Long eventoId,
             @Param("jugadorId") Long jugadorId
     );
@@ -53,7 +53,7 @@ public interface EstadisticaJugadorEvento extends JpaRepository<EstadisticaJugad
     @Query("SELECT e FROM EstadisticaJugadorEvento e " +
             "JOIN e.evento ev " +
             "WHERE ev.competicion.id = :competicionId AND e.jugador.id = :jugadorId")
-    List<EstadisticaJugadorEvento> findByCompeticionIdAndJugadorId(
+    List<EstadisticaJugadorEventoRepository> findByCompeticionIdAndJugadorId(
             @Param("competicionId") Long competicionId,
             @Param("jugadorId") Long jugadorId
     );

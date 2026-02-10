@@ -42,12 +42,15 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
     @Query("SELECT c FROM Competicion c " +
             "LEFT JOIN FETCH c.deporte " +
             "LEFT JOIN FETCH c.configuracion " +
+            "LEFT JOIN FETCH c.creador " +
             "WHERE c.id = :id")
     Optional<Competicion> findByIdWithDetails(
             @Param("id") Long id
     );
 
     @Query("SELECT c FROM Competicion c " +
+            "LEFT JOIN FETCH c.deporte " +
+            "LEFT JOIN FETCH c.creador " +
             "WHERE c.deporte.id = :deporteId AND c.publica = true")
     Page<Competicion> findByDeporteIdAndPublicaTrue(
             @Param("deporteId") Long id,
@@ -55,6 +58,8 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
     );
 
     @Query("SELECT c FROM Competicion c " +
+            "LEFT JOIN FETCH c.deporte " +
+            "LEFT JOIN FETCH c.creador " +
             "WHERE (LOWER(c.nombre) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR LOWER(c.descripcion) LIKE LOWER(CONCAT('%', :search, '%'))) " +
             "AND c.publica = true")
