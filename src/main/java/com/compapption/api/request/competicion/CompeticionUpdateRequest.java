@@ -20,9 +20,9 @@ public class CompeticionUpdateRequest {
     private String nombre;
 
     private String descripcion;
-    private Boolean publica;
-    private Boolean inscripcionAbierta;
-    private Boolean estadisticasActivas;
+    private boolean publica;
+    private boolean inscripcionAbierta;
+    private boolean estadisticasActivas;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private Competicion.EstadoCompeticion estado;
@@ -30,11 +30,11 @@ public class CompeticionUpdateRequest {
     private ConfiguracionUpdaterequest configuracion;
 
     public static class ConfiguracionUpdaterequest {
-        private Integer puntosVictoria;
-        private Integer puntosEmpate;
-        private Integer puntosDerrota;
+        private int puntosVictoria;
+        private int puntosEmpate;
+        private int puntosDerrota;
         private ConfiguracionCompeticion.FormatoCompeticion formato;
-        private Integer numEquiposPlayOff;
-        private Integer partidosEliminatoria;
+        private int numEquiposPlayOff;
+        private int partidosEliminatoria;
     }
 }

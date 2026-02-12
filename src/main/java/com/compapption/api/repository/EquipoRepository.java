@@ -19,14 +19,14 @@ public interface EquipoRepository extends JpaRepository<Equipo, Long> {
             "LEFT JOIN FETCH ej.jugador " +
             "WHERE e.id = :id")
     Optional<Equipo> findByIdWithJugadores(
-            @Param("id") Long id
+            @Param("id") long id
     );
 
     @Query("SELECT DISTINCT e FROM Equipo e " +
             "JOIN e.managers m " +
             "WHERE m.usuario.id = :usuarioId")
     List<Equipo> findByManagersId(
-            @Param("usuarioId") Long usuarioId
+            @Param("usuarioId") long usuarioId
     );
 
     @Query("SELECT DISTINCT e FROM Equipo e " +
@@ -34,7 +34,7 @@ public interface EquipoRepository extends JpaRepository<Equipo, Long> {
             "WHERE ce.competicion.id = : competicionId " +
             "AND ce.activo = true")
     List<Equipo> findByCompeticionId(
-            @Param("competicionId") Long CompeticionId
+            @Param("competicionId") long CompeticionId
     );
 
     @Query("SELECT e FROM Equipo e " +

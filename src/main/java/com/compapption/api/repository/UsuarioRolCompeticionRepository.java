@@ -16,8 +16,8 @@ public interface UsuarioRolCompeticionRepository extends JpaRepository<UsuarioRo
             "LEFT JOIN FETCH urc.rol " +
             "WHERE urc.usuario.id = :usuarioId AND urc.competicion.id = :competicionId")
     List<UsuarioRolCompeticion> findByUsuarioIdAndCompeticionId(
-            @Param("usuarioId") Long usuarioId,
-            @Param("competicionId") Long competicionId
+            @Param("usuarioId") long usuarioId,
+            @Param("competicionId") long competicionId
     );
 
     @Query("SELECT urc FROM UsuarioRolCompeticion urc " +
@@ -25,24 +25,24 @@ public interface UsuarioRolCompeticionRepository extends JpaRepository<UsuarioRo
             "LEFT JOIN FETCH urc.rol " +
             "WHERE urc.competicion.id = :competicionId")
     List<UsuarioRolCompeticion> findByCompeticionId(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
 
     Optional<UsuarioRolCompeticion> findByUsuarioIdAndCompeticionIdAndRolId(
-            Long usuarioId,
-            Long competicionId,
-            Long rolId
+            long usuarioId,
+            long competicionId,
+            long rolId
     );
 
     boolean existsByUsuarioIdAndCompeticionIdAndRolId(
-            Long usuarioId,
-            Long competicionId,
-            Long rolId
+            long usuarioId,
+            long competicionId,
+            long rolId
     );
 
     void deleteByUsuarioIdAndCompeticionIdAndRolId(
-            Long usuarioId,
-            Long competicionId,
-            Long rolId
+            long usuarioId,
+            long competicionId,
+            long rolId
     );
 }

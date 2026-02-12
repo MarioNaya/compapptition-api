@@ -14,14 +14,14 @@ import java.util.Optional;
 @Repository
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
 
-    Optional<Jugador> findByUsuarioId(Long usuarioId);
+    Optional<Jugador> findByUsuarioId(long usuarioId);
 
     @Query("SELECT j FROM Jugador j " +
             "LEFT JOIN FETCH  j.equipos ej " +
             "LEFT JOIN FETCH ej.equipo " +
             "WHERE j.id = :id")
     Optional<Jugador> findByIdWithEquipos(
-            @Param("id") Long id
+            @Param("id") long id
     );
 
     @Query("SELECT DISTINCT j FROM Jugador j " +
@@ -29,7 +29,7 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
             "WHERE ej.equipo.id = :equipoId " +
             "AND ej.activo = true")
     List<Jugador> findByEquipoId(
-            @Param("equipoId") Long equipoId
+            @Param("equipoId") long equipoId
     );
 
     @Query("SELECT j FROM Jugador j " +
@@ -47,6 +47,6 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
             "LEFT JOIN FETCH e.tipoEstadistica " +
             "WHERE j.id = :id")
     Optional<Jugador> findByIdWithEstadisticas(
-            @Param("id") Long id
+            @Param("id") long id
     );
 }

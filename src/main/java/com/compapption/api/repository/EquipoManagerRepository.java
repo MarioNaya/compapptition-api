@@ -13,9 +13,9 @@ import java.util.Optional;
 public interface EquipoManagerRepository extends JpaRepository<EquipoManager, Long> {
 
     Optional<EquipoManager> findByEquipoIdAndCompeticionIdAndUsuarioId(
-            Long equipoId,
-            Long competicionId,
-            Long usuarioId
+            long equipoId,
+            long competicionId,
+            long usuarioId
     );
 
     @Query("SELECT em FROM EquipoManager em " +
@@ -23,8 +23,8 @@ public interface EquipoManagerRepository extends JpaRepository<EquipoManager, Lo
             "WHERE em.equipo.id = :equipoId " +
             "AND em.competicion.id = :competicionId")
     List<EquipoManager> findByEquipoIdAndCompeticionId(
-            @Param("equipoId") Long equipoId,
-            @Param("competicionId") Long competicionId
+            @Param("equipoId") long equipoId,
+            @Param("competicionId") long competicionId
     );
 
     @Query("SELECT em FROM EquipoManager em " +
@@ -32,18 +32,18 @@ public interface EquipoManagerRepository extends JpaRepository<EquipoManager, Lo
             "LEFT JOIN FETCH em.competicion " +
             "WHERE em.usuario.id = :usuarioId")
     List<EquipoManager> findByUsuarioId(
-            @Param("usuarioId") Long usuarioId
+            @Param("usuarioId") long usuarioId
     );
 
     boolean existsByEquipoIdAndCompeticionIdAndUsuarioId(
-            Long equipoId,
-            Long competicionId,
-            Long usuarioId
+            long equipoId,
+            long competicionId,
+            long usuarioId
     );
 
     void deleteByEquipoIdAndCompeticionId(
-            Long equipoId,
-            Long competicionId
+            long equipoId,
+            long competicionId
     );
 
 }

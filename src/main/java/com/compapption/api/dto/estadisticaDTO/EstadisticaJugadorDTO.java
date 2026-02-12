@@ -13,11 +13,11 @@ import java.math.BigDecimal;
 @Builder
 public class EstadisticaJugadorDTO {
 
-    private Long id;
-    private Long eventoId;
-    private Long jugadorId;
+    private long id;
+    private long eventoId;
+    private long jugadorId;
     private String jugadorNombre;
-    private Long tipoEstadisticaId;
+    private long tipoEstadisticaId;
     private String tipoEstadisticaNombre;
     private BigDecimal valor;
 

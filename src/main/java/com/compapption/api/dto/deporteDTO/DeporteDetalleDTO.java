@@ -14,10 +14,10 @@ import java.util.List;
 @Builder
 public class DeporteDetalleDTO {
 
-    private Long id;
+    private long id;
     private String nombre;
     private String descripcion;
     private byte[] icono;
-    private Boolean activo;
+    private boolean activo;
     private List<TipoEstadistica> tipoEstadisticas;
 }

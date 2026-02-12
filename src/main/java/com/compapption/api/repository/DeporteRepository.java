@@ -20,7 +20,7 @@ public interface DeporteRepository extends JpaRepository<Deporte, Long> {
             "LEFT JOIN FETCH d.tipoEstadisticaSet " +
             "WHERE d.id = :id")
     Optional<Deporte> findByIdWithEstadisticas(
-            @Param("id") Long id
+            @Param("id") long id
     );
 
     boolean existsByNombre(String nombre);

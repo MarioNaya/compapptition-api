@@ -17,7 +17,7 @@ public class Deporte {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String nombre;
@@ -30,7 +30,7 @@ public class Deporte {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean activo = true;
+    private boolean activo = true;
 
     @Builder.Default
     @OneToMany(mappedBy = "deporte", cascade = CascadeType.ALL, orphanRemoval = true)

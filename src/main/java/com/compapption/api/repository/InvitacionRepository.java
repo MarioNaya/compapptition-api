@@ -27,19 +27,19 @@ public interface InvitacionRepository extends JpaRepository<Invitacion, Long> {
             "WHERE  i.destinatario.id = :usuarioId " +
             "AND i.estado = 'PENDIENTE'")
     List<Invitacion> findPendientesByUsuarioId(
-            @Param("usuarioId") Long usuarioId
+            @Param("usuarioId") long usuarioId
     );
 
     @Query("SELECT i FROM Invitacion i " +
             "WHERE i.emisor.id = :emisorId")
     List<Invitacion> findByEmisorId(
-            @Param("emisorId") Long emisorId
+            @Param("emisorId") long emisorId
     );
 
     @Query("SELECT i FROM Invitacion i " +
             "WHERE i.competicion.id = :competicionId")
     List<Invitacion> findByCompeticionId(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
 
     @Modifying
@@ -51,7 +51,7 @@ public interface InvitacionRepository extends JpaRepository<Invitacion, Long> {
             );
 
     boolean existsByDestinatarioEmailAndCompeticionIdAndEstado(
-            String email, Long competicionId,
+            String email, long competicionId,
             Invitacion.EstadoInvitacion estado
     );
 }

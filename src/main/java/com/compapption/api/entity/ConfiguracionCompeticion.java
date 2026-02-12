@@ -15,7 +15,7 @@ public class ConfiguracionCompeticion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competicion_id", nullable = false, unique = true)
@@ -23,15 +23,15 @@ public class ConfiguracionCompeticion {
 
     @Builder.Default
     @Column(name = "puntos_victoria")
-    private Integer puntosVictoria = 3;
+    private int puntosVictoria = 3;
 
     @Builder.Default
     @Column(name = "puntos_empate")
-    private Integer puntosEmpate = 1;
+    private int puntosEmpate = 1;
 
     @Builder.Default
     @Column(name = "puntos_derrota")
-    private Integer puntosDerrota = 0;
+    private int puntosDerrota = 0;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -40,11 +40,11 @@ public class ConfiguracionCompeticion {
 
     @Builder.Default
     @Column(name = "num_equipos_playoff")
-    private Integer numEquiposPlayoff = 8;
+    private int numEquiposPlayoff = 8;
 
     @Builder.Default
     @Column(name = "partidos_eliminatoria")
-    private Integer partidosEliminatoria = 1;
+    private int partidosEliminatoria = 1;
 
     public enum FormatoCompeticion {
         EVENTO_UNICO,

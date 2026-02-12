@@ -18,7 +18,7 @@ public class EquipoJugador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipo_id", nullable = false)
@@ -29,11 +29,11 @@ public class EquipoJugador {
     private Jugador jugador;
 
     @Column(name = "dorsal_equipo")
-    private Integer dorsalEquipo;
+    private int dorsalEquipo;
 
     @Builder.Default
     @Column(nullable = false)
-    private  Boolean activo = true;
+    private  boolean activo = true;
 
     @CreationTimestamp
     @Column(name = "fecha_alta", updatable = false)

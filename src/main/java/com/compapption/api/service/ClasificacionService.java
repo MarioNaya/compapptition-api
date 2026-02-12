@@ -23,7 +23,7 @@ public class ClasificacionService {
     private final ClasificacionMapper clasificacionMapper;
 
     @Transactional(readOnly = true)
-    public List<ClasificacionDetalleDTO> obtenerClasificacionDetalle(Long competicionId){
+    public List<ClasificacionDetalleDTO> obtenerClasificacionDetalle(long competicionId){
         if (!competicionRepository.existsById(competicionId)){
             throw new ResourceNotFoundException("Competición", "id", competicionId);
         }
@@ -33,7 +33,7 @@ public class ClasificacionService {
     }
 
     @Transactional(readOnly = true)
-    public List<ClasificacionSimpleDTO> obtenerClasificacionSimple(Long competicionId){
+    public List<ClasificacionSimpleDTO> obtenerClasificacionSimple(long competicionId){
         if (!competicionRepository.existsById(competicionId)){
             throw new ResourceNotFoundException("Competición", "id", competicionId);
         }

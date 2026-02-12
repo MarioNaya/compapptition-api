@@ -35,7 +35,7 @@ public interface EquipoJugadorMapper {
             return null;
         }
         return equipoJugadores.stream()
-                .filter(EquipoJugador::getActivo)
+                .filter(EquipoJugador::isActivo)
                 .map(this::toJugadorSimpleDTO)
                 .collect(Collectors.toList());
     }

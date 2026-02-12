@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 public class EventoSimpleDTO {
 
-    private Long id;
-    private Long competicionId;
+    private long id;
+    private long competicionId;
     private String competicionNombre;
     private LocalDateTime fechaHora;
     private EventoEquipoDTO equipoLocal;

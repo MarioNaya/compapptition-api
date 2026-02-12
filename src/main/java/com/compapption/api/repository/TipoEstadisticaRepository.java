@@ -10,9 +10,9 @@ import java.util.Optional;
 @Repository
 public interface TipoEstadisticaRepository extends JpaRepository<TipoEstadistica, Long> {
 
-    List<TipoEstadistica> findByDeporteIdAndActivoTrueOrderByOrdenAsc(Long deporteId);
+    List<TipoEstadistica> findByDeporteIdAndActivoTrueOrderByOrdenAsc(long deporteId);
 
-    Optional<TipoEstadistica> findByDeporteIdAndNombre(Long deporteId, String nombre);
+    Optional<TipoEstadistica> findByDeporteIdAndNombre(long deporteId, String nombre);
 
-    boolean existsByDeporteIdAndNombre(Long deporteId, String nombre);
+    boolean existsByDeporteIdAndNombre(long deporteId, String nombre);
 }

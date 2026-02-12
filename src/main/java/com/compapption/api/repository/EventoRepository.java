@@ -20,13 +20,13 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             "WHERE e.competicion.id = :competicionId " +
             "ORDER BY e.jornada, e.fechaHora")
     List<Evento> findByCompeticionIdOrdered(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
 
     @Query("SELECT e FROM Evento e " +
             "WHERE e.competicion.id = :competicionId")
     Page<Evento> findByCompeticionId(
-            @Param("competicionId") Long competicionId,
+            @Param("competicionId") long competicionId,
             Pageable pageable
     );
 
@@ -34,7 +34,7 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             "WHERE e.competicion.id = :competicionId " +
             "AND e.jornada = :jornada")
     List<Evento> findByCompeticionIdAndJornada(
-            @Param("competicionId") Long competicionId,
+            @Param("competicionId") long competicionId,
             @Param("jornada") Integer jornada
     );
 
@@ -43,7 +43,7 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             "LEFT JOIN FETCH ee.equipo " +
             "WHERE e.id = :id")
     Optional<Evento> findByIdWithEquipos(
-            @Param("id") Long id
+            @Param("id") long id
     );
 
     @Query("SELECT e FROM Evento e " +
@@ -52,7 +52,7 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             "LEFT JOIN FETCH es.tipoEstadistica " +
             "WHERE e.id = :id")
     Optional<Evento> findByIdWithEstadisticas(
-            @Param("id") Long id
+            @Param("id") long id
     );
 
     @Query("SELECT e FROM Evento e " +
@@ -60,7 +60,7 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             "WHERE ee.equipo.id = :equipoId " +
             "ORDER BY e.fechaHora DESC")
     List<Evento> findByEquipoId(
-            @Param("equipoId") Long equipoId
+            @Param("equipoId") long equipoId
     );
 
     @Query("SELECT e FROM Evento e " +
@@ -76,7 +76,7 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             "AND e.fechaHora " +
             "BETWEEN :inicio AND :fin")
     List<Evento> findByCompeticionIdAndFechaHoraBetween(
-            @Param("competicionId") Long competicionId,
+            @Param("competicionId") long competicionId,
             @Param("inicio") LocalDateTime inicio,
             @Param("fin") LocalDateTime fin
     );
@@ -84,13 +84,13 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     @Query("SELECT MAX(e.jornada) FROM Evento e " +
             "WHERE e.competicion.id = :competicionId")
     Integer findMaxJornadaByCompeticionId(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
 
     @Query("SELECT e FROM Evento e " +
             "WHERE e.competicion.id = :competicionId " +
             "AND e.estado = 'FINALIZADO'")
     List<Evento> findFinalizadosByCompeticionId(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
 }

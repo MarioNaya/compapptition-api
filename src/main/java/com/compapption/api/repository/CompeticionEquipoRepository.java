@@ -12,27 +12,27 @@ import java.util.Optional;
 @Repository
 public interface CompeticionEquipoRepository extends JpaRepository<CompeticionEquipo, Long> {
     
-    Optional<CompeticionEquipo> findByCompeticionIdAndEquipoId(Long competicionId, Long equipoId);
+    Optional<CompeticionEquipo> findByCompeticionIdAndEquipoId(long competicionId, long equipoId);
     
     @Query("SELECT ce FROM CompeticionEquipo ce " +
             "LEFT JOIN FETCH ce.equipo " +
             "WHERE ce.competicion.id = :competicionId AND ce.activo = true")
     List<CompeticionEquipo> findActivosByCompeticionId(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
     
     @Query("SELECT ce FROM CompeticionEquipo ce " +
             "LEFT JOIN FETCH ce.competicion " +
             "WHERE ce.equipo.id = :equipoId AND ce.activo = true")
     List<CompeticionEquipo> findActivosByEquipoId(
-            @Param("equipoId") Long equipoId
+            @Param("equipoId") long equipoId
     );
     
-    boolean existsByCompeticionIdAndEquipoId(Long competicionId, Long equipoId);
+    boolean existsByCompeticionIdAndEquipoId(long competicionId, long equipoId);
 
     @Query("SELECT COUNT(ce) FROM CompeticionEquipo ce " +
             "WHERE ce.competicion.id = :competicionId AND ce.activo = true")
     long countActivosByCompeticionId(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
 }

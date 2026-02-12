@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class EquipoSimpleDTO {
 
-    private Long id;
+    private long id;
     private String nombre;
     private String descripcion;
     private byte[] escudo;

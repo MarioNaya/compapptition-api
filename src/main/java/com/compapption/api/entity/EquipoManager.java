@@ -17,7 +17,7 @@ public class EquipoManager {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipo_id", nullable = false)

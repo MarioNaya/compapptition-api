@@ -20,7 +20,7 @@ public class Competicion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -38,7 +38,7 @@ public class Competicion {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean publica = true;
+    private boolean publica = true;
 
     @Builder.Default
     @Column(name = "inscripcion_abierta", nullable = false)

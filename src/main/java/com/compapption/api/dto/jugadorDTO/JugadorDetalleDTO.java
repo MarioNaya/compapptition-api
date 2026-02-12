@@ -16,10 +16,10 @@ public class JugadorDetalleDTO {
     Long id;
     private String nombre;
     private String apellidos;
-    private Integer Dorsal;
+    private int Dorsal;
     private String posicion;
     private byte[] foto;
-    private Long usuarioid;
+    private long usuarioid;
     private String usuarioUsername;
     private LocalDateTime fechaCreacion;
 }

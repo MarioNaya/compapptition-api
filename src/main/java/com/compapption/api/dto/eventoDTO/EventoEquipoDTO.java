@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class EventoEquipoDTO {
-    private Long id;
+    private long id;
     private String nombre;
     private byte[] escudo;
-    private Boolean esLocal;
+    private boolean esLocal;
 }

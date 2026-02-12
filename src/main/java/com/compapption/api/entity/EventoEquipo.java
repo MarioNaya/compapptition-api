@@ -19,7 +19,7 @@ public class EventoEquipo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evento_id", nullable = false)
@@ -30,5 +30,5 @@ public class EventoEquipo {
     private Equipo equipo;
 
     @Column(name = "es_local", nullable = false)
-    private Boolean esLocal;
+    private boolean esLocal;
 }

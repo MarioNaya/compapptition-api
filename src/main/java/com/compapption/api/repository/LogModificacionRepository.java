@@ -18,7 +18,7 @@ public interface LogModificacionRepository extends JpaRepository<LogModificacion
             "WHERE  l.competicion.id = :competicionId " +
             "ORDER BY l.fecha DESC")
     Page<LogModificacion> findByCompeticionId(
-            @Param("competicionId") Long competicionId,
+            @Param("competicionId") long competicionId,
             Pageable pageable
     );
 
@@ -26,7 +26,7 @@ public interface LogModificacionRepository extends JpaRepository<LogModificacion
             "WHERE l.usuario.id = :usuarioId " +
             "ORDER BY l.fecha DESC")
     Page<LogModificacion> findByUsuarioId(
-            @Param("usuarioId") Long usuarioId,
+            @Param("usuarioId") long usuarioId,
             Pageable pageable
     );
 
@@ -36,7 +36,7 @@ public interface LogModificacionRepository extends JpaRepository<LogModificacion
             "ORDER BY l.fecha DESC")
     List<LogModificacion> findByEntidadAndEntidadId(
             @Param("entidad") String entidad,
-            @Param("entidadId") Long entidadId
+            @Param("entidadId") long entidadId
     );
 
     @Query("SELECT l FROM LogModificacion l " +

@@ -20,7 +20,7 @@ public class Jugador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -29,7 +29,7 @@ public class Jugador {
     private String apellidos;
 
     @Column
-    private Integer dorsal;
+    private int dorsal;
 
     @Column(length = 50)
     private String posicion;

@@ -21,14 +21,14 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
     @Query("SELECT c FROM Competicion c " +
             "WHERE c.creador.id = :usuarioId")
     List<Competicion> findByCreadorId(
-            @Param("usuarioId") Long usuarioId
+            @Param("usuarioId") long usuarioId
     );
 
     @Query("SELECT DISTINCT c FROM Competicion c " +
             "JOIN c.usuariosRol ur " +
             "WHERE ur.usuario.id = :usuarioId")
     List<Competicion> findByUsuarioParticipante(
-            @Param("usuarioId") Long usuarioId
+            @Param("usuarioId") long usuarioId
     );
 
     @Query("SELECT c FROM Competicion c " +
@@ -36,7 +36,7 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
             "LEFT JOIN FETCH ce.equipo " +
             "WHERE c.id = :id")
     Optional<Competicion> findByIdWithEquipos(
-            @Param("id") Long id
+            @Param("id") long id
     );
 
     @Query("SELECT c FROM Competicion c " +
@@ -45,7 +45,7 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
             "LEFT JOIN FETCH c.creador " +
             "WHERE c.id = :id")
     Optional<Competicion> findByIdWithDetails(
-            @Param("id") Long id
+            @Param("id") long id
     );
 
     @Query("SELECT c FROM Competicion c " +
@@ -53,7 +53,7 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
             "LEFT JOIN FETCH c.creador " +
             "WHERE c.deporte.id = :deporteId AND c.publica = true")
     Page<Competicion> findByDeporteIdAndPublicaTrue(
-            @Param("deporteId") Long id,
+            @Param("deporteId") long id,
             Pageable pageable
     );
 

@@ -21,7 +21,7 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
@@ -40,7 +40,7 @@ public class Usuario {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean activo = true;
+    private boolean activo = true;
 
     @CreationTimestamp
     @Column(name = "fecha_creacion", updatable = false)

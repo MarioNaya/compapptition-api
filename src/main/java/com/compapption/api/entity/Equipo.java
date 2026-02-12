@@ -17,7 +17,7 @@ public class Equipo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -25,7 +25,7 @@ public class Equipo {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "escudo_equipo", columnDefinition = "LONGBLOB")
+    @Column(name = "escudo_equipo", columnDefinition = "BLOB")
     private byte[] escudo;
 
     @Builder.Default

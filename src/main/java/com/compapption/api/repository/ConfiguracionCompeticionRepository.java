@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ConfiguracionCompeticionRepository extends JpaRepository<ConfiguracionCompeticion, Long> {
 
-    Optional<ConfiguracionCompeticion> findByCompeticionId(Long competicionId);
+    Optional<ConfiguracionCompeticion> findByCompeticionId(long competicionId);
 }

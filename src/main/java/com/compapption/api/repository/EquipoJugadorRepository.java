@@ -18,14 +18,14 @@ public interface EquipoJugadorRepository extends JpaRepository<EquipoJugador, Lo
             "LEFT JOIN FETCH ej.jugador " +
             "WHERE ej.equipo.id = :equipoId AND ej.activo = true")
     List<EquipoJugador> findActivosByEquipoId(
-            @Param("equipoId") Long jugadorId
+            @Param("equipoId") long jugadorId
     );
 
     @Query("SELECT ej FROM EquipoJugador ej " +
             "LEFT JOIN FETCH ej.equipo " +
             "WHERE ej.jugador.id = :jugadorId AND ej.activo = true")
     List<EquipoJugador> findActivosByJugadorId(
-            @Param("jugadorId") Long jugadorId
+            @Param("jugadorId") long jugadorId
     );
 
     boolean existsByEquipoIdAndJugadorIdAndActivoTrue();
@@ -33,7 +33,7 @@ public interface EquipoJugadorRepository extends JpaRepository<EquipoJugador, Lo
     @Query("SELECT COUNT(ej) FROM EquipoJugador ej " +
             "WHERE ej.equipo.id = :equipoId AND ej.activo = true")
     long countActivosByEquipoId(
-            @Param("equipoId") Long equipoId
+            @Param("equipoId") long equipoId
     );
 
     @Query("SELECT ej FROM EquipoJugador ej " +
@@ -41,7 +41,7 @@ public interface EquipoJugadorRepository extends JpaRepository<EquipoJugador, Lo
             "AND ej.dorsalEquipo = :dorsal " +
             "AND ej.activo = true")
     Optional<EquipoJugador> findByEquipoIdAndDorsalEquipo(
-            @Param("equipoId") Long equipoId,
-            @Param("dorsal") Integer dorsal
+            @Param("equipoId") long equipoId,
+            @Param("dorsal") int dorsal
     );
 }

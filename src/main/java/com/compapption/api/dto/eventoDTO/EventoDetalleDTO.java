@@ -14,15 +14,15 @@ import java.time.LocalDateTime;
 @Builder
 public class EventoDetalleDTO {
 
-    private Long id;
-    private Long competicionId;
+    private long id;
+    private long competicionId;
     private String competicionnombre;
-    private Integer jornada;
+    private int jornada;
     private LocalDateTime fechaHora;
     private String lugar;
     private Evento.EstadoEvento estado;
-    private Integer resultadoLocal;
-    private Integer resultadoVisitante;
+    private int resultadoLocal;
+    private int resultadoVisitante;
     private String observaciones;
     private LocalDateTime fechaCreacion;
 

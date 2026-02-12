@@ -17,7 +17,7 @@ public interface EstadisticaJugadorEventoRepository extends JpaRepository<Estadi
             "LEFT JOIN FETCH e.tipoEstadistica " +
             "WHERE e.evento.id = :eventoId")
     List<EstadisticaJugadorEvento> findByEventoId(
-            @Param("eventoId") Long eventoId
+            @Param("eventoId") long eventoId
     );
 
     @Query("SELECT e FROM EstadisticaJugadorEvento e " +
@@ -25,37 +25,37 @@ public interface EstadisticaJugadorEventoRepository extends JpaRepository<Estadi
             "LEFT JOIN FETCH e.tipoEstadistica " +
             "WHERE e.jugador.id = :jugadorId")
     List<EstadisticaJugadorEvento> findByJugadorId(
-            @Param("jugadorId") Long jugadorId
+            @Param("jugadorId") long jugadorId
     );
 
     Optional<EstadisticaJugadorEvento> findByEventoIdAndJugadorIdAndTipoEstadisticaId(
-            Long eventoId,
-            Long jugadorId,
-            Long tipoEstadisticaId
+            long eventoId,
+            long jugadorId,
+            long tipoEstadisticaId
     );
 
     @Query("SELECT e FROM EstadisticaJugadorEvento e " +
             "WHERE e.evento.id = :eventoId AND e.jugador.id = :jugadorId")
     List<EstadisticaJugadorEvento> findByEventoIdAndJugadorId(
-            @Param("eventoId") Long eventoId,
-            @Param("jugadorId") Long jugadorId
+            @Param("eventoId") long eventoId,
+            @Param("jugadorId") long jugadorId
     );
 
-    void deleteByEventoId(Long eventoId);
+    void deleteByEventoId(long eventoId);
 
     @Query("SELECT SUM(e.valor) FROM EstadisticaJugadorEvento e " +
             "WHERE e.jugador.id = :jugadorId " +
             "AND e.tipoEstadistica.id = :tipoEstadisticaId")
     java.math.BigDecimal sumValorByJugadorIdAndTipoEstadisticaId(
-            @Param("jugadorId") Long jugadorId,
-            @Param("tipoEstadisticaId") Long tipoEstadisticaId
+            @Param("jugadorId") long jugadorId,
+            @Param("tipoEstadisticaId") long tipoEstadisticaId
     );
 
     @Query("SELECT e FROM EstadisticaJugadorEvento e " +
             "JOIN e.evento ev " +
             "WHERE ev.competicion.id = :competicionId AND e.jugador.id = :jugadorId")
     List<EstadisticaJugadorEvento> findByCompeticionIdAndJugadorId(
-            @Param("competicionId") Long competicionId,
-            @Param("jugadorId") Long jugadorId
+            @Param("competicionId") long competicionId,
+            @Param("jugadorId") long jugadorId
     );
 }

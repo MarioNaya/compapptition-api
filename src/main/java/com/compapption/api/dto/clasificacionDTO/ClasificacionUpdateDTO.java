@@ -11,16 +11,16 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ClasificacionUpdateDTO {
 
-    private Long id;
-    private Long equipoId;
-    private Integer posicion;
-    private Integer puntos;
-    private Integer partidosJugados;
-    private Integer victorias;
-    private Integer empates;
-    private Integer derrotas;
-    private Integer golesFavor;
-    private Integer golesContra;
-    private Integer diferenciaGoles;
+    private long id;
+    private long equipoId;
+    private int posicion;
+    private int puntos;
+    private int partidosJugados;
+    private int victorias;
+    private int empates;
+    private int derrotas;
+    private int golesFavor;
+    private int golesContra;
+    private int diferenciaGoles;
 
 }

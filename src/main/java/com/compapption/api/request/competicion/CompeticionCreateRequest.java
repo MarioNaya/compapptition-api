@@ -24,11 +24,11 @@ public class CompeticionCreateRequest {
     private String descripcion;
 
     @NotNull(message = "El deporte es obligatorio")
-    private Long deporteId;
+    private long deporteId;
 
-    private Boolean publica;
-    private Boolean inscripcionAbierta;
-    private Boolean estadisticasActivas;
+    private boolean publica;
+    private boolean inscripcionAbierta;
+    private boolean estadisticasActivas;
 
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
@@ -41,12 +41,12 @@ public class CompeticionCreateRequest {
     @Builder
     public static class ConfiguracionRequest {
 
-        private Integer puntosVictoria;
-        private Integer puntosEmpate;
-        private Integer puntosDerrota;
+        private int puntosVictoria;
+        private int puntosEmpate;
+        private int puntosDerrota;
         private ConfiguracionCompeticion.FormatoCompeticion formato;
-        private Integer numEquiposPlayoff;
-        private Integer partidosEliminatoria;
+        private int numEquiposPlayoff;
+        private int partidosEliminatoria;
     }
 
 }

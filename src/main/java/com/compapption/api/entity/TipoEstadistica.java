@@ -16,7 +16,7 @@ public class TipoEstadistica {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deporte_id", nullable = false)
@@ -35,11 +35,11 @@ public class TipoEstadistica {
 
     @Builder.Default
     @Column
-    private Integer orden = 0;
+    private int orden = 0;
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean activo = true;
+    private boolean activo = true;
 
     public enum TipoValor {
         ENTERO,

@@ -17,18 +17,18 @@ public interface ClasificacionRepository extends JpaRepository<Clasificacion, Lo
             "WHERE c.competicion.id = :competicionId " +
             "ORDER BY c.posicion ASC")
     List<Clasificacion> findByCompeticionIdOrderByPosicion(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
 
-    Optional<Clasificacion> findByCompeticionIdAndEquipoId(Long competicionId);
+    Optional<Clasificacion> findByCompeticionIdAndEquipoId(long competicionId);
 
     @Query("SELECT c FROM Clasificacion c " +
             "WHERE c.competicion.id = :competicionId")
     List<Clasificacion> findByCompeticionId(
-            @Param("competicionId") Long competicionId
+            @Param("competicionId") long competicionId
     );
 
-    void deleteByCompeticionId(Long competicionId);
+    void deleteByCompeticionId(long competicionId);
 
-    void deleteByCompeticionIdAndEquipoId(Long competicionId, Long equipoId);
+    void deleteByCompeticionIdAndEquipoId(long competicionId, long equipoId);
 }

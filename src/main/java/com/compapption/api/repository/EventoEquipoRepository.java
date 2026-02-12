@@ -16,27 +16,27 @@ public interface EventoEquipoRepository extends JpaRepository<EventoEquipo, Long
             "LEFT JOIN FETCH ee.equipo " +
             "WHERE ee.evento.id = :eventoId")
     List<EventoEquipo> findByEventoId(
-            @Param("eventoId") Long eventoId
+            @Param("eventoId") long eventoId
     );
 
     Optional<EventoEquipo> findByEventoIdAndEquipoId(
-            Long eventoId,
-            Long equipoId
+            long eventoId,
+            long equipoId
     );
 
     @Query("SELECT ee FROM EventoEquipo ee " +
             "WHERE ee.evento.id = :eventoId " +
             "AND ee.esLocal = true")
     Optional<EventoEquipo> findLocalByEventoId(
-            @Param("eventoId") Long eventoId
+            @Param("eventoId") long eventoId
     );
 
     @Query("SELECT ee FROM EventoEquipo ee " +
             "WHERE ee.evento.id = :eventoId " +
             "AND ee.esLocal = false")
     Optional<EventoEquipo> findVisitanteByEventoId(
-            @Param("eventoId") Long eventoId
+            @Param("eventoId") long eventoId
     );
 
-    void deleteByEventoId(Long eventoId);
+    void deleteByEventoId(long eventoId);
 }

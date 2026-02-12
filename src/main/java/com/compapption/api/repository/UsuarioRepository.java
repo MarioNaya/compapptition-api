@@ -44,6 +44,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
             "LEFT JOIN FETCH rc.competicion " +
             "WHERE u.id = :id")
     Optional<Usuario> findByIdWithRolesAndCompeticiones(
-            @Param("id") Long id
+            @Param("id") long id
     );
 }
