@@ -40,6 +40,13 @@ public interface ClasificacionMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "competicion", ignore = true)
     @Mapping(target = "equipo", ignore = true)
-    @Mapping(target = "equipoId", ignore = true)
     void updateEntityFromDTO(ClasificacionUpdateDTO dto, @MappingTarget Clasificacion entity);
+
+    // Método para convertir byte[] a String Base64
+    default String map(byte[] escudo) {
+        if (escudo == null || escudo.length == 0) {
+            return null;
+        }
+        return java.util.Base64.getEncoder().encodeToString(escudo);
+    }
 }

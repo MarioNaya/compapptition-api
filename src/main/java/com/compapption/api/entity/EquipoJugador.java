@@ -29,7 +29,7 @@ public class EquipoJugador {
     private Jugador jugador;
 
     @Column(name = "dorsal_equipo")
-    private int dorsalEquipo;
+    private Integer dorsalEquipo;
 
     @Builder.Default
     @Column(nullable = false)

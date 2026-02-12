@@ -29,7 +29,7 @@ public class Jugador {
     private String apellidos;
 
     @Column
-    private int dorsal;
+    private Integer dorsal;
 
     @Column(length = 50)
     private String posicion;

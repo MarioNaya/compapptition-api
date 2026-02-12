@@ -28,7 +28,7 @@ public interface EquipoJugadorRepository extends JpaRepository<EquipoJugador, Lo
             @Param("jugadorId") long jugadorId
     );
 
-    boolean existsByEquipoIdAndJugadorIdAndActivoTrue();
+    boolean existsByEquipoIdAndJugadorIdAndActivoTrue(long equipoId, long jugadorId);
 
     @Query("SELECT COUNT(ej) FROM EquipoJugador ej " +
             "WHERE ej.equipo.id = :equipoId AND ej.activo = true")

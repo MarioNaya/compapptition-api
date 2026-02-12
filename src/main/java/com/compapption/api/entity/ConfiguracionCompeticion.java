@@ -40,11 +40,11 @@ public class ConfiguracionCompeticion {
 
     @Builder.Default
     @Column(name = "num_equipos_playoff")
-    private int numEquiposPlayoff = 8;
+    private Integer numEquiposPlayoff = 8;
 
     @Builder.Default
     @Column(name = "partidos_eliminatoria")
-    private int partidosEliminatoria = 1;
+    private Integer partidosEliminatoria = 1;
 
     public enum FormatoCompeticion {
         EVENTO_UNICO,

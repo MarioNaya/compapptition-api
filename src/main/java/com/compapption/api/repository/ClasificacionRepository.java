@@ -20,7 +20,7 @@ public interface ClasificacionRepository extends JpaRepository<Clasificacion, Lo
             @Param("competicionId") long competicionId
     );
 
-    Optional<Clasificacion> findByCompeticionIdAndEquipoId(long competicionId);
+    Optional<Clasificacion> findByCompeticionIdAndEquipoId(long competicionId, long equipoId);
 
     @Query("SELECT c FROM Clasificacion c " +
             "WHERE c.competicion.id = :competicionId")

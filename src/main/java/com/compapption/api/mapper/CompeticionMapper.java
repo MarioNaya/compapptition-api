@@ -26,7 +26,7 @@ public interface CompeticionMapper {
     @Mapping(target = "numEquipos",
             expression = "java(competicion.getEquipos() != null ? " +
             "(int) competicion.getEquipos().stream()" +
-            ".filter(e -> e.getActivo()).count() : 0)")
+            ".filter(e -> e.isActivo()).count() : 0)")
     CompeticionDetalleDTO toDetalleDTO(Competicion competicion);
 
     // Información detalle intermedio de competición
@@ -35,7 +35,7 @@ public interface CompeticionMapper {
     @Mapping(target = "numEquipos",
             expression = "java(competicion.getEquipos() != null ? " +
                     "(int) competicion.getEquipos().stream()" +
-                    ".filter(e -> e.getActivo()).count() : 0)")
+                    ".filter(e -> e.isActivo()).count() : 0)")
     CompeticionInfoDTO toInfoDTO(Competicion competicion);
 
     // Formato simple información para listados

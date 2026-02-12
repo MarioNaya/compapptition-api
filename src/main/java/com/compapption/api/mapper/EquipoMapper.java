@@ -23,7 +23,7 @@ public interface EquipoMapper {
     @Mapping(target = "numJugadores",
             expression = "java(equipo.getJugadores() != null ? " +
                     "(int) equipo.getJugadores().stream()" +
-                    ".filter(ej -> ej.getActivo()).count() : 0)")
+                    ".filter(ej -> ej.isActivo()).count() : 0)")
     @Mapping(target = "jugadores", source = "jugadores")
     EquipoDetalleDTO toDetalleDTO(Equipo equipo);
 
@@ -34,4 +34,11 @@ public interface EquipoMapper {
     List<EquipoDetalleDTO> toDetalleDTOList(List<Equipo> equipos);
     List<EquipoSimpleDTO> toSimpleDTOList(List<Equipo> equipos);
 
+    // Metodo para convertir byte[] a String Base64
+    default String map(byte[] escudo) {
+        if (escudo == null || escudo.length == 0) {
+            return null;
+        }
+        return java.util.Base64.getEncoder().encodeToString(escudo);
+    }
 }
