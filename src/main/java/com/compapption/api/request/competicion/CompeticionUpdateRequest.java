@@ -27,14 +27,18 @@ public class CompeticionUpdateRequest {
     private LocalDate fechaFin;
     private Competicion.EstadoCompeticion estado;
 
-    private ConfiguracionUpdaterequest configuracion;
+    private ConfiguracionUpdateRequest configuracion;
 
-    public static class ConfiguracionUpdaterequest {
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ConfiguracionUpdateRequest {
         private int puntosVictoria;
         private int puntosEmpate;
         private int puntosDerrota;
         private ConfiguracionCompeticion.FormatoCompeticion formato;
-        private int numEquiposPlayOff;
-        private int partidosEliminatoria;
+        private Integer numEquiposPlayOff;
+        private Integer partidosEliminatoria;
     }
 }

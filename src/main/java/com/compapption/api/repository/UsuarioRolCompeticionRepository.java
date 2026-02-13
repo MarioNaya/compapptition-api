@@ -1,5 +1,6 @@
 package com.compapption.api.repository;
 
+import com.compapption.api.entity.Rol;
 import com.compapption.api.entity.UsuarioRolCompeticion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,21 +29,21 @@ public interface UsuarioRolCompeticionRepository extends JpaRepository<UsuarioRo
             @Param("competicionId") long competicionId
     );
 
-    Optional<UsuarioRolCompeticion> findByUsuarioIdAndCompeticionIdAndRolId(
+    Optional<UsuarioRolCompeticion> findByUsuarioIdAndCompeticionIdAndRolNombre(
             long usuarioId,
             long competicionId,
-            long rolId
+            String nombre
     );
 
-    boolean existsByUsuarioIdAndCompeticionIdAndRolId(
+    boolean existsByUsuarioIdAndCompeticionIdAndRolNombre(
             long usuarioId,
             long competicionId,
-            long rolId
+            String nombre
     );
 
-    void deleteByUsuarioIdAndCompeticionIdAndRolId(
+    void deleteByUsuarioIdAndCompeticionIdAndRolNombre(
             long usuarioId,
             long competicionId,
-            long rolId
+            String nombre
     );
 }
