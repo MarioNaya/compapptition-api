@@ -67,6 +67,4 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
             @Param("search") String search,
             Pageable pageable
     );
-
-    long id(long id);
 }

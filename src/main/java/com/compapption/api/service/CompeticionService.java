@@ -112,7 +112,9 @@ public class CompeticionService {
         competicion = competicionRepository.save(competicion);
 
         // Crear configuración
-        ConfiguracionCompeticion configuracion = configuracionCompeticionService.crear(competicion, request.getConfiguracion());
+        ConfiguracionCompeticion configuracion = configuracionCompeticionService.crear(
+                competicion,
+                request.getConfiguracion());
         competicion.setConfiguracion(configuracion);
 
         // Asignar rol de administrador
@@ -154,7 +156,9 @@ public class CompeticionService {
             competicion.setEstado(request.getEstado());
         }
         if (request.getConfiguracion() != null){
-            configuracionCompeticionService.actualizar(competicion.getConfiguracion(), request.getConfiguracion());
+            configuracionCompeticionService.actualizar(
+                    competicion.getConfiguracion(),
+                    request.getConfiguracion());
         }
 
         competicion = competicionRepository.save(competicion);
@@ -231,7 +235,8 @@ public class CompeticionService {
 
     // === VALIDACIONES ESPECÍFICAS DE COMPETICIONES === //
 
-    private void validarCambioEstado(Competicion competicion, Competicion.EstadoCompeticion nuevoEstado) throws BadRequestException {
+    private void validarCambioEstado(Competicion competicion, Competicion.EstadoCompeticion nuevoEstado)
+            throws BadRequestException {
         if (nuevoEstado == Competicion.EstadoCompeticion.ACTIVA) {
             long numEquipos = competicionEquipoRepository.countActivosByCompeticionId(competicion.getId());
             ConfiguracionCompeticion config = competicion.getConfiguracion();

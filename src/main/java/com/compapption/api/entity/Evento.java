@@ -44,7 +44,7 @@ public class Evento {
     private int resultadoLocal;
 
     @Column(name = "resultado_visitante")
-    private String resultadoVisitante;
+    private int resultadoVisitante;
 
     @Column(columnDefinition = "TEXT")
     private String observaciones;
@@ -56,9 +56,6 @@ public class Evento {
     @UpdateTimestamp
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
-
-    @Column(name = "fecha_evento",nullable = false)
-    private LocalDateTime fechaEvento;
 
     @Builder.Default
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)

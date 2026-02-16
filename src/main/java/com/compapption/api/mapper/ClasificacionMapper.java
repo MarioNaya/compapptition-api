@@ -42,7 +42,7 @@ public interface ClasificacionMapper {
     @Mapping(target = "equipo", ignore = true)
     void updateEntityFromDTO(ClasificacionUpdateDTO dto, @MappingTarget Clasificacion entity);
 
-    // Método para convertir byte[] a String Base64
+    // Metodo para convertir byte[] a String Base64
     default String map(byte[] escudo) {
         if (escudo == null || escudo.length == 0) {
             return null;

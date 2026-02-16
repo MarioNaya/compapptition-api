@@ -7,13 +7,15 @@ import com.compapption.api.entity.UsuarioRolCompeticion;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.repository.RolRepository;
 import com.compapption.api.repository.UsuarioRolCompeticionRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioRolCompeticionService {
 
-    RolRepository rolRepository;
-    UsuarioRolCompeticionRepository usuarioRolCompeticionRepository;
+    private final RolRepository rolRepository;
+    private final UsuarioRolCompeticionRepository usuarioRolCompeticionRepository;
 
     // === ASIGNACIÓN ROL DE USUARIO EN COMPETICIÓN === //
 
