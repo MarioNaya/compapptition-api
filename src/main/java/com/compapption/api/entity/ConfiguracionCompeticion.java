@@ -15,7 +15,7 @@ public class ConfiguracionCompeticion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competicion_id", nullable = false, unique = true)
@@ -23,15 +23,15 @@ public class ConfiguracionCompeticion {
 
     @Builder.Default
     @Column(name = "puntos_victoria")
-    private int puntosVictoria = 3;
+    private Integer puntosVictoria = 3;
 
     @Builder.Default
     @Column(name = "puntos_empate")
-    private int puntosEmpate = 1;
+    private Integer puntosEmpate = 1;
 
     @Builder.Default
     @Column(name = "puntos_derrota")
-    private int puntosDerrota = 0;
+    private Integer puntosDerrota = 0;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

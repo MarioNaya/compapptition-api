@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class DeporteSimpleDTO {
 
-    private long id;
+    private Long id;
     private String nombre;
-    private boolean activo;
+    private Boolean activo;
 }

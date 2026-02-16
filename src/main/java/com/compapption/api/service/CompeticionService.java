@@ -3,8 +3,11 @@ package com.compapption.api.service;
 import com.compapption.api.dto.competicionDTO.CompeticionDetalleDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionInfoDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionSimpleDTO;
+import com.compapption.api.dto.equipoDTO.EquipoDetalleDTO;
+import com.compapption.api.dto.equipoDTO.EquipoSimpleDTO;
 import com.compapption.api.entity.*;
 import com.compapption.api.exception.ResourceNotFoundException;
+import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.mapper.CompeticionMapper;
 import com.compapption.api.mapper.EquipoMapper;
 import com.compapption.api.repository.*;
@@ -12,7 +15,6 @@ import com.compapption.api.request.competicion.CompeticionCreateRequest;
 import com.compapption.api.request.competicion.CompeticionUpdateRequest;
 import com.compapption.api.request.page.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
@@ -168,17 +170,23 @@ public class CompeticionService {
     // Eliminación
 
     @Transactional
-    public void eliminar(long id, long usuarioId) throws BadRequestException {
+    public void eliminar(long id, long usuarioId) {
         Competicion competicion = competicionRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Competicion", "id", id));
 
         validarPermisoEdicion(competicion, usuarioId);
+
+        if (competicion.getEstado() == Competicion.EstadoCompeticion.ACTIVA) {
+            throw new BadRequestException("No se puede eliminar una competición activa");
+        }
+
+        competicionRepository.delete(competicion);
     }
 
     // Gestión de equipos
 
     @Transactional
-    public void altaEquipo(long competicionId, long equipoId, long usuarioId) throws BadRequestException {
+    public void altaEquipo(long competicionId, long equipoId, long usuarioId) {
         Competicion competicion = competicionRepository.findById(competicionId)
                 .orElseThrow(()-> new ResourceNotFoundException("Competición", "id", competicionId));
 
@@ -191,7 +199,7 @@ public class CompeticionService {
 
         validarPermisoEdicion(competicion, usuarioId);
 
-        if (!competicion.isInscripcionAbierta()){
+        if (!competicion.isInscripcionAbierta()) {
             throw new BadRequestException("Las inscripciones están cerradas");
         }
 
@@ -204,7 +212,46 @@ public class CompeticionService {
         competicionEquipoRepository.save(inscripcion);
 
         // Inicializar clasificación para el nuevo equipo
-        // ClasificacionService.
+        clasificacionService.inicializarClasificacionEquipo(competicion, equipo);
+    }
+
+    @Transactional
+    public void bajaEquipo(long competicionId, long equipoId, long usuarioId){
+        Competicion competicion = competicionRepository.findById(competicionId)
+                .orElseThrow(()-> new ResourceNotFoundException("Competicion", "id", competicionId));
+
+        validarPermisoEdicion(competicion, usuarioId);
+
+        CompeticionEquipo inscripcion = competicionEquipoRepository
+                .findByCompeticionIdAndEquipoId(competicionId, equipoId)
+                .orElseThrow(()-> new ResourceNotFoundException("Inscripción no encontrada"));
+
+        inscripcion.setActivo(false);
+        competicionEquipoRepository.save(inscripcion);
+    }
+
+    @Transactional
+    public List<EquipoSimpleDTO> obtenerInscritosSimple(long competicionId){
+        if (!competicionRepository.existsById(competicionId)){
+            throw new ResourceNotFoundException("Competición", "id", competicionId);
+        }
+
+        return competicionEquipoRepository.findActivosByCompeticionId(competicionId)
+                .stream()
+                .map(ce -> equipoMapper.toSimpleDTO(ce.getEquipo()))
+                .toList();
+    }
+
+    @Transactional
+    public List<EquipoDetalleDTO> obtenerInscritosDetalle(long competicionId){
+        if (!competicionRepository.existsById(competicionId)){
+            throw new ResourceNotFoundException("Competición", "id", competicionId);
+        }
+
+        return competicionEquipoRepository.findActivosByCompeticionId(competicionId)
+                .stream()
+                .map(ce -> equipoMapper.toDetalleDTO(ce.getEquipo()))
+                .toList();
     }
 
     // === CONVERSIÓN DTOS A PAGE === //
@@ -235,8 +282,7 @@ public class CompeticionService {
 
     // === VALIDACIONES ESPECÍFICAS DE COMPETICIONES === //
 
-    private void validarCambioEstado(Competicion competicion, Competicion.EstadoCompeticion nuevoEstado)
-            throws BadRequestException {
+    private void validarCambioEstado(Competicion competicion, Competicion.EstadoCompeticion nuevoEstado) {
         if (nuevoEstado == Competicion.EstadoCompeticion.ACTIVA) {
             long numEquipos = competicionEquipoRepository.countActivosByCompeticionId(competicion.getId());
             ConfiguracionCompeticion config = competicion.getConfiguracion();
@@ -263,7 +309,7 @@ public class CompeticionService {
 
     // === PERMISOS DE EDICIÓN === //
 
-    private void validarPermisoEdicion(Competicion competicion, long usuarioId) throws BadRequestException {
+    private void validarPermisoEdicion(Competicion competicion, long usuarioId) {
         if (!Objects.equals(competicion.getCreador().getId(), usuarioId) &&
                 !usuarioRolCompeticionRepository.existsByUsuarioIdAndCompeticionIdAndRolNombre(
                         usuarioId, competicion.getId(), "ADMIN_COMPETICION")) {

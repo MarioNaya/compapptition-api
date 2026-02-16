@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CompeticionSimpleDTO {
 
-    private long id;
+    private Long id;
     private String nombre;
     private String deporteNombre;
     private Competicion.EstadoCompeticion estado;

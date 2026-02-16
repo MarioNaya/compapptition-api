@@ -16,13 +16,13 @@ import java.util.List;
 @Builder
 public class EquipoDetalleDTO {
 
-    private long id;
+    private Long id;
     private String nombre;
     private String descripcion;
-    private String escudo;
+    private Byte[] escudo;
     private Equipo.TipoEquipo tipo;
     private LocalDateTime fechaCreacion;
-    private int numJugadores;
+    private Integer numJugadores;
     private List<JugadorSimpleDTO> jugadores;
 
 }

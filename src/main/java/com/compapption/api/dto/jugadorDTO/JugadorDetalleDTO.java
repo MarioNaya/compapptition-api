@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 @Builder
 public class JugadorDetalleDTO {
 
-    Long id;
+    private Long id;
     private String nombre;
     private String apellidos;
-    private int Dorsal;
+    private Integer Dorsal;
     private String posicion;
-    private byte[] foto;
-    private long usuarioid;
+    private Byte[] foto;
+    private Long usuarioid;
     private String usuarioUsername;
     private LocalDateTime fechaCreacion;
 }

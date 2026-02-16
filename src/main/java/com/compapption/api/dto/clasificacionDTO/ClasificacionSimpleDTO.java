@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ClasificacionSimpleDTO {
 
-    private long id;
-    private long competicionId;
-    private long equipoId;
+    private Long id;
+    private Long competicionId;
+    private Long equipoId;
     private String equipoNombre;
-    private int posicion;
-    private int puntos;
-    private int partidosJugados;
+    private Integer posicion;
+    private Integer puntos;
+    private Integer partidosJugados;
 }

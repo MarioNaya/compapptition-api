@@ -17,7 +17,7 @@ public class Clasificacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competicion_id", nullable = false)
@@ -29,39 +29,39 @@ public class Clasificacion {
 
     @Builder.Default
     @Column
-    private int posicion = 0;
+    private Integer posicion = 0;
 
     @Builder.Default
     @Column
-    private int puntos = 0;
+    private Integer puntos = 0;
 
     @Builder.Default
     @Column (name = "partidos_jugados")
-    private int partidosJugados = 0;
+    private Integer partidosJugados = 0;
 
     @Builder.Default
     @Column
-    private int victorias = 0;
+    private Integer victorias = 0;
 
     @Builder.Default
     @Column
-    private int empates = 0;
+    private Integer empates = 0;
 
     @Builder.Default
     @Column
-    private int derrotas = 0;
+    private Integer derrotas = 0;
 
     @Builder.Default
     @Column(name = "goles_favor")
-    private int golesFavor = 0;
+    private Integer golesFavor = 0;
 
     @Builder.Default
     @Column(name = "goles_contra")
-    private int golesContra = 0;
+    private Integer golesContra = 0;
 
     @Builder.Default
     @Column(name = "diferencia_goles")
-    private int diferenciaGoles = 0;
+    private Integer diferenciaGoles = 0;
 
     @UpdateTimestamp
     @Column(name = "fecha_actualizacion")

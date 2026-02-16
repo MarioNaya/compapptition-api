@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class JugadorSimpleDTO {
 
-    private long id;
+    private Long id;
     private String nombre;
     private String apellidos;
-    private int dorsal;
+    private Integer dorsal;
     private String posicion;
-    private byte[] foto;
+    private Byte[] foto;
 }

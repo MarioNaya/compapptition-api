@@ -11,18 +11,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ClasificacionDetalleDTO {
 
-    private long id;
-    private long competicionId;
-    private long equipoId;
+    private Long id;
+    private Long competicionId;
+    private Long equipoId;
     private String equipoNombre;
     private String equipoEscudo;
-    private int posicion;
-    private int puntos;
-    private int partidosJugados;
-    private int victorias;
-    private int empates;
-    private int derrotas;
-    private int golesFavor;
-    private int golesContra;
-    private int diferenciaGoles;
+    private Integer posicion;
+    private Integer puntos;
+    private Integer partidosJugados;
+    private Integer victorias;
+    private Integer empates;
+    private Integer derrotas;
+    private Integer golesFavor;
+    private Integer golesContra;
+    private Integer diferenciaGoles;
 }

@@ -2,6 +2,9 @@ package com.compapption.api.service;
 
 import com.compapption.api.dto.clasificacionDTO.ClasificacionDetalleDTO;
 import com.compapption.api.dto.clasificacionDTO.ClasificacionSimpleDTO;
+import com.compapption.api.entity.Clasificacion;
+import com.compapption.api.entity.Competicion;
+import com.compapption.api.entity.Equipo;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.ClasificacionMapper;
 import com.compapption.api.repository.*;
@@ -23,7 +26,7 @@ public class ClasificacionService {
     private final ClasificacionMapper clasificacionMapper;
 
     @Transactional(readOnly = true)
-    public List<ClasificacionDetalleDTO> obtenerClasificacionDetalle(long competicionId){
+    public List<ClasificacionDetalleDTO> obtenerClasificacionDetalle(Long competicionId){
         if (!competicionRepository.existsById(competicionId)){
             throw new ResourceNotFoundException("Competición", "id", competicionId);
         }
@@ -33,12 +36,34 @@ public class ClasificacionService {
     }
 
     @Transactional(readOnly = true)
-    public List<ClasificacionSimpleDTO> obtenerClasificacionSimple(long competicionId){
+    public List<ClasificacionSimpleDTO> obtenerClasificacionSimple(Long competicionId){
         if (!competicionRepository.existsById(competicionId)){
             throw new ResourceNotFoundException("Competición", "id", competicionId);
         }
         return clasificacionMapper.toSimpleDTOList(
                 clasificacionRepository.findByCompeticionId(competicionId)
         );
+    }
+
+    @Transactional
+    public void inicializarClasificacionEquipo(Competicion competicion, Equipo equipo){
+        if (clasificacionRepository.findByCompeticionIdAndEquipoId(competicion.getId(), equipo.getId()).isEmpty()){
+            Clasificacion clasificacion = Clasificacion.builder()
+                    .competicion(competicion)
+                    .equipo(equipo)
+                    .posicion(0)
+                    .puntos(0)
+                    .partidosJugados(0)
+                    .victorias(0)
+                    .empates(0)
+                    .derrotas(0)
+                    .golesFavor(0)
+                    .golesContra(0)
+                    .diferenciaGoles(0)
+                    .build();
+
+            clasificacionRepository.save(clasificacion);
+
+        }
     }
 }

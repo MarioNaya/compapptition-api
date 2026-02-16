@@ -16,22 +16,22 @@ import java.time.LocalDateTime;
 @Builder
 public class CompeticionDetalleDTO {
 
-    private long id;
+    private Long id;
     private String nombre;
     private String descripcion;
-    private long deporteId;
+    private Long deporteId;
     private String deporteNombre;
-    private long creadorId;
+    private Long creadorId;
     private String creadorUsername;
-    private boolean publica;
-    private boolean inscripcionAbierta;
-    private boolean estadisticasActivas;
+    private Boolean publica;
+    private Boolean inscripcionAbierta;
+    private Boolean estadisticasActivas;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private Competicion.EstadoCompeticion estado;
     private LocalDateTime fechaCreacion;
     private ConfiguracionDTO configuracion;
-    private int numEquipos;
+    private Integer numEquipos;
 
     @Data
     @NoArgsConstructor

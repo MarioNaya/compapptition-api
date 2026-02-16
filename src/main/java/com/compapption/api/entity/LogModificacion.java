@@ -20,7 +20,7 @@ public class LogModificacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -34,7 +34,7 @@ public class LogModificacion {
     private String entidad;
 
     @Column(name = "entidad_id", nullable = false)
-    private long entidadId;
+    private Long entidadId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

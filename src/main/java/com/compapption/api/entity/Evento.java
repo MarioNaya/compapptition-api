@@ -20,14 +20,14 @@ public class Evento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competicion_id", nullable = false)
     private Competicion competicion;
 
     @Column
-    private int jornada;
+    private Integer jornada;
 
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
@@ -41,10 +41,10 @@ public class Evento {
     private EstadoEvento estado = EstadoEvento.PROGRAMADO;
 
     @Column(name = "resultado_local")
-    private int resultadoLocal;
+    private Integer resultadoLocal;
 
     @Column(name = "resultado_visitante")
-    private int resultadoVisitante;
+    private Integer resultadoVisitante;
 
     @Column(columnDefinition = "TEXT")
     private String observaciones;

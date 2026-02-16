@@ -1,5 +1,6 @@
 package com.compapption.api.dto.equipoDTO;
 
+import com.compapption.api.entity.Equipo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class EquipoSimpleDTO {
 
-    private long id;
+    private Long id;
     private String nombre;
     private String descripcion;
-    private byte[] escudo;
-
+    private Byte[] escudo;
 }

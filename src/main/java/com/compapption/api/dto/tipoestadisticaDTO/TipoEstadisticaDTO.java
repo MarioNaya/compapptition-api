@@ -1,4 +1,4 @@
-package com.compapption.api.dto.deporteDTO;
+package com.compapption.api.dto.tipoestadisticaDTO;
 
 import com.compapption.api.entity.TipoEstadistica;
 import lombok.AllArgsConstructor;
@@ -6,18 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DeporteDetalleDTO {
+public class TipoEstadisticaDTO {
 
     private Long id;
     private String nombre;
     private String descripcion;
-    private Byte[] icono;
-    private Boolean activo;
-    private List<TipoEstadistica> tipoEstadisticas;
+    private TipoEstadistica.TipoValor tipoValor;
+    private Integer orden;
 }

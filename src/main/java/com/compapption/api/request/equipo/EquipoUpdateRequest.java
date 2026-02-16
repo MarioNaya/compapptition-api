@@ -1,4 +1,4 @@
-package com.compapption.api.dto.eventoDTO;
+package com.compapption.api.request.equipo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EventoEquipoDTO {
-    private Long id;
+public class EquipoUpdateRequest {
+
     private String nombre;
-    private Byte[] escudo;
-    private Boolean esLocal;
+
+    private String descripcion;
+
+    private byte[] escudo;
 }

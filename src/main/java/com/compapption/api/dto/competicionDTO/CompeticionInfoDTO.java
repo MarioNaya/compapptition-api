@@ -14,13 +14,13 @@ import java.time.LocalDate;
 @Builder
 public class CompeticionInfoDTO {
 
-    private long id;
+    private Long id;
     private String nombre;
     private String descripcion;
     private String deporteNombre;
     private String creadorUsername;
-    private boolean publica;
+    private Boolean publica;
     private Competicion.EstadoCompeticion estado;
-    private int numEquipos;
+    private Integer numEquipos;
     private LocalDate fechaInicio;
 }
