@@ -2,7 +2,10 @@ package com.compapption.api.controller;
 
 import com.compapption.api.dto.equipoDTO.EquipoDetalleDTO;
 import com.compapption.api.dto.equipoDTO.EquipoSimpleDTO;
+import com.compapption.api.dto.jugadorDTO.JugadorDetalleDTO;
+import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
 import com.compapption.api.request.equipo.EquipoCreateRequest;
+import com.compapption.api.request.equipo.EquipoUpdateRequest;
 import com.compapption.api.request.page.PageResponse;
 import com.compapption.api.service.EquipoService;
 import jakarta.validation.Valid;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/equipos")
@@ -22,6 +26,8 @@ import java.util.List;
 public class EquipoController {
 
     private final EquipoService equipoService;
+
+    /// === END POINTS CRUD === ///
 
     @GetMapping
     public ResponseEntity<PageResponse<EquipoSimpleDTO>> buscar(
@@ -53,5 +59,58 @@ public class EquipoController {
     @PostMapping
     public ResponseEntity<EquipoDetalleDTO> crear(@Valid @RequestBody EquipoCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(equipoService.crear(request));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<EquipoSimpleDTO> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody EquipoUpdateRequest request) {
+        return ResponseEntity.ok(equipoService.actualizar(id,request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        equipoService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /// === END POINTS GESTIÓN PLANTILLA === ///
+
+    @GetMapping("/{id}/jugadores-simple")
+    public ResponseEntity<List<JugadorSimpleDTO>> listarJugadoresSimple(@PathVariable Long id) {
+        return ResponseEntity.ok(equipoService.obtenerJugadoresSimple(id));
+    }
+
+    @GetMapping("/{id}/jugadores-detalle")
+    public ResponseEntity<List<JugadorDetalleDTO>> listarJugadoresDetalle(@PathVariable Long id) {
+        return ResponseEntity.ok(equipoService.obtenerJugadoresDetalle(id));
+    }
+
+    @PostMapping("/{id}/jugadores/{jugador id}")
+    public ResponseEntity<Map<String,String>> agregarJugador(
+            @PathVariable Long id,
+            @PathVariable Long jugadorId,
+            @RequestParam(required = false) Integer dorsal) {
+        equipoService.agregarJugador(id,jugadorId,dorsal);
+        return ResponseEntity.ok(Map.of("message","Jugador inscrito en el equipo"));
+    }
+
+    @DeleteMapping("{id}/jugadores/{jugadorId}")
+    public ResponseEntity<Void> quitarJugador(
+            @PathVariable Long id,
+            @PathVariable Long jugadorId) {
+        equipoService.quitarJugador(id, jugadorId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /// === AÑADIR MANAGER === ///
+
+    @PostMapping("/{id}/managers")
+    public ResponseEntity<Map<String,String>> asignarManager(
+            @PathVariable Long id,
+            @RequestParam Long competicionId,
+            @RequestParam Long usuarioId) {
+        equipoService.asignarManager(id, competicionId, usuarioId);
+        return ResponseEntity.ok(Map.of("message","Manager asignado correctamente"));
     }
 }

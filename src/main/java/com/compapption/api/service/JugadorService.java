@@ -2,6 +2,7 @@ package com.compapption.api.service;
 
 import com.compapption.api.dto.jugadorDTO.JugadorDetalleDTO;
 import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
+import com.compapption.api.dto.jugadorDTO.JugadorUsuarioDTO;
 import com.compapption.api.entity.Jugador;
 import com.compapption.api.entity.Usuario;
 import com.compapption.api.exception.BadRequestException;
@@ -135,7 +136,7 @@ public class JugadorService {
     }
 
     @Transactional
-    public JugadorSimpleDTO vincularUsuario(Long jugadorId, Long usuarioId) {
+    public JugadorUsuarioDTO vincularUsuario(Long jugadorId, Long usuarioId) {
         Jugador jugador = jugadorRepository.findById(jugadorId)
                 .orElseThrow(()-> new ResourceNotFoundException("Jugador", "id", jugadorId));
 
@@ -148,6 +149,6 @@ public class JugadorService {
 
         jugador.setUsuario(usuario);
         jugador = jugadorRepository.save(jugador);
-        return jugadorMapper.toSimpleDTO(jugador);
+        return jugadorMapper.toUsuarioDTO(jugador);
     }
 }
