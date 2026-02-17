@@ -10,6 +10,7 @@ import com.compapption.api.mapper.JugadorMapper;
 import com.compapption.api.repository.JugadorRepository;
 import com.compapption.api.repository.UsuarioRepository;
 import com.compapption.api.request.jugador.JugadorCreateRequest;
+import com.compapption.api.request.jugador.JugadorUpdateRequest;
 import com.compapption.api.request.page.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -97,4 +98,56 @@ public class JugadorService {
         return jugadorMapper.toDetalleDTO(jugador);
     }
 
+    @Transactional
+    public JugadorDetalleDTO actualizar(Long id, JugadorUpdateRequest request) {
+        Jugador jugador = jugadorRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Jugador", "id", id));
+
+        if (request.getNombre()!=null){
+            jugador.setNombre(request.getNombre());
+        }
+        if (request.getApellidos()!=null){
+            jugador.setApellidos(request.getApellidos());
+        }
+        if (request.getDorsal()!=null){
+            jugador.setDorsal(request.getDorsal());
+        }
+        if (request.getPosicion()!=null){
+            jugador.setPosicion(request.getPosicion());
+        }
+        if (request.getFoto()!=null){
+            jugador.setFoto(request.getFoto());
+        }
+
+        jugador = jugadorRepository.save(jugador);
+        return jugadorMapper.toDetalleDTO(jugador);
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        Jugador jugador = jugadorRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Jugador", "id", id));
+
+        if (!jugador.getEquipos().isEmpty()) {
+            throw new BadRequestException("No se puede eliminar un jugador que pertenece a un equipo");
+        }
+        jugadorRepository.delete(jugador);
+    }
+
+    @Transactional
+    public JugadorSimpleDTO vincularUsuario(Long jugadorId, Long usuarioId) {
+        Jugador jugador = jugadorRepository.findById(jugadorId)
+                .orElseThrow(()-> new ResourceNotFoundException("Jugador", "id", jugadorId));
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(()-> new ResourceNotFoundException("Usuario", "id", usuarioId));
+
+        if (jugador.getUsuario()!=null) {
+            throw new BadRequestException("El jugador ya está vinculado a un usuario");
+        }
+
+        jugador.setUsuario(usuario);
+        jugador = jugadorRepository.save(jugador);
+        return jugadorMapper.toSimpleDTO(jugador);
+    }
 }

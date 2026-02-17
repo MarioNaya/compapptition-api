@@ -35,5 +35,4 @@ public class CompeticionController {
             @PageableDefault(size = 20) Pageable pageable){
         return ResponseEntity.ok(competicionService.buscarPublicas(search, pageable));
     }
-
 }
