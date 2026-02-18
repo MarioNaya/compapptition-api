@@ -13,6 +13,7 @@ public class ClasificacionUpdateDTO {
 
     private Long id;
     private Long equipoId;
+    private Integer temporada;
     private Integer posicion;
     private Integer puntos;
     private Integer partidosJugados;

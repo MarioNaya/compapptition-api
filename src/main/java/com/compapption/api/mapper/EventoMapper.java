@@ -2,11 +2,11 @@ package com.compapption.api.mapper;
 
 import com.compapption.api.dto.eventoDTO.EventoDetalleDTO;
 import com.compapption.api.dto.eventoDTO.EventoEquipoDTO;
+import com.compapption.api.dto.eventoDTO.EventoResultadoDTO;
 import com.compapption.api.dto.eventoDTO.EventoSimpleDTO;
 import com.compapption.api.entity.Evento;
 import com.compapption.api.entity.EventoEquipo;
 import org.mapstruct.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Set;
@@ -23,6 +23,9 @@ public interface EventoMapper {
     @Mapping(target = "escudo",  source = "equipo.escudo")
     @Mapping(target = "esLocal", source = "esLocal")
     EventoEquipoDTO toEquipoDTO(EventoEquipo eventoEquipo);
+
+    @Mapping(target = "competicionId", source = "competicion.id")
+    EventoResultadoDTO toResultadoDTO(Evento evento);
 
     @Named("extractLocal")
     default EventoEquipoDTO extractLocal(Set<EventoEquipo> equipos) {

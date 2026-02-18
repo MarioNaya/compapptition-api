@@ -14,6 +14,7 @@ public class ClasificacionDetalleDTO {
     private Long id;
     private Long competicionId;
     private Long equipoId;
+    private Integer temporada;
     private String equipoNombre;
     private String equipoEscudo;
     private Integer posicion;

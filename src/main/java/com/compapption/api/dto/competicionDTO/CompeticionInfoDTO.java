@@ -18,6 +18,7 @@ public class CompeticionInfoDTO {
     private String nombre;
     private String descripcion;
     private String deporteNombre;
+    private Integer temporadaActual;
     private String creadorUsername;
     private Boolean publica;
     private Competicion.EstadoCompeticion estado;

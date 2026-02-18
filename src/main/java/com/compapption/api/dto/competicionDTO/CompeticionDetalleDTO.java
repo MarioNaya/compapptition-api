@@ -21,6 +21,7 @@ public class CompeticionDetalleDTO {
     private String descripcion;
     private Long deporteId;
     private String deporteNombre;
+    private Integer temporadaActual;
     private Long creadorId;
     private String creadorUsername;
     private Boolean publica;

@@ -20,6 +20,7 @@ public class CompeticionUpdateRequest {
     private String nombre;
 
     private String descripcion;
+    private Integer temporadaActual;
     private boolean publica;
     private boolean inscripcionAbierta;
     private boolean estadisticasActivas;

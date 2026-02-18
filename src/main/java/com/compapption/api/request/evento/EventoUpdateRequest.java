@@ -1,4 +1,4 @@
-package com.compapption.api.dto.eventoDTO;
+package com.compapption.api.request.evento;
 
 import com.compapption.api.entity.Evento;
 import lombok.AllArgsConstructor;
@@ -12,22 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EventoDetalleDTO {
+public class EventoUpdateRequest {
 
-    private Long id;
-    private Long competicionId;
-    private String competicionNombre;
     private Integer jornada;
     private Integer temporada;
     private LocalDateTime fechaHora;
     private String lugar;
     private Evento.EstadoEvento estado;
-    private Integer resultadoLocal;
-    private Integer resultadoVisitante;
     private String observaciones;
-    private LocalDateTime fechaCreacion;
-    private Evento.EstadoEvento estadoEvento;
-
-    private EventoEquipoDTO equipoLocal;
-    private EventoEquipoDTO equipoVisitante;
 }

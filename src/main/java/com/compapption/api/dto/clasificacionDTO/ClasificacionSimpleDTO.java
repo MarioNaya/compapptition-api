@@ -14,6 +14,7 @@ public class ClasificacionSimpleDTO {
     private Long id;
     private Long competicionId;
     private Long equipoId;
+    private Integer temporada;
     private String equipoNombre;
     private Integer posicion;
     private Integer puntos;

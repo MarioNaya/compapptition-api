@@ -32,6 +32,10 @@ public class Competicion {
     @JoinColumn(name = "deporte_id", nullable = false)
     private Deporte deporte;
 
+    @Builder.Default
+    @Column(name = "temporada_actual")
+    private Integer temporadaActual = 1;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creador_id")
     private Usuario creador;

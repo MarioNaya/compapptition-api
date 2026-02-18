@@ -26,6 +26,8 @@ public class CompeticionCreateRequest {
     @NotNull(message = "El deporte es obligatorio")
     private long deporteId;
 
+    private Integer temporadaActual;
+
     private boolean publica;
     private boolean inscripcionAbierta;
     private boolean estadisticasActivas;

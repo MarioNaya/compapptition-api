@@ -29,6 +29,9 @@ public class Evento {
     @Column
     private Integer jornada;
 
+    @Column
+    private Integer temporada;
+
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
 

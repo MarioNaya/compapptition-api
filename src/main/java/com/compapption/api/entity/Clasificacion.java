@@ -7,7 +7,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "clasificacion", uniqueConstraints = @UniqueConstraint(columnNames = {"competicion_id", "equipo_id"}))
+@Table(
+        name = "clasificacion",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"competicion_id", "equipo_id", "temporada"}))
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -22,6 +24,9 @@ public class Clasificacion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competicion_id", nullable = false)
     private Competicion competicion;
+
+    @Column(nullable = false)
+    private Integer temporada;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipo_id", nullable = false)

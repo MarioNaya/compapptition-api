@@ -93,4 +93,12 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     List<Evento> findFinalizadosByCompeticionId(
             @Param("competicionId") long competicionId
     );
+
+    @Query("SELECT e FROM Evento e " +
+            "WHERE e.competicion.id = :competicionId " +
+            "AND e.estado = 'FINALIZADO' " +
+            "AND e.temporada = :temporada")
+    List<Evento> findFinalizadosByCompeticionIdAndTemporada(
+            @Param("competicionId") Long competicionId,
+            @Param("temporada") Integer temporada);
 }

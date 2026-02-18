@@ -183,11 +183,38 @@ public class CompeticionService {
         competicionRepository.delete(competicion);
     }
 
+    // Cambio de temporada
+
+    @Transactional
+    public CompeticionDetalleDTO cambiarTemporada(Long competicionId, Integer nuevaTemporada, Long usuarioId) {
+        Competicion competicion = competicionRepository.findByIdWithDetails(competicionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Competicion", "id", competicionId));
+
+        validarPermisoEdicion(competicion, usuarioId);
+
+        if (nuevaTemporada <= competicion.getTemporadaActual()) {
+            throw new BadRequestException("La nueva temporada debe ser mayor a la actual");
+        }
+
+        competicion.setTemporadaActual(nuevaTemporada);
+        competicion = competicionRepository.save(competicion);
+
+        // Inicializar clasificaciones para la nueva temporada
+        Competicion finalCompeticion = competicion;
+        competicionEquipoRepository.findActivosByCompeticionId(competicionId)
+                .forEach(ce -> clasificacionService
+                        .inicializarClasificacionEquipo(finalCompeticion, ce.getEquipo()));
+
+        // TODO: generación de calendario, gestión de inscripciones, etc.
+
+        return competicionMapper.toDetalleDTO(competicion);
+    }
+
     // Gestión de equipos
 
     @Transactional
     public void altaEquipo(long competicionId, long equipoId, long usuarioId) {
-        Competicion competicion = competicionRepository.findById(competicionId)
+        Competicion competicion = competicionRepository.findByIdWithDetails(competicionId)
                 .orElseThrow(()-> new ResourceNotFoundException("Competición", "id", competicionId));
 
         Equipo equipo = equipoRepository.findById(equipoId)

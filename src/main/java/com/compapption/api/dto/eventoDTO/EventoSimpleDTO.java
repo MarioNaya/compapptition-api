@@ -16,6 +16,8 @@ public class EventoSimpleDTO {
     private Long id;
     private Long competicionId;
     private String competicionNombre;
+    private Integer jornada;
+    private Integer temporada;
     private LocalDateTime fechaHora;
     private EventoEquipoDTO equipoLocal;
     private EventoEquipoDTO equipoVisitante;
