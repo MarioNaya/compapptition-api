@@ -1,0 +1,77 @@
+{
+  "_descripcion": "Guía de flujo completo para probar el sistema end-to-end. Seguir los pasos en orden.",
+
+  "paso_1_crear_deporte": {
+    "_nota": "Los deportes normalmente se precargan en BD. Si no hay datos, insertar manualmente.",
+    "_sql": "INSERT INTO deporte (nombre, descripcion, activo) VALUES ('Fútbol', 'Fútbol 11', true);",
+    "verificar": "GET /deportes"
+  },
+
+  "paso_2_crear_equipos": {
+    "equipo_1": {
+      "_endpoint": "POST /equipos",
+      "nombre": "Real Oviedo CF",
+      "descripcion": "Club de fútbol de Oviedo"
+    },
+    "equipo_2": {
+      "_endpoint": "POST /equipos",
+      "nombre": "Sporting de Gijón",
+      "descripcion": "Club de fútbol de Gijón"
+    },
+    "equipo_3": {
+      "_endpoint": "POST /equipos",
+      "nombre": "Langreo CF",
+      "descripcion": "Club de fútbol de Langreo"
+    },
+    "equipo_4": {
+      "_endpoint": "POST /equipos",
+      "nombre": "Avilés Stadium",
+      "descripcion": "Club de fútbol de Avilés"
+    },
+    "verificar": "GET /equipos?search=&page=0&size=10"
+  },
+
+  "paso_3_crear_jugadores": {
+    "_endpoint": "POST /jugadores",
+    "jugadores_oviedo": [
+      { "nombre": "Carlos", "apellidos": "García López", "dorsal": 9, "posicion": "Delantero" },
+      { "nombre": "Miguel", "apellidos": "Fernández Ruiz", "dorsal": 1, "posicion": "Portero" },
+      { "nombre": "Pablo", "apellidos": "Martínez Suárez", "dorsal": 4, "posicion": "Defensa" }
+    ],
+    "jugadores_sporting": [
+      { "nombre": "Adrián", "apellidos": "López Díaz", "dorsal": 8, "posicion": "Mediocentro" },
+      { "nombre": "Lucas", "apellidos": "Rodríguez Pérez", "dorsal": 11, "posicion": "Extremo" },
+      { "nombre": "Sergio", "apellidos": "Álvarez Cuesta", "dorsal": 1, "posicion": "Portero" }
+    ]
+  },
+
+  "paso_4_asignar_jugadores_a_equipos": {
+    "_nota": "Sustituir IDs por los reales devueltos en pasos anteriores",
+    "oviedo": [
+      "POST /equipos/{equipoId_oviedo}/jugadores/{jugadorId_carlos}?dorsal=9",
+      "POST /equipos/{equipoId_oviedo}/jugadores/{jugadorId_miguel}?dorsal=1",
+      "POST /equipos/{equipoId_oviedo}/jugadores/{jugadorId_pablo}?dorsal=4"
+    ],
+    "sporting": [
+      "POST /equipos/{equipoId_sporting}/jugadores/{jugadorId_adrian}?dorsal=8",
+      "POST /equipos/{equipoId_sporting}/jugadores/{jugadorId_lucas}?dorsal=11",
+      "POST /equipos/{equipoId_sporting}/jugadores/{jugadorId_sergio}?dorsal=1"
+    ],
+    "verificar": "GET /equipos/{equipoId}/jugadores-detalle"
+  },
+
+  "paso_5_verificar_datos": {
+    "deportes": "GET /deportes",
+    "deporte_detalle": "GET /deportes/1",
+    "equipos": "GET /equipos?search=&page=0&size=10",
+    "equipo_detalle": "GET /equipos/1/detalle",
+    "equipo_simple": "GET /equipos/1/simple",
+    "jugadores_equipo": "GET /equipos/1/jugadores-simple",
+    "jugador_detalle": "GET /jugadores/detalle/1",
+    "buscar_jugadores": "GET /jugadores/buscar?search=García",
+    "competiciones_publicas": "GET /competiciones/publicas?page=0&size=10",
+    "buscar_competiciones": "GET /competiciones/publicas/buscar?search=Liga"
+  },
+
+  "_nota_final": "Los pasos de crear competición, inscribir equipos, crear eventos y registrar resultados requieren que se completen los controllers pendientes (CompeticionController CRUD y EventoController)."
+}

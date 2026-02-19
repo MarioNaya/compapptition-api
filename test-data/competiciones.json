@@ -1,0 +1,121 @@
+{
+  "_nota": "CompeticionController solo expone 2 GET por ahora. Estos JSON son para cuando se complete el controller.",
+
+  "crear": [
+    {
+      "_descripcion": "POST /competiciones — Liga de fútbol completa",
+      "nombre": "Liga Asturiana 2026",
+      "descripcion": "Competición de fútbol amateur de Asturias",
+      "deporteId": 1,
+      "publica": true,
+      "inscripcionAbierta": true,
+      "estadisticasActivas": true,
+      "fechaInicio": "2026-03-01",
+      "fechaFin": "2026-06-30",
+      "configuracion": {
+        "puntosVictoria": 3,
+        "puntosEmpate": 1,
+        "puntosDerrota": 0,
+        "formato": "LIGA",
+        "numEquiposPlayoff": 4,
+        "partidosEliminatoria": 1
+      }
+    },
+    {
+      "_descripcion": "POST /competiciones — Liga ida y vuelta",
+      "nombre": "Torneo Primavera 2026",
+      "descripcion": "Torneo de primavera con ida y vuelta",
+      "deporteId": 1,
+      "publica": true,
+      "inscripcionAbierta": true,
+      "estadisticasActivas": true,
+      "fechaInicio": "2026-04-01",
+      "fechaFin": "2026-07-31",
+      "configuracion": {
+        "puntosVictoria": 3,
+        "puntosEmpate": 1,
+        "puntosDerrota": 0,
+        "formato": "LIGA_IDA_VUELTA",
+        "numEquiposPlayoff": 4,
+        "partidosEliminatoria": 2
+      }
+    },
+    {
+      "_descripcion": "POST /competiciones — Torneo playoff puro",
+      "nombre": "Copa Eliminatoria 2026",
+      "descripcion": "Torneo por eliminación directa",
+      "deporteId": 1,
+      "publica": true,
+      "inscripcionAbierta": true,
+      "estadisticasActivas": false,
+      "configuracion": {
+        "formato": "PLAYOFF",
+        "numEquiposPlayoff": 8,
+        "partidosEliminatoria": 1
+      }
+    },
+    {
+      "_descripcion": "POST /competiciones — Liga + playoff",
+      "nombre": "Superliga 2026",
+      "descripcion": "Liga regular seguida de fase eliminatoria",
+      "deporteId": 1,
+      "publica": true,
+      "inscripcionAbierta": false,
+      "estadisticasActivas": true,
+      "fechaInicio": "2026-03-15",
+      "configuracion": {
+        "puntosVictoria": 3,
+        "puntosEmpate": 1,
+        "puntosDerrota": 0,
+        "formato": "LIGA_PLAYOFF",
+        "numEquiposPlayoff": 4,
+        "partidosEliminatoria": 2
+      }
+    },
+    {
+      "_descripcion": "POST /competiciones — Competición privada mínima",
+      "nombre": "Torneo Interno",
+      "deporteId": 1,
+      "publica": false,
+      "inscripcionAbierta": false,
+      "estadisticasActivas": false
+    },
+    {
+      "_descripcion": "POST /competiciones — Caso error: sin nombre (debe fallar)",
+      "deporteId": 1,
+      "publica": true
+    },
+    {
+      "_descripcion": "POST /competiciones — Caso error: sin deporteId (debe fallar)",
+      "nombre": "Torneo sin deporte"
+    }
+  ],
+  "actualizar": [
+    {
+      "_descripcion": "PUT /competiciones/{id} — Cambiar estado a activa",
+      "estado": "ACTIVA"
+    },
+    {
+      "_descripcion": "PUT /competiciones/{id} — Actualizar nombre y fechas",
+      "nombre": "Liga Asturiana Temporada 2026-2027",
+      "fechaInicio": "2026-09-01",
+      "fechaFin": "2027-06-30"
+    },
+    {
+      "_descripcion": "PUT /competiciones/{id} — Abrir inscripciones",
+      "inscripcionAbierta": true
+    },
+    {
+      "_descripcion": "PUT /competiciones/{id} — Actualizar configuración",
+      "configuracion": {
+        "puntosVictoria": 2,
+        "puntosEmpate": 1,
+        "puntosDerrota": 0
+      }
+    }
+  ],
+  "endpoints_get_disponibles": {
+    "listar_publicas": "GET /competiciones/publicas?page=0&size=10",
+    "buscar_publicas": "GET /competiciones/publicas/buscar?search=Liga&page=0&size=10"
+  }
+}

@@ -1,17 +1,16 @@
 package com.compapption.api.service;
 
+import com.compapption.api.dto.estadisticaDTO.EstadisticaJugadorDTO;
 import com.compapption.api.dto.eventoDTO.EventoDetalleDTO;
 import com.compapption.api.dto.eventoDTO.EventoResultadoDTO;
 import com.compapption.api.dto.eventoDTO.EventoSimpleDTO;
-import com.compapption.api.entity.Competicion;
-import com.compapption.api.entity.Equipo;
-import com.compapption.api.entity.Evento;
-import com.compapption.api.entity.EventoEquipo;
+import com.compapption.api.entity.*;
 import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.EstadisticaMapper;
 import com.compapption.api.mapper.EventoMapper;
 import com.compapption.api.repository.*;
+import com.compapption.api.request.estadistica.EstadisticaRequest;
 import com.compapption.api.request.evento.EventoCreateRequest;
 import com.compapption.api.request.evento.EventoUpdateRequest;
 import com.compapption.api.request.evento.ResultadoRequest;
@@ -245,6 +244,52 @@ public class EventoService {
 
     /// === GESTIÓN DE ESTADÍSTICAS === ///
 
+    // Obtener estadísticas jugador
+    @Transactional(readOnly = true)
+    public List<EstadisticaJugadorDTO> obtenerEstadisticas(Long eventoId){
+        if (!eventoRepository.existsById(eventoId)) {
+            throw new ResourceNotFoundException("Evento", "id", eventoId);
+        }
+        return estadisticaMapper.toDTOList(estadisticaJugadorEventoRepository.findByEventoId(eventoId));
+    }
 
+    // Registrar estadísticas en jugador
+    @Transactional
+    public EstadisticaJugadorDTO registrarEstadistica(Long eventoId, EstadisticaRequest request){
+        Evento evento = eventoRepository.findById(eventoId)
+                .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", eventoId));
+
+        Jugador jugador = jugadorRepository.findById(request.getJugadorId())
+                .orElseThrow(()-> new ResourceNotFoundException("Jugador", "id", request.getJugadorId()));
+
+        TipoEstadistica tipoEstadistica = tipoEstadisticaRepository.findById(request.getTipoEstadisticaId())
+                .orElseThrow(()-> new ResourceNotFoundException("Tipo estadística", "id", request.getTipoEstadisticaId()));
+
+        // Revisar si la estadística ya existe
+        EstadisticaJugadorEvento estadistica = estadisticaJugadorEventoRepository
+                .findByEventoIdAndJugadorIdAndTipoEstadisticaId(eventoId, request.getJugadorId(), request.getJugadorId())
+                .orElse(EstadisticaJugadorEvento.builder()
+                        .evento(evento)
+                        .jugador(jugador)
+                        .tipoEstadistica(tipoEstadistica)
+                        .build());
+
+        estadistica.setValor(request.getValor());
+        estadistica = estadisticaJugadorEventoRepository.save(estadistica);
+
+        return estadisticaMapper.toDTO(estadistica);
+    }
+
+    // Eliminar estadística
+    @Transactional
+    public void eliminarEstadistica(Long eventoId, Long estadisticaId){
+        EstadisticaJugadorEvento estadistica = estadisticaJugadorEventoRepository.findById(estadisticaId)
+                .orElseThrow(()-> new ResourceNotFoundException("Estadistica", "id", estadisticaId));
+
+        if (!estadistica.getEvento().getId().equals(eventoId)) {
+            throw new BadRequestException("La estadistica no pertenece a este evento");
+        }
+        estadisticaJugadorEventoRepository.delete(estadistica);
+    }
 }
 

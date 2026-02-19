@@ -1,0 +1,42 @@
+{
+  "crear": [
+    {
+      "_descripcion": "POST /equipos — Equipo de fútbol básico",
+      "nombre": "Real Oviedo CF",
+      "descripcion": "Club de fútbol de la ciudad de Oviedo"
+    },
+    {
+      "_descripcion": "POST /equipos — Equipo con todos los campos",
+      "nombre": "Sporting de Gijón",
+      "descripcion": "Club de fútbol de la ciudad de Gijón"
+    },
+    {
+      "_descripcion": "POST /equipos — Equipo de baloncesto",
+      "nombre": "Oviedo Baloncesto",
+      "descripcion": "Equipo de baloncesto de Oviedo"
+    },
+    {
+      "_descripcion": "POST /equipos — Equipo mínimo (solo nombre obligatorio)",
+      "nombre": "Cangas Voleibol"
+    },
+    {
+      "_descripcion": "POST /equipos — Caso error: sin nombre (debe fallar)",
+      "descripcion": "Equipo sin nombre"
+    }
+  ],
+  "actualizar": [
+    {
+      "_descripcion": "PUT /equipos/{id} — Actualizar nombre",
+      "nombre": "Real Oviedo Club de Fútbol"
+    },
+    {
+      "_descripcion": "PUT /equipos/{id} — Actualizar descripción",
+      "descripcion": "Club histórico fundado en 1926"
+    },
+    {
+      "_descripcion": "PUT /equipos/{id} — Actualizar varios campos",
+      "nombre": "Sporting de Gijón SAD",
+      "descripcion": "Club de fútbol profesional de Gijón, Asturias"
+    }
+  ]
+}

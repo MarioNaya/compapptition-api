@@ -1,0 +1,70 @@
+{
+  "crear": [
+    {
+      "_descripcion": "POST /jugadores — Jugador completo",
+      "nombre": "Carlos",
+      "apellidos": "García López",
+      "dorsal": 9,
+      "posicion": "Delantero"
+    },
+    {
+      "_descripcion": "POST /jugadores — Portero",
+      "nombre": "Miguel",
+      "apellidos": "Fernández Ruiz",
+      "dorsal": 1,
+      "posicion": "Portero"
+    },
+    {
+      "_descripcion": "POST /jugadores — Defensa",
+      "nombre": "Pablo",
+      "apellidos": "Martínez Suárez",
+      "dorsal": 4,
+      "posicion": "Defensa central"
+    },
+    {
+      "_descripcion": "POST /jugadores — Centrocampista",
+      "nombre": "Adrián",
+      "apellidos": "López Díaz",
+      "dorsal": 8,
+      "posicion": "Mediocentro"
+    },
+    {
+      "_descripcion": "POST /jugadores — Extremo",
+      "nombre": "Lucas",
+      "apellidos": "Rodríguez Pérez",
+      "dorsal": 11,
+      "posicion": "Extremo izquierdo"
+    },
+    {
+      "_descripcion": "POST /jugadores — Solo nombre (mínimo obligatorio)",
+      "nombre": "David"
+    },
+    {
+      "_descripcion": "POST /jugadores — Jugador de baloncesto",
+      "nombre": "Sergio",
+      "apellidos": "Álvarez Cuesta",
+      "dorsal": 23,
+      "posicion": "Base"
+    },
+    {
+      "_descripcion": "POST /jugadores — Caso error: sin nombre (debe fallar)",
+      "apellidos": "Sin Nombre",
+      "dorsal": 99
+    }
+  ],
+  "actualizar": [
+    {
+      "_descripcion": "PUT /jugadores/{id} — Cambiar posición",
+      "posicion": "Mediapunta"
+    },
+    {
+      "_descripcion": "PUT /jugadores/{id} — Cambiar dorsal y apellidos",
+      "apellidos": "García-López Menéndez",
+      "dorsal": 10
+    }
+  ],
+  "vincular_usuario": {
+    "_descripcion": "POST /jugadores/{jugadorId}/vincular/{usuarioId} — Vincular jugador 1 a usuario 1",
+    "_nota": "Sustituir {jugadorId} y {usuarioId} por IDs reales de la BD"
+  }
+}

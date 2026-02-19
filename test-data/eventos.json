@@ -1,0 +1,109 @@
+{
+  "_nota": "EventoController está vacío. Estos JSON son para cuando se implementen los endpoints.",
+
+  "crear": [
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Partido jornada 1",
+      "jornada": 1,
+      "fechaHora": "2026-03-07T18:00:00",
+      "lugar": "Estadio Carlos Tartiere, Oviedo",
+      "equipoLocalId": 1,
+      "equipoVisitanteId": 2,
+      "observaciones": "Partido inaugural de la liga"
+    },
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Partido jornada 1 segundo",
+      "jornada": 1,
+      "fechaHora": "2026-03-07T20:00:00",
+      "lugar": "El Molinón, Gijón",
+      "equipoLocalId": 3,
+      "equipoVisitanteId": 4
+    },
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Partido jornada 2",
+      "jornada": 2,
+      "fechaHora": "2026-03-14T18:00:00",
+      "lugar": "Estadio Carlos Tartiere, Oviedo",
+      "equipoLocalId": 1,
+      "equipoVisitanteId": 3
+    },
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Partido jornada 2 segundo",
+      "jornada": 2,
+      "fechaHora": "2026-03-14T20:00:00",
+      "lugar": "El Molinón, Gijón",
+      "equipoLocalId": 2,
+      "equipoVisitanteId": 4
+    },
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Partido jornada 3",
+      "jornada": 3,
+      "fechaHora": "2026-03-21T18:00:00",
+      "lugar": "Pabellón municipal",
+      "equipoLocalId": 1,
+      "equipoVisitanteId": 4
+    },
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Partido jornada 3 segundo",
+      "jornada": 3,
+      "fechaHora": "2026-03-21T20:00:00",
+      "lugar": "Polideportivo Sur",
+      "equipoLocalId": 3,
+      "equipoVisitanteId": 2
+    },
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Partido sin jornada ni lugar (mínimo)",
+      "fechaHora": "2026-04-01T17:00:00",
+      "equipoLocalId": 1,
+      "equipoVisitanteId": 2
+    },
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Caso error: sin fecha (debe fallar)",
+      "equipoLocalId": 1,
+      "equipoVisitanteId": 2
+    },
+    {
+      "_descripcion": "POST /competiciones/{competicionId}/eventos — Caso error: sin equipos (debe fallar)",
+      "fechaHora": "2026-04-01T17:00:00"
+    }
+  ],
+  "actualizar": [
+    {
+      "_descripcion": "PUT /eventos/{id} — Cambiar fecha y lugar",
+      "fechaHora": "2026-03-08T19:30:00",
+      "lugar": "Estadio Municipal de Llanera"
+    },
+    {
+      "_descripcion": "PUT /eventos/{id} — Suspender partido",
+      "estado": "SUSPENDIDO",
+      "observaciones": "Suspendido por lluvia"
+    },
+    {
+      "_descripcion": "PUT /eventos/{id} — Aplazar partido",
+      "estado": "APLAZADO",
+      "observaciones": "Aplazado a nueva fecha por determinar"
+    }
+  ],
+  "registrar_resultado": [
+    {
+      "_descripcion": "POST /eventos/{id}/resultado — Victoria local",
+      "resultadoLocal": 2,
+      "resultadoVisitante": 0
+    },
+    {
+      "_descripcion": "POST /eventos/{id}/resultado — Empate",
+      "resultadoLocal": 1,
+      "resultadoVisitante": 1
+    },
+    {
+      "_descripcion": "POST /eventos/{id}/resultado — Victoria visitante goleada",
+      "resultadoLocal": 0,
+      "resultadoVisitante": 4
+    },
+    {
+      "_descripcion": "POST /eventos/{id}/resultado — Caso error: resultado negativo (debe fallar)",
+      "resultadoLocal": -1,
+      "resultadoVisitante": 0
+    }
+  ]
+}
