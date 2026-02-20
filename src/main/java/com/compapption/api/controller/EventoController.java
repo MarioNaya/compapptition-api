@@ -54,7 +54,7 @@ public class EventoController {
         return ResponseEntity.ok(eventoService.obtenerPorJornadaDetalle(competicionId,jornada));
     }
 
-    @GetMapping("/calendario")
+    @GetMapping("/calendariosimple")
     public ResponseEntity<List<EventoSimpleDTO>> obtenerPorFechas(
             @PathVariable Long competicionId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
@@ -68,6 +68,15 @@ public class EventoController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fin) {
         return ResponseEntity.ok(eventoService.obtenerPorRangoFechasDetalle(competicionId, inicio, fin));
+    }
+
+    @GetMapping("/equipo/{equipoId}")
+    public ResponseEntity<List<EventoSimpleDTO>> listarPorEquipoDetalle(
+            @PathVariable Long competicionId,
+            @PathVariable Long equipoId) {
+        return ResponseEntity.ok(eventoService.obtenerPorCompeticionYEquipo(
+                competicionId,
+                equipoId));
     }
 
     @GetMapping("/{id}")

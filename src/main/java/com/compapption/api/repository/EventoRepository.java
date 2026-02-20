@@ -64,6 +64,15 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     );
 
     @Query("SELECT e FROM Evento e " +
+            "JOIN e.equipos ee " +
+            "WHERE e.competicion.id = :competicionId " +
+            "AND ee.equipo.id = :equipoId " +
+            "ORDER BY e.jornada, e.fechaHora")
+    List<Evento> findByCompeticionIdAndEquipoId(
+            @Param("competicionId") Long competicionid,
+            @Param("equipoId") Long equipoid);
+
+    @Query("SELECT e FROM Evento e " +
             "WHERE e.fechaHora " +
             "BETWEEN :inicio AND :fin")
     List<Evento> findByFechaHoraBetween(

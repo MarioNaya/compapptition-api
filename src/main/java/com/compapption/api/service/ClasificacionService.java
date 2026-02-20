@@ -24,7 +24,6 @@ public class ClasificacionService {
     private final CompeticionRepository competicionRepository;
     private final EventoRepository eventoRepository;
     private final EventoEquipoRepository eventoEquipoRepository;
-    private final ConfiguracionCompeticionRepository configuracionCompeticionRepository;
     private final ClasificacionMapper clasificacionMapper;
 
     @Transactional(readOnly = true)
@@ -48,12 +47,42 @@ public class ClasificacionService {
     }
 
     @Transactional(readOnly = true)
-    public List<ClasificacionDetalleDTO> obtenerClasificacionPorTemporada(
+    public ClasificacionDetalleDTO obtenerPorEquipoDetalle(Long competicionId, Long equipoId) {
+        Competicion competicion = competicionRepository.findById(competicionId)
+                .orElseThrow(()-> new ResourceNotFoundException("Competicion", "id", competicionId));
+        return clasificacionMapper.toDetalleDTO(
+                clasificacionRepository.findByCompeticionIdAndEquipoIdAndTemporada(
+                        competicionId, equipoId, competicion.getTemporadaActual())
+                        .orElseThrow(()-> new ResourceNotFoundException("Clasificación", "equipo", equipoId)));
+    }
+
+    @Transactional(readOnly = true)
+    public ClasificacionSimpleDTO obtenerPorEquipoSimple(Long competicionId, Long equipoId) {
+        Competicion competicion = competicionRepository.findById(competicionId)
+                .orElseThrow(()-> new ResourceNotFoundException("Competicion", "id", competicionId));
+        return clasificacionMapper.toSimpleDTO(
+                clasificacionRepository.findByCompeticionIdAndEquipoIdAndTemporada(
+                                competicionId, equipoId, competicion.getTemporadaActual())
+                        .orElseThrow(()-> new ResourceNotFoundException("Clasificación", "equipo", equipoId)));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClasificacionDetalleDTO> obtenerPorTemporadaDetalle(
             Long competicionId, Integer temporada) {
         if (!competicionRepository.existsById(competicionId)) {
             throw new ResourceNotFoundException("Competición", "id", competicionId);
         }
         return clasificacionMapper.toDetalleDTOList(
+                clasificacionRepository.findByCompeticionIdAndTemporada(competicionId, temporada));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClasificacionSimpleDTO> obtenerPorTemporadaSimple(
+            Long competicionId, Integer temporada) {
+        if (!competicionRepository.existsById(competicionId)) {
+            throw new ResourceNotFoundException("Competición", "id", competicionId);
+        }
+        return clasificacionMapper.toSimpleDTOList(
                 clasificacionRepository.findByCompeticionIdAndTemporada(competicionId, temporada));
     }
 

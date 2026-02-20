@@ -106,6 +106,20 @@ public class EventoService {
                 eventoRepository.findByEquipoId(equipoId));
     }
 
+    @Transactional(readOnly = true)
+    public List<EventoSimpleDTO> obtenerPorCompeticionYEquipo(
+            Long competicionId,
+            Long equipoId){
+        if (!competicionRepository.existsById(equipoId)) {
+            throw new ResourceNotFoundException("Competicion", "id", equipoId);
+        }
+        if (!equipoRepository.existsById(equipoId)) {
+            throw new ResourceNotFoundException("Equipo", "id", equipoId);
+        }
+        return eventoMapper.toSimpleDTOList(
+                eventoRepository.findByCompeticionIdAndEquipoId(competicionId,equipoId));
+    }
+
     // Por fecha
 
     @Transactional(readOnly = true)
@@ -134,6 +148,7 @@ public class EventoService {
 
     /// === CREAR, ACTUALIZAR Y ELIMINAR EVENTO === ///
 
+    @Transactional
     public EventoDetalleDTO crear(Long competicionId, EventoCreateRequest request){
 
         Competicion competicion = competicionRepository.findById(competicionId)
