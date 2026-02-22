@@ -68,7 +68,7 @@ public class DeporteService {
 
         return tipoEstadisticaRepository.findByDeporteIdAndActivoTrueOrderByOrdenAsc(deporteId)
                 .stream()
-                .map(tipoEstadisticaMapper::toTipoEstidisticaDTO)
+                .map(tipoEstadisticaMapper::toTipoEstadisticaDTO)
                 .toList();
     }
 }

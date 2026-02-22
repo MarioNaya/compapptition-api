@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface TipoEstadisticaMapper {
 
-    TipoEstadisticaDTO toTipoEstidisticaDTO(TipoEstadistica tipoEstadistica);
+    TipoEstadisticaDTO toTipoEstadisticaDTO(TipoEstadistica tipoEstadistica);
 
     List<TipoEstadisticaDTO> toTipoEstadisticaDTOList(List<TipoEstadistica> tipos);
 }

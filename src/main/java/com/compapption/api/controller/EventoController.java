@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/competiciones({competicionId}/eventos")
+@RequestMapping("/competiciones/{competicionId}/eventos")
 @RequiredArgsConstructor
 public class EventoController {
 
