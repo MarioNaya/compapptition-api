@@ -41,6 +41,15 @@ public interface EstadisticaJugadorEventoRepository extends JpaRepository<Estadi
             @Param("jugadorId") long jugadorId
     );
 
+    @Query("SELECT e FROM EstadisticaJugadorEvento e " +
+            "LEFT JOIN FETCH e.evento " +
+            "LEFT JOIN FETCH e.tipoEstadistica " +
+            "WHERE e.jugador.id = :jugadorId " +
+            "AND e.evento.temporada = :temporada")
+    List<EstadisticaJugadorEvento> findByJugadorIdAndTemporada(
+            @Param("jugadorId") Long jugadorId,
+            @Param("temporada") Integer temporada);
+
     void deleteByEventoId(long eventoId);
 
     @Query("SELECT SUM(e.valor) FROM EstadisticaJugadorEvento e " +
@@ -58,4 +67,13 @@ public interface EstadisticaJugadorEventoRepository extends JpaRepository<Estadi
             @Param("competicionId") long competicionId,
             @Param("jugadorId") long jugadorId
     );
+
+    @Query("SELECT e FROM EstadisticaJugadorEvento e " +
+            "LEFT JOIN FETCH e.jugador " +
+            "LEFT JOIN FETCH e.tipoEstadistica " +
+            "JOIN e.evento ev " +
+            "WHERE ev.competicion.id = :competicionId AND e.tipoEstadistica.id = :tipoEstadisticaId")
+    List<EstadisticaJugadorEvento> findByCompeticionIdAndTipoEstadisticaId(
+            @Param("competicionId") Long competicionId,
+            @Param("tipoEstadisticaId") Long tipoEstadisticaId);
 }

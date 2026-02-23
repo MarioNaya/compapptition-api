@@ -39,6 +39,10 @@ public class ConfiguracionCompeticion {
     private FormatoCompeticion formato = FormatoCompeticion.LIGA;
 
     @Builder.Default
+    @Column(name = "dias_entre_jornadas")
+    private Integer diasEntreJornadas = 7;
+
+    @Builder.Default
     @Column(name = "num_equipos_playoff")
     private Integer numEquiposPlayoff = 8;
 
