@@ -3,7 +3,6 @@ package com.compapption.api.mapper;
 import com.compapption.api.dto.deporteDTO.DeporteDetalleDTO;
 import com.compapption.api.dto.deporteDTO.DeporteSimpleDTO;
 import com.compapption.api.entity.Deporte;
-import com.compapption.api.entity.TipoEstadistica;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -13,7 +12,7 @@ import java.util.List;
 
 @Mapper(
         componentModel = "spring",
-        uses = TipoEstadistica.class,
+        uses = TipoEstadisticaMapper.class,
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface DeporteMapper {

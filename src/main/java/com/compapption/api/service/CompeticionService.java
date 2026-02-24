@@ -144,9 +144,9 @@ public class CompeticionService {
         if (request.getDescripcion() != null){
             competicion.setDescripcion(request.getDescripcion());
         }
-        competicion.setPublica(request.isPublica());
-        competicion.setInscripcionAbierta(request.isInscripcionAbierta());
-        competicion.setEstadisticasActivas(request.isEstadisticasActivas());
+        if (request.getPublica() != null) competicion.setPublica(request.getPublica());
+        if (request.getInscripcionAbierta() != null) competicion.setInscripcionAbierta(request.getInscripcionAbierta());
+        if (request.getEstadisticasActivas() != null) competicion.setEstadisticasActivas(request.getEstadisticasActivas());
         if (request.getFechaInicio() != null){
             competicion.setFechaInicio(request.getFechaInicio());
         }
@@ -339,7 +339,7 @@ public class CompeticionService {
     private void validarPermisoEdicion(Competicion competicion, long usuarioId) {
         if (!Objects.equals(competicion.getCreador().getId(), usuarioId) &&
                 !usuarioRolCompeticionRepository.existsByUsuarioIdAndCompeticionIdAndRolNombre(
-                        usuarioId, competicion.getId(), "ADMIN_COMPETICION")) {
+                        usuarioId, competicion.getId(), Rol.RolNombre.ADMIN_COMPETICION)) {
             throw new BadRequestException("No tienes permisos para editar esta competición");
         }
     }

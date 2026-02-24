@@ -20,7 +20,7 @@ public class EmailService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    @Value("${spring.mail.username:noreply@compapptition.com")
+    @Value("${spring.mail.username:noreply@compapptition.com}")
     private String fromEmail;
 
     @Async

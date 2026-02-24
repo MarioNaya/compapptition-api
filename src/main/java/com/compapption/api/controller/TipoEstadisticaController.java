@@ -5,6 +5,7 @@ import com.compapption.api.request.tipoestadistica.TipoEstadisticaRequest;
 import com.compapption.api.service.TipoEstadisticaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,9 +30,10 @@ public class TipoEstadisticaController {
 
     @PostMapping("/deporte/{deporteId}")
     public ResponseEntity<TipoEstadisticaDTO> crear(
-            @PathVariable Long id,
+            @PathVariable Long deporteId,
             @Valid @RequestBody TipoEstadisticaRequest request) {
-        return ResponseEntity.ok(tipoEstadisticaService.actualizar(id, request));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(tipoEstadisticaService.crear(deporteId, request));
     }
 
     @PutMapping("/{id}")

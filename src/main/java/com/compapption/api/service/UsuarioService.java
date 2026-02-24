@@ -50,10 +50,10 @@ public class UsuarioService {
             usuario.setNombre(request.getNombre());
         }
         if (request.getApellidos()!=null) {
-            usuario.setNombre(request.getNombre());
+            usuario.setApellidos(request.getApellidos());
         }
         if (request.getEmail()!=null) {
-            if (usuarioRepository.existsByEmail(request.getEmail())) {
+            if (usuarioRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
                 throw new BadRequestException("El email ya está en uso");
             }
             usuario.setEmail(request.getEmail());

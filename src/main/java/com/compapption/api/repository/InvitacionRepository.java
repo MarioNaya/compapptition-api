@@ -54,4 +54,9 @@ public interface InvitacionRepository extends JpaRepository<Invitacion, Long> {
             String email, long competicionId,
             Invitacion.EstadoInvitacion estado
     );
+
+    boolean existsByDestinatarioEmailAndEquipoIdAndEstado(
+            String email, long equipoId,
+            Invitacion.EstadoInvitacion estado
+    );
 }

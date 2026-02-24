@@ -46,10 +46,12 @@ public interface EventoMapper {
                 .orElse(null);
     }
 
-    @Mapping(target = "competicionId",     source = "competicion.id")
-    @Mapping(target = "competicionNombre", source = "competicion.nombre")
-    @Mapping(target = "equipoLocal",       source = "equipos", qualifiedByName = "extractLocal")
-    @Mapping(target = "equipoVisitante",   source = "equipos", qualifiedByName = "extractVisitante")
+    @Mapping(target = "competicionId",              source = "competicion.id")
+    @Mapping(target = "competicionNombre",          source = "competicion.nombre")
+    @Mapping(target = "equipoLocal",                source = "equipos", qualifiedByName = "extractLocal")
+    @Mapping(target = "equipoVisitante",            source = "equipos", qualifiedByName = "extractVisitante")
+    @Mapping(target = "partidoAnteriorLocalId",     source = "partidoAnteriorLocal.id")
+    @Mapping(target = "partidoAnteriorVisitanteId", source = "partidoAnteriorVisitante.id")
     EventoDetalleDTO toDetalleDTO(Evento evento);
 
     @Mapping(target = "competicionId",     source = "competicion.id")

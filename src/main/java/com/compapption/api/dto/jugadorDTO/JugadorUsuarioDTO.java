@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class JugadorUsuarioDTO {
 
     private Long id;
-    private Long usuarioid;
+    private Long usuarioId;
     private String usuarioUsername;
     private LocalDateTime fechaCreacion;
 }

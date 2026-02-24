@@ -26,8 +26,11 @@ public class EventoDetalleDTO {
     private Integer resultadoVisitante;
     private String observaciones;
     private LocalDateTime fechaCreacion;
-    private Evento.EstadoEvento estadoEvento;
 
     private EventoEquipoDTO equipoLocal;
     private EventoEquipoDTO equipoVisitante;
+
+    private Long partidoAnteriorLocalId;
+    private Long partidoAnteriorVisitanteId;
+    private Integer numeroPartido;
 }

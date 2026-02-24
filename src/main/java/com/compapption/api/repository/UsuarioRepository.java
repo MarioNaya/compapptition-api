@@ -30,6 +30,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     boolean existsByEmail(String email);
 
+    boolean existsByEmailAndIdNot(String email, Long id);
+
     @Query("SELECT u FROM Usuario u " +
             "LEFT JOIN FETCH u.rolesCompeticion rc " +
             "LEFT JOIN FETCH rc.rol " +

@@ -20,10 +20,20 @@ final class CalendarioUtils {
                               Equipo visitante,
                               int jornada,
                               LocalDateTime fechaHora) {
+        return crearEvento(competicion, local, visitante, jornada, fechaHora, null);
+    }
+
+    static Evento crearEvento(Competicion competicion,
+                              Equipo local,
+                              Equipo visitante,
+                              int jornada,
+                              LocalDateTime fechaHora,
+                              Integer numeroPartido) {
         Evento evento = Evento.builder()
                 .competicion(competicion)
                 .jornada(jornada)
                 .fechaHora(fechaHora)
+                .numeroPartido(numeroPartido)
                 .estado(Evento.EstadoEvento.PROGRAMADO)
                 .build();
 
@@ -43,5 +53,26 @@ final class CalendarioUtils {
         evento.getEquipos().add(eventoVisitante);
 
         return evento;
+    }
+
+    /**
+     * Crea un evento placeholder para rondas futuras del bracket.
+     * No tiene equipos asignados todavía; se rellenan cuando se resuelve la eliminatoria anterior.
+     */
+    static Evento crearEventoPlaceholder(Competicion competicion,
+                                         int jornada,
+                                         LocalDateTime fechaHora,
+                                         Evento anteriorLocal,
+                                         Evento anteriorVisitante,
+                                         Integer numeroPartido) {
+        return Evento.builder()
+                .competicion(competicion)
+                .jornada(jornada)
+                .fechaHora(fechaHora)
+                .partidoAnteriorLocal(anteriorLocal)
+                .partidoAnteriorVisitante(anteriorVisitante)
+                .numeroPartido(numeroPartido)
+                .estado(Evento.EstadoEvento.PROGRAMADO)
+                .build();
     }
 }

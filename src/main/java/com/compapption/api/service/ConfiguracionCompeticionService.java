@@ -20,12 +20,12 @@ public class ConfiguracionCompeticionService {
                 .competicion(competicion);
 
         if (configRequest != null) {
-            builder.puntosVictoria(configRequest.getPuntosVictoria())
-                    .puntosEmpate(configRequest.getPuntosEmpate())
-                    .puntosDerrota(configRequest.getPuntosDerrota())
-                    .formato(configRequest.getFormato() != null ? configRequest.getFormato() : ConfiguracionCompeticion.FormatoCompeticion.LIGA)
-                    .numEquiposPlayoff(configRequest.getNumEquiposPlayoff())
-                    .partidosEliminatoria(configRequest.getPartidosEliminatoria());
+            if (configRequest.getPuntosVictoria() != null) builder.puntosVictoria(configRequest.getPuntosVictoria());
+            if (configRequest.getPuntosEmpate() != null)   builder.puntosEmpate(configRequest.getPuntosEmpate());
+            if (configRequest.getPuntosDerrota() != null)  builder.puntosDerrota(configRequest.getPuntosDerrota());
+            if (configRequest.getFormato() != null)        builder.formato(configRequest.getFormato());
+            if (configRequest.getNumEquiposPlayoff() != null) builder.numEquiposPlayoff(configRequest.getNumEquiposPlayoff());
+            if (configRequest.getPartidosEliminatoria() != null) builder.partidosEliminatoria(configRequest.getPartidosEliminatoria());
         }
 
         return builder.build();
@@ -35,9 +35,9 @@ public class ConfiguracionCompeticionService {
             ConfiguracionCompeticion config,
             CompeticionUpdateRequest.ConfiguracionUpdateRequest request) {
 
-        config.setPuntosVictoria(request.getPuntosVictoria());
-        config.setPuntosEmpate(request.getPuntosEmpate());
-        config.setPuntosDerrota(request.getPuntosDerrota());
+        if (request.getPuntosVictoria() != null) config.setPuntosVictoria(request.getPuntosVictoria());
+        if (request.getPuntosEmpate() != null)   config.setPuntosEmpate(request.getPuntosEmpate());
+        if (request.getPuntosDerrota() != null)  config.setPuntosDerrota(request.getPuntosDerrota());
         if (request.getFormato() != null) {
             config.setFormato(request.getFormato());
         }

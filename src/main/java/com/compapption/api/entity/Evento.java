@@ -35,6 +35,15 @@ public class Evento {
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
 
+    @Column(name = "fecha_evento", nullable = false)
+    private LocalDateTime fechaEvento;
+
+    @PrePersist
+    @PreUpdate
+    private void sincronizarFechaEvento() {
+        this.fechaEvento = this.fechaHora;
+    }
+
     @Column(length = 255)
     private String lugar;
 
@@ -59,6 +68,17 @@ public class Evento {
     @UpdateTimestamp
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "partido_anterior_local_id")
+    private Evento partidoAnteriorLocal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "partido_anterior_visitante_id")
+    private Evento partidoAnteriorVisitante;
+
+    @Column(name = "numero_partido")
+    private Integer numeroPartido;
 
     @Builder.Default
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
