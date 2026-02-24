@@ -147,6 +147,10 @@ public class JugadorService {
             throw new BadRequestException("El jugador ya está vinculado a un usuario");
         }
 
+        if (jugadorRepository.findByUsuarioId(usuarioId).isPresent()) {
+            throw new BadRequestException("El usuario ya tiene un perfil de jugador");
+        }
+
         jugador.setUsuario(usuario);
         jugador = jugadorRepository.save(jugador);
         return jugadorMapper.toUsuarioDTO(jugador);

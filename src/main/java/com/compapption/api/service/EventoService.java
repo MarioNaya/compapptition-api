@@ -479,7 +479,7 @@ public class EventoService {
 
         // Revisar si la estadística ya existe
         EstadisticaJugadorEvento estadistica = estadisticaJugadorEventoRepository
-                .findByEventoIdAndJugadorIdAndTipoEstadisticaId(eventoId, request.getJugadorId(), request.getJugadorId())
+                .findByEventoIdAndJugadorIdAndTipoEstadisticaId(eventoId, request.getJugadorId(), request.getTipoEstadisticaId())
                 .orElse(EstadisticaJugadorEvento.builder()
                         .evento(evento)
                         .jugador(jugador)
