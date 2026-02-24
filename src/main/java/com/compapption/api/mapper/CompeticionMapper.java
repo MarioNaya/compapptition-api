@@ -57,6 +57,7 @@ public interface CompeticionMapper {
                 .puntosVictoria(config.getPuntosVictoria())
                 .puntosEmpate(config.getPuntosEmpate())
                 .puntosDerrota(config.getPuntosDerrota())
+                .diasEntreJornada(config.getDiasEntreJornadas())
                 .formato(config.getFormato())
                 .numEquiposPlayoff(config.getNumEquiposPlayoff())
                 .partidosEliminatoria(config.getPartidosEliminatoria())

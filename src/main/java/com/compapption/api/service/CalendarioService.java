@@ -58,16 +58,20 @@ public class CalendarioService {
      * Genera la fase eliminatoria (playoff seeded) para LIGA_PLAYOFF o GRUPOS_PLAYOFF.
      * Toma los mejores N equipos de la clasificación actual.
      * Si rondaInicial es null, se calcula como maxJornada + 1.
+     * diasJornada y partidosEliminatoria se toman de la config si no se pasan explícitamente.
      */
     @Transactional
     public List<EventoDetalleDTO> generarPlayoffSeededPorIdDetalle(Long competicionId,
                                                             LocalDateTime fechaInicio,
-                                                            Integer rondaInicial) {
+                                                            Integer rondaInicial,
+                                                            Integer diasJornada) {
         Competicion competicion = competicionRepository.findByIdWithDetails(competicionId)
                 .orElseThrow(()-> new ResourceNotFoundException("Competicion", "id", competicionId));
 
         ConfiguracionCompeticion config = competicion.getConfiguracion();
         int numEquiposPlayoff = config != null ? config.getNumEquiposPlayoff() : 8;
+        int dias = diasJornada != null ? diasJornada : (config != null && config.getDiasEntreJornadas() != null ? config.getDiasEntreJornadas() : 7);
+        int partidosEliminatoria = config != null && config.getPartidosEliminatoria() != null ? config.getPartidosEliminatoria() : 1;
 
         List<Equipo> clasificados = clasificacionRepository
                 .findByCompeticionIdAndTemporada(competicionId, competicion.getTemporadaActual())
@@ -85,7 +89,7 @@ public class CalendarioService {
         int ronda = rondaInicial != null ? rondaInicial : calcularSiguienteRonda(competicionId);
 
         return eventoMapper.toDetalleDTOList(
-                generarPlayoffSeeded(competicion, clasificados, fechaInicio, ronda));
+                generarPlayoffSeeded(competicion, clasificados, fechaInicio, ronda, dias, partidosEliminatoria));
     }
 
     ///  === MÉTODOS DE DOMINIO - TRABAJA CON ENTIDADES - SE PUEDE LLAMAR DESDE OTROS SERVICIOS === ///
@@ -132,8 +136,18 @@ public class CalendarioService {
                                              List<Equipo> clasificados,
                                              LocalDateTime fechaInicio,
                                              int rondaInicial) {
-        List<Evento> eventos =
-                generadorPlayoff.generarBracket(competicion, clasificados, fechaInicio, null, rondaInicial);
+        return generarPlayoffSeeded(competicion, clasificados, fechaInicio, rondaInicial, 7, 1);
+    }
+
+    @Transactional
+    public List<Evento> generarPlayoffSeeded(Competicion competicion,
+                                             List<Equipo> clasificados,
+                                             LocalDateTime fechaInicio,
+                                             int rondaInicial,
+                                             int diasJornada,
+                                             int partidosEliminatoria) {
+        List<Evento> eventos = generadorPlayoff.generarBracketCompleto(
+                competicion, clasificados, fechaInicio, diasJornada, rondaInicial, partidosEliminatoria);
 
         if (!eventos.isEmpty()) {
             eventoRepository.saveAll(eventos);

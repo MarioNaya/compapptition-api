@@ -37,12 +37,12 @@ public class EquipoController {
     }
 
     @GetMapping("mis-equipos/manager")
-    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposManager(long id) {
+    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposManager(@RequestParam long id) {
         return ResponseEntity.ok(equipoService.obtenerPorManager(id));
     }
 
     @GetMapping("mis-equipos/jugador")
-    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposJugador(long id) {
+    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposJugador(@RequestParam long id) {
         return ResponseEntity.ok(equipoService.obtenerPorJugador(id));
     }
 
@@ -86,7 +86,7 @@ public class EquipoController {
         return ResponseEntity.ok(equipoService.obtenerJugadoresDetalle(id));
     }
 
-    @PostMapping("/{id}/jugadores/{jugador id}")
+    @PostMapping("/{id}/jugadores/{jugadorId}")
     public ResponseEntity<Map<String,String>> agregarJugador(
             @PathVariable Long id,
             @PathVariable Long jugadorId,

@@ -5,6 +5,7 @@ import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
 import com.compapption.api.dto.jugadorDTO.JugadorUsuarioDTO;
 import com.compapption.api.entity.Jugador;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
@@ -19,12 +20,16 @@ public interface JugadorMapper {
     // === ENTITY TO DTO === //
 
     // Jugador con todos los atributos
+    @Mapping(target = "usuarioId", source = "usuario.id")
+    @Mapping(target = "usuarioUsername", source = "usuario.username")
     JugadorDetalleDTO toDetalleDTO(Jugador jugador);
 
     // Jugador simplificado para uso en listas y vistas
     JugadorSimpleDTO toSimpleDTO(Jugador jugador);
 
     // Jugador para vinculación con usuario
+    @Mapping(target = "usuarioId", source = "usuario.id")
+    @Mapping(target = "usuarioUsername", source = "usuario.username")
     JugadorUsuarioDTO toUsuarioDTO(Jugador jugador);
 
     // Listas jugadores con los 2 formatos

@@ -32,18 +32,18 @@ public interface UsuarioRolCompeticionRepository extends JpaRepository<UsuarioRo
     Optional<UsuarioRolCompeticion> findByUsuarioIdAndCompeticionIdAndRolNombre(
             long usuarioId,
             long competicionId,
-            String nombre
+            Rol.RolNombre nombre
     );
 
     boolean existsByUsuarioIdAndCompeticionIdAndRolNombre(
             long usuarioId,
             long competicionId,
-            String nombre
+            Rol.RolNombre nombre
     );
 
     void deleteByUsuarioIdAndCompeticionIdAndRolNombre(
             long usuarioId,
             long competicionId,
-            String nombre
+            Rol.RolNombre nombre
     );
 }

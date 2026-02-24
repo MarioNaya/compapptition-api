@@ -110,4 +110,44 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     List<Evento> findFinalizadosByCompeticionIdAndTemporada(
             @Param("competicionId") Long competicionId,
             @Param("temporada") Integer temporada);
+
+    /**
+     * Encuentra eventos de siguiente ronda que referencian el evento dado como local o visitante anterior.
+     * Hace JOIN FETCH de los anteriors para evitar lazy-init al acceder a sus IDs.
+     * Usado para avance automático del bracket.
+     */
+    @Query("SELECT e FROM Evento e " +
+            "LEFT JOIN FETCH e.partidoAnteriorLocal " +
+            "LEFT JOIN FETCH e.partidoAnteriorVisitante " +
+            "WHERE e.partidoAnteriorLocal.id = :eventoId " +
+            "OR e.partidoAnteriorVisitante.id = :eventoId")
+    List<Evento> findByPartidoAnteriorId(@Param("eventoId") Long eventoId);
+
+    /**
+     * Encuentra todos los partidos de una serie de rondas 2+:
+     * comparten los mismos eventos anteriores (mismo anteriorLocal y anteriorVisitante).
+     */
+    @Query("SELECT e FROM Evento e " +
+            "WHERE e.partidoAnteriorLocal.id = :anteriorLocalId " +
+            "AND e.partidoAnteriorVisitante.id = :anteriorVisitanteId " +
+            "ORDER BY e.numeroPartido")
+    List<Evento> findSerieByAnteriores(
+            @Param("anteriorLocalId") Long anteriorLocalId,
+            @Param("anteriorVisitanteId") Long anteriorVisitanteId);
+
+    /**
+     * Encuentra todos los partidos de una serie de ronda 1:
+     * mismos dos equipos participantes, mismo competicion, numeroPartido no nulo.
+     */
+    @Query("SELECT e FROM Evento e " +
+            "WHERE e.competicion.id = :competicionId " +
+            "AND e.partidoAnteriorLocal IS NULL " +
+            "AND e.numeroPartido IS NOT NULL " +
+            "AND EXISTS (SELECT ee FROM EventoEquipo ee WHERE ee.evento = e AND ee.equipo.id = :equipo1Id) " +
+            "AND EXISTS (SELECT ee FROM EventoEquipo ee WHERE ee.evento = e AND ee.equipo.id = :equipo2Id) " +
+            "ORDER BY e.numeroPartido")
+    List<Evento> findSerieRonda1ByEquipos(
+            @Param("competicionId") Long competicionId,
+            @Param("equipo1Id") Long equipo1Id,
+            @Param("equipo2Id") Long equipo2Id);
 }

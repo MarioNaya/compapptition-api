@@ -43,10 +43,10 @@ public class InvitacionService {
         if (!ROLES_VALIDOS.contains(rol)) {
             throw new BadRequestException("Rol ofrecido no válido: " + rol + ". Valores permitidos: " + ROLES_VALIDOS);
         }
-        if (("ADMIN_COMPETICION".equals(rol) || "MANAGER_EQUIPO".equals(rol) && request.getCompeticionId() == null)) {
+        if (("ADMIN_COMPETICION".equals(rol) || "MANAGER_EQUIPO".equals(rol)) && request.getCompeticionId() == null) {
             throw new BadRequestException("Se requiere id de la competicion para invitar como " + rol);
         }
-        if ("MANAGER_EQUIPO".equals(rol) || "JUGADOR".equals(rol) && request.getEquipoId() == null) {
+        if (("MANAGER_EQUIPO".equals(rol) || "JUGADOR".equals(rol)) && request.getEquipoId() == null) {
             throw new BadRequestException("Se requiere id del equipo para invitar como " + rol);
         }
 
@@ -67,12 +67,12 @@ public class InvitacionService {
 
         // Verificar duplicados para invitaciones de competición
         if (competicion != null && invitacionRepository.existsByDestinatarioEmailAndCompeticionIdAndEstado(
-                request.getDestinatarioEmail(), request.getEquipoId(), Invitacion.EstadoInvitacion.PENDIENTE)) {
+                request.getDestinatarioEmail(), request.getCompeticionId(), Invitacion.EstadoInvitacion.PENDIENTE)) {
             throw new BadRequestException("Ya existe una invitación pendiente para ese email en esta competición");
         }
 
         // Verificar duplicado para invitaciones de equipo (JUGADOR)
-        if ("JUGADOR".equals(rol) && invitacionRepository.existsByDestinatarioEmailAndCompeticionIdAndEstado(
+        if ("JUGADOR".equals(rol) && equipo != null && invitacionRepository.existsByDestinatarioEmailAndEquipoIdAndEstado(
                 request.getDestinatarioEmail(), request.getEquipoId(), Invitacion.EstadoInvitacion.PENDIENTE)) {
             throw new BadRequestException("Ya existe una invitación pendiente para ese email en este equipo");
         }
@@ -127,13 +127,13 @@ public class InvitacionService {
                 if (invitacion.getCompeticion() == null) {
                     throw new BadRequestException("La invitación no tiene competición asociada");
                 }
-                asignarRolEncompeticion(usuario, invitacion.getCompeticion(), "ADMIN_COMPETICION");
+                asignarRolEncompeticion(usuario, invitacion.getCompeticion(), Rol.RolNombre.ADMIN_COMPETICION);
             }
             case "MANAGER_EQUIPO" -> {
                 if (invitacion.getCompeticion()==null || invitacion.getEquipo()==null) {
                     throw new BadRequestException("La invitación requiere competición y equipo");
                 }
-                asignarRolEncompeticion(usuario, invitacion.getCompeticion(),"MANAGER_EQUIPO");
+                asignarRolEncompeticion(usuario, invitacion.getCompeticion(), Rol.RolNombre.MANAGER_EQUIPO);
                 asignarManagerEquipo(usuario, invitacion.getEquipo(), invitacion.getCompeticion());
             }
             case "JUGADOR"-> {
@@ -206,13 +206,13 @@ public class InvitacionService {
 
     // Helpers
 
-    private void asignarRolEncompeticion(Usuario usuario, Competicion competicion, String rolNombre) {
+    private void asignarRolEncompeticion(Usuario usuario, Competicion competicion, Rol.RolNombre rolNombre) {
         if (usuarioRolCompeticionRepository.existsByUsuarioIdAndCompeticionIdAndRolNombre(
                 usuario.getId(), competicion.getId(), rolNombre)) {
             return;
         }
         Rol rol = rolRepository.findByNombre(rolNombre)
-                .orElseThrow(()-> new ResourceNotFoundException("Rol", "nombre", rolNombre));
+                .orElseThrow(()-> new ResourceNotFoundException("Rol", "nombre", rolNombre.name()));
         UsuarioRolCompeticion urc = UsuarioRolCompeticion.builder()
                 .usuario(usuario)
                 .competicion(competicion)

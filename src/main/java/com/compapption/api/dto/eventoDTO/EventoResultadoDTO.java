@@ -16,5 +16,5 @@ public class EventoResultadoDTO {
     private Long competicionId;
     private Integer resultadoLocal;
     private Integer resultadoVisitante;
-    private Evento.EstadoEvento estadoEvento;
+    private Evento.EstadoEvento estado;
 }

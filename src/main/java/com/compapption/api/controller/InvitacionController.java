@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,22 +22,21 @@ public class InvitacionController {
     @PostMapping
     public ResponseEntity<InvitacionDetalleDTO> crear(
             @Valid @RequestBody InvitacionCreateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
+            @RequestParam Long usuarioId) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(invitacionService.crearInvitacion(userDetails.getId(), request));
+                .body(invitacionService.crearInvitacion(usuarioId, request));
     }
 
     @GetMapping("/pendientes")
     public ResponseEntity<List<InvitacionSimpleDTO>> obtenerPendientes(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(invitacionService.obtenerPendientes(userDetails.getId()));
+            @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(invitacionService.obtenerPendientes(usuarioId));
     }
 
     @GetMapping("/enviadas")
     public ResponseEntity<List<InvitacionSimpleDTO>> obtenerEnviadas(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(invitacionService.obtenerEnviadas(userDetails.getId()));
+            @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(invitacionService.obtenerEnviadas(usuarioId));
     }
 
     @GetMapping("/competicion/{competicionId}")
@@ -50,14 +48,14 @@ public class InvitacionController {
     @PutMapping("/{token}/aceptar")
     public ResponseEntity<InvitacionDetalleDTO> aceptar(
             @PathVariable String token,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(invitacionService.aceptarPorToken(token, userDetails.getId()));
+            @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(invitacionService.aceptarPorToken(token, usuarioId));
     }
 
     @PutMapping("/{token}/rechazar")
     public ResponseEntity<InvitacionDetalleDTO> rechazar(
             @PathVariable String token,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(invitacionService.rechazarPorToken(token, userDetails.getId()));
+            @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(invitacionService.rechazarPorToken(token, usuarioId));
     }
 }

@@ -45,6 +45,6 @@ public class CalendarioController {
             @RequestParam(required = false) Integer rondaInicial) {
         return ResponseEntity.ok(
                 calendarioService.generarPlayoffSeededPorIdDetalle(
-                        competicionId, request.getFechaInicio(), rondaInicial));
+                        competicionId, request.getFechaInicio(), rondaInicial, request.getDiasJornada()));
     }
 }

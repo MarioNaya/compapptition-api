@@ -21,9 +21,9 @@ public class CompeticionUpdateRequest {
 
     private String descripcion;
     private Integer temporadaActual;
-    private boolean publica;
-    private boolean inscripcionAbierta;
-    private boolean estadisticasActivas;
+    private Boolean publica;
+    private Boolean inscripcionAbierta;
+    private Boolean estadisticasActivas;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private Competicion.EstadoCompeticion estado;
@@ -35,9 +35,9 @@ public class CompeticionUpdateRequest {
     @AllArgsConstructor
     @Builder
     public static class ConfiguracionUpdateRequest {
-        private int puntosVictoria;
-        private int puntosEmpate;
-        private int puntosDerrota;
+        private Integer puntosVictoria;
+        private Integer puntosEmpate;
+        private Integer puntosDerrota;
         private ConfiguracionCompeticion.FormatoCompeticion formato;
         private Integer numEquiposPlayOff;
         private Integer partidosEliminatoria;

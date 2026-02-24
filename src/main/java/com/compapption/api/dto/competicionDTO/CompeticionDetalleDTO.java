@@ -39,12 +39,13 @@ public class CompeticionDetalleDTO {
     @AllArgsConstructor
     @Builder
     public static class ConfiguracionDTO {
-        private int puntosVictoria;
-        private int puntosEmpate;
-        private int puntosDerrota;
+        private Integer puntosVictoria;
+        private Integer puntosEmpate;
+        private Integer puntosDerrota;
+        private Integer diasEntreJornada;
         private ConfiguracionCompeticion.FormatoCompeticion formato;
-        private int numEquiposPlayoff;
-        private int partidosEliminatoria;
+        private Integer numEquiposPlayoff;
+        private Integer partidosEliminatoria;
     }
 
 }

@@ -20,7 +20,7 @@ public class UsuarioRolCompeticionService {
     // === ASIGNACIÓN ROL DE USUARIO EN COMPETICIÓN === //
 
     public void asignarRolAdminCompeticion(Usuario creador, Competicion competicion){
-        Rol rolAdmin = rolRepository.findByNombre("ADMIN_COMPETICION")
+        Rol rolAdmin = rolRepository.findByNombre(Rol.RolNombre.ADMIN_COMPETICION)
                 .orElseThrow(()-> new ResourceNotFoundException("Rol", "nombre", "ADMIN_COMPETICION"));
 
         UsuarioRolCompeticion urc = UsuarioRolCompeticion.builder()

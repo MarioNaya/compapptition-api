@@ -19,7 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -110,8 +114,8 @@ public class EventoService {
     public List<EventoSimpleDTO> obtenerPorCompeticionYEquipo(
             Long competicionId,
             Long equipoId){
-        if (!competicionRepository.existsById(equipoId)) {
-            throw new ResourceNotFoundException("Competicion", "id", equipoId);
+        if (!competicionRepository.existsById(competicionId)) {
+            throw new ResourceNotFoundException("Competicion", "id", competicionId);
         }
         if (!equipoRepository.existsById(equipoId)) {
             throw new ResourceNotFoundException("Equipo", "id", equipoId);
@@ -186,9 +190,11 @@ public class EventoService {
         EventoEquipo eventoVisitante = EventoEquipo.builder()
                 .evento(evento)
                 .equipo(equipovisitante)
-                .esLocal(true)
+                .esLocal(false)
                 .build();
 
+        eventoEquipoRepository.save(eventoLocal);
+        eventoEquipoRepository.save(eventoVisitante);
         evento.getEquipos().add(eventoLocal);
         evento.getEquipos().add(eventoVisitante);
 
@@ -242,7 +248,198 @@ public class EventoService {
         // Recalcular clasificación
         clasificacionService.calcularClasificacion(evento.getCompeticion().getId());
 
+        // Avance automático de bracket playoff
+        procesarAvancePlayoff(evento);
+
         return eventoMapper.toResultadoDTO(evento);
+    }
+
+    /// === LÓGICA DE AVANCE AUTOMÁTICO EN BRACKET PLAYOFF === ///
+
+    /**
+     * Tras finalizar un evento, comprueba si pertenece a un bracket de playoff
+     * y, si la eliminatoria está resuelta, rellena el equipo ganador en el evento
+     * de la siguiente ronda.
+     */
+    private void procesarAvancePlayoff(Evento eventoFinalizado) {
+        boolean esSerie = eventoFinalizado.getNumeroPartido() != null;
+
+        Evento decisivo;
+        Optional<Equipo> ganadorOpt;
+
+        if (!esSerie) {
+            // Partido único: este evento es el decisivo
+            decisivo = eventoFinalizado;
+            ganadorOpt = determinarGanadorPartidoUnico(eventoFinalizado);
+        } else {
+            // Serie: buscar todos los partidos de la eliminatoria
+            List<Evento> serie = encontrarSerie(eventoFinalizado);
+            int maxPartidos = serie.stream()
+                    .mapToInt(e -> e.getNumeroPartido() != null ? e.getNumeroPartido() : 1)
+                    .max().orElse(1);
+
+            ganadorOpt = determinarGanador(serie, maxPartidos);
+            if (ganadorOpt.isEmpty()) return;
+
+            // El evento "decisivo" es el último posible de la serie (el que referencia la siguiente ronda)
+            decisivo = serie.stream()
+                    .max(Comparator.comparingInt(e -> e.getNumeroPartido() != null ? e.getNumeroPartido() : 0))
+                    .orElse(eventoFinalizado);
+        }
+
+        if (ganadorOpt.isEmpty()) return;
+        Equipo ganador = ganadorOpt.get();
+
+        // Buscar eventos de siguiente ronda que referencian este partido como decisivo
+        List<Evento> siguientes = eventoRepository.findByPartidoAnteriorId(decisivo.getId());
+        if (siguientes.isEmpty()) return;
+
+        for (Evento siguiente : siguientes) {
+            // Evitar duplicados
+            boolean yaExiste = eventoEquipoRepository.findByEventoId(siguiente.getId())
+                    .stream().anyMatch(ee -> ee.getEquipo().getId().equals(ganador.getId()));
+            if (yaExiste) continue;
+
+            // El rol depende de qué campo anterior apunta al decisivo:
+            // anteriorLocal → ganador juega como local; anteriorVisitante → como visitante
+            Long anteriorLocalId = siguiente.getPartidoAnteriorLocal() != null
+                    ? siguiente.getPartidoAnteriorLocal().getId() : null;
+            boolean esLocal = decisivo.getId().equals(anteriorLocalId);
+
+            eventoEquipoRepository.save(EventoEquipo.builder()
+                    .evento(siguiente)
+                    .equipo(ganador)
+                    .esLocal(esLocal)
+                    .build());
+        }
+    }
+
+    /**
+     * Encuentra todos los eventos de la misma eliminatoria (serie) que el evento dado.
+     */
+    private List<Evento> encontrarSerie(Evento evento) {
+        // Ronda 2+: comparten anteriorLocal y anteriorVisitante
+        if (evento.getPartidoAnteriorLocal() != null) {
+            return eventoRepository.findSerieByAnteriores(
+                    evento.getPartidoAnteriorLocal().getId(),
+                    evento.getPartidoAnteriorVisitante().getId());
+        }
+
+        // Ronda 1: buscar por los mismos dos equipos
+        Evento conEquipos = eventoRepository.findByIdWithEquipos(evento.getId())
+                .orElse(evento);
+        Long localId = conEquipos.getEquipos().stream()
+                .filter(EventoEquipo::isEsLocal)
+                .map(ee -> ee.getEquipo().getId())
+                .findFirst().orElse(null);
+        Long visitanteId = conEquipos.getEquipos().stream()
+                .filter(ee -> !ee.isEsLocal())
+                .map(ee -> ee.getEquipo().getId())
+                .findFirst().orElse(null);
+
+        if (localId == null || visitanteId == null) return List.of(evento);
+
+        return eventoRepository.findSerieRonda1ByEquipos(
+                evento.getCompeticion().getId(), localId, visitanteId);
+    }
+
+    /**
+     * Evalúa si una serie está resuelta y devuelve el ganador.
+     * @param maxPartidos número máximo de partidos posibles (1, 2, 3, 5 o 7)
+     */
+    private Optional<Equipo> determinarGanador(List<Evento> serie, int maxPartidos) {
+        List<Evento> finalizados = serie.stream()
+                .filter(e -> e.getEstado() == Evento.EstadoEvento.FINALIZADO)
+                .toList();
+
+        if (maxPartidos == 1) {
+            if (finalizados.isEmpty()) return Optional.empty();
+            return determinarGanadorPartidoUnico(
+                    eventoRepository.findByIdWithEquipos(finalizados.get(0).getId())
+                            .orElse(finalizados.get(0)));
+        }
+
+        if (maxPartidos == 2) {
+            // Ida/vuelta: decidida cuando ambos juegos están finalizados
+            if (finalizados.size() < 2) return Optional.empty();
+            return determinarGanadorAgregado(finalizados);
+        }
+
+        // Best-of-N
+        int threshold = (maxPartidos + 1) / 2;
+        return determinarGanadorBestOf(finalizados, threshold);
+    }
+
+    private Optional<Equipo> determinarGanadorPartidoUnico(Evento e) {
+        if (e.getResultadoLocal() == null || e.getResultadoVisitante() == null) return Optional.empty();
+        if (e.getResultadoLocal() > e.getResultadoVisitante()) {
+            return e.getEquipos().stream()
+                    .filter(EventoEquipo::isEsLocal)
+                    .map(EventoEquipo::getEquipo)
+                    .findFirst();
+        }
+        if (e.getResultadoLocal() < e.getResultadoVisitante()) {
+            return e.getEquipos().stream()
+                    .filter(ee -> !ee.isEsLocal())
+                    .map(EventoEquipo::getEquipo)
+                    .findFirst();
+        }
+        return Optional.empty(); // Empate → sin avance automático
+    }
+
+    private Optional<Equipo> determinarGanadorAgregado(List<Evento> finalizados) {
+        Map<Long, Integer> totalGoles = new HashMap<>();
+        for (Evento e : finalizados) {
+            Evento conEq = eventoRepository.findByIdWithEquipos(e.getId()).orElse(e);
+            for (EventoEquipo ee : conEq.getEquipos()) {
+                int goles = ee.isEsLocal()
+                        ? (conEq.getResultadoLocal() != null ? conEq.getResultadoLocal() : 0)
+                        : (conEq.getResultadoVisitante() != null ? conEq.getResultadoVisitante() : 0);
+                totalGoles.merge(ee.getEquipo().getId(), goles, Integer::sum);
+            }
+        }
+        if (totalGoles.size() != 2) return Optional.empty();
+
+        List<Map.Entry<Long, Integer>> sorted = totalGoles.entrySet().stream()
+                .sorted(Map.Entry.<Long, Integer>comparingByValue().reversed())
+                .toList();
+        if (sorted.get(0).getValue().equals(sorted.get(1).getValue())) return Optional.empty();
+
+        Long ganadorId = sorted.get(0).getKey();
+        return finalizados.stream()
+                .flatMap(e -> e.getEquipos().stream())
+                .filter(ee -> ee.getEquipo().getId().equals(ganadorId))
+                .map(EventoEquipo::getEquipo)
+                .findFirst();
+    }
+
+    private Optional<Equipo> determinarGanadorBestOf(List<Evento> finalizados, int threshold) {
+        Map<Long, Integer> victorias = new HashMap<>();
+        for (Evento e : finalizados) {
+            if (e.getResultadoLocal() == null || e.getResultadoVisitante() == null) continue;
+            Evento conEq = eventoRepository.findByIdWithEquipos(e.getId()).orElse(e);
+            Optional<EventoEquipo> ganadorEe;
+            if (e.getResultadoLocal() > e.getResultadoVisitante()) {
+                ganadorEe = conEq.getEquipos().stream().filter(EventoEquipo::isEsLocal).findFirst();
+            } else if (e.getResultadoLocal() < e.getResultadoVisitante()) {
+                ganadorEe = conEq.getEquipos().stream().filter(ee -> !ee.isEsLocal()).findFirst();
+            } else {
+                continue; // Empate no cuenta como victoria en best-of
+            }
+            ganadorEe.ifPresent(ee -> victorias.merge(ee.getEquipo().getId(), 1, Integer::sum));
+        }
+
+        for (Map.Entry<Long, Integer> entry : victorias.entrySet()) {
+            if (entry.getValue() >= threshold) {
+                Long ganadorId = entry.getKey();
+                return finalizados.stream()
+                        .flatMap(e -> e.getEquipos().stream())
+                        .filter(ee -> ee.getEquipo().getId().equals(ganadorId))
+                        .map(EventoEquipo::getEquipo)
+                        .findFirst();
+            }
+        }
+        return Optional.empty();
     }
 
     @Transactional

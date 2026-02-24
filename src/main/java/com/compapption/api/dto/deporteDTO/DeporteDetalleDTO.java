@@ -1,6 +1,6 @@
 package com.compapption.api.dto.deporteDTO;
 
-import com.compapption.api.entity.TipoEstadistica;
+import com.compapption.api.dto.tipoestadisticaDTO.TipoEstadisticaDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +19,5 @@ public class DeporteDetalleDTO {
     private String descripcion;
     private Byte[] icono;
     private Boolean activo;
-    private List<TipoEstadistica> tipoEstadisticas;
+    private List<TipoEstadisticaDTO> tipoEstadisticas;
 }
