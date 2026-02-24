@@ -72,7 +72,7 @@ public class GeneradorPlayoff implements GeneradorCalendario {
     }
 
     /**
-     * Genera el orden del bracket recursivamente.
+     * Genera el orden del bracket recursivamente..
      * Para n=8: [1,8, 4,5, 2,7, 3,6]
      */
     private List<Integer> generarOrdenBracket(int n) {
