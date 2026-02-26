@@ -1,5 +1,6 @@
 package com.compapption.api.config;
 
+import com.compapption.api.entity.UsuarioRolCompeticion;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -26,23 +28,60 @@ public class JwtService {
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
-    public String extractUsername(String token) {return extractClaim(token, Claims::getSubject);}
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
+    public boolean isTokenValid(String token) {
+        return !isTokenExpired(token);
+    }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
-        return   claimsResolver.apply(claims);
+        return claimsResolver.apply(claims);
     }
 
-    public String generateAccessToken(UserDetails userDetails) {
-        return generateAccessToken(new HashMap<>(), userDetails);
-    }
+    /**
+     * Genera el access token incluyendo el userId y el contexto de competiciones del usuario.
+     * Es el metodo principal que deben usar AuthService y el flujo de refresh.
+     */
+    public String generateAccessToken(UserDetails userDetails, List<UsuarioRolCompeticion> rolesCompeticion) {
+        Map<String, Object> extraClaims = new HashMap<>();
 
-    public String generateAccessToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        if (userDetails instanceof CustomUserDetails customDetails) {
+            extraClaims.put("userId", customDetails.getId());
+        }
+
+        List<Map<String, Object>> competicionesData = rolesCompeticion.stream()
+                .map(urc -> Map.<String, Object>of(
+                        "id", urc.getCompeticion().getId(),
+                        "nombre", urc.getCompeticion().getNombre(),
+                        "rol", urc.getRol().getNombre()
+                ))
+                .toList();
+        extraClaims.put("competiciones", competicionesData);
+
         return buildToken(extraClaims, userDetails, accessTokenExpiration);
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshTokenExpiration);
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
@@ -55,31 +94,17 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-    }
-
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {return extractClaim(token, Claims::getExpiration);}
-
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSignInKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
-
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public long getAccessTokenExpiration() {return accessTokenExpiration;}
+    public long getAccessTokenExpiration() {
+        return accessTokenExpiration;
+    }
 
-    public long getRefreshTokenExpiration() {return refreshTokenExpiration;}
+    public long getRefreshTokenExpiration() {
+        return refreshTokenExpiration;
+    }
 }
+
