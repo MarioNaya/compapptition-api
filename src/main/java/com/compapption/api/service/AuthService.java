@@ -2,21 +2,27 @@ package com.compapption.api.service;
 
 import com.compapption.api.config.CustomUserDetails;
 import com.compapption.api.config.JwtService;
-import com.compapption.api.dto.auth.AuthResponse;
+import com.compapption.api.dto.auth.*;
 import com.compapption.api.entity.RefreshToken;
 import com.compapption.api.entity.Usuario;
 import com.compapption.api.entity.UsuarioRolCompeticion;
+import com.compapption.api.exception.BadRequestException;
+import com.compapption.api.exception.UnauthorizedException;
 import com.compapption.api.repository.RefreshTokenRepository;
 import com.compapption.api.repository.UsuarioRepository;
 import com.compapption.api.repository.UsuarioRolCompeticionRepository;
+import com.compapption.api.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,9 +39,132 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
+    @Transactional
+    public AuthResponse registro(RegistroRequest request) {
+        if (usuarioRepository.existsByUsername(request.getUsername())) {
+            throw new BadRequestException("El nombre de usuario ya está en uso");
+        }
+        if (usuarioRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("El email ya está registrado");
+        }
 
+        Usuario usuario = Usuario.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .nombre(request.getNombre())
+                .apellidos(request.getApellidos())
+                .activo(true)
+                .build();
 
-    /// === HELPERS === ///
+        usuario = usuarioRepository.save(usuario);
+        log.info("Usuario registrado: {}", usuario.getUsername());
+
+        // Usuario nuevo: sin competiciones todavía
+        return buildAuthResponse(usuario, Collections.emptyList());
+    }
+
+    @Transactional
+    public AuthResponse login(LoginRequest request) {
+        // 1. Localizar usuario (query simple, solo para comprobar activo y obtener username)
+        Usuario usuario = usuarioRepository.findByUsernameOrEmail(
+                        request.getUsernameOrEmail(), request.getUsernameOrEmail())
+                .orElseThrow(() -> new UnauthorizedException("Credenciales inválidas"));
+
+        if (!usuario.isActivo()) {
+            throw new UnauthorizedException("La cuenta está desactivada");
+        }
+
+        // 2. Validar credenciales (Spring Security — llama a loadUserByUsername internamente)
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(usuario.getUsername(), request.getPassword())
+        );
+
+        // 3. Cargar contexto de competiciones en query separada
+        List<UsuarioRolCompeticion> rolesCompeticion =
+                usuarioRolCompeticionRepository.findByUsuarioIdWithRolesAndCompeticiones(usuario.getId());
+
+        log.info("Usuario autenticado: {} — {} competiciones", usuario.getUsername(), rolesCompeticion.size());
+        return buildAuthResponse(usuario, rolesCompeticion);
+    }
+
+    @Transactional
+    public AuthResponse refreshToken(String refreshTokenStr) {
+        // 1. Buscar en BD (no validar como JWT — ya no es un JWT)
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenWithUsuario(refreshTokenStr)
+                .orElseThrow(() -> new UnauthorizedException("Refresh token inválido"));
+
+        // 2. Verificar que no está revocado
+        if (refreshToken.isRevocado()) {
+            throw new UnauthorizedException("Refresh token revocado");
+        }
+
+        // 3. Verificar expiración
+        if (refreshToken.getFechaExpiracion().isBefore(LocalDateTime.now())) {
+            throw new UnauthorizedException("Refresh token expirado");
+        }
+
+        Usuario usuario = refreshToken.getUsuario();
+
+        // 4. Cargar roles ACTUALES desde BD — clave del Nivel 2
+        List<UsuarioRolCompeticion> rolesActuales =
+                usuarioRolCompeticionRepository.findByUsuarioIdWithRolesAndCompeticiones(usuario.getId());
+
+        // 5. Generar nuevo access token con roles actualizados
+        CustomUserDetails userDetails = new CustomUserDetails(usuario);
+        String nuevoAccessToken = jwtService.generateAccessToken(userDetails, rolesActuales);
+
+        // 6. Rotación del refresh token (seguridad: invalida el anterior, emite uno nuevo)
+        refreshToken.setRevocado(true);
+        refreshTokenRepository.save(refreshToken);
+        RefreshToken nuevoRefreshToken = crearRefreshToken(usuario);
+
+        return AuthResponse.builder()
+                .accessToken(nuevoAccessToken)
+                .refreshToken(nuevoRefreshToken.getToken())
+                .tokenType("Bearer")
+                .expiresIn(jwtService.getAccessTokenExpiration() / 1000)
+                .usuario(mapToUsuarioInfo(usuario))
+                .competiciones(mapToCompeticionRolResponse(rolesActuales))
+                .build();
+    }
+
+    @Transactional
+    public void logout(String refreshTokenStr) {
+        refreshTokenRepository.findByTokenWithUsuario(refreshTokenStr)
+                .ifPresent(rt -> {
+                    rt.setRevocado(true);
+                    refreshTokenRepository.save(rt);
+                    log.info("Refresh token revocado para usuario: {}", rt.getUsuario().getUsername());
+                });
+    }
+
+    @Transactional
+    public void recuperarPassword(RecuperarPasswordRequest request) {
+        Usuario usuario = usuarioRepository.findByEmail(request.getEmail()).orElse(null);
+
+        // Siempre responder con éxito para no revelar si el email existe
+        if (usuario == null) {
+            log.warn("Intento de recuperación para email no existente: {}", request.getEmail());
+            return;
+        }
+
+        String token = UUID.randomUUID().toString();
+        // TODO: Almacenar token de recuperación con expiración (tabla PasswordResetToken o Redis)
+
+        emailService.enviarEmailRecuperacion(usuario.getEmail(), usuario.getNombre(), token);
+        log.info("Email de recuperación enviado a: {}", usuario.getEmail());
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        // TODO: Validar token desde almacenamiento y actualizar contraseña
+        throw new BadRequestException("Funcionalidad pendiente de implementar almacenamiento de tokens");
+    }
+
+    // -------------------------------------------------------------------------
+    // Métodos privados
+    // -------------------------------------------------------------------------
 
     private AuthResponse buildAuthResponse(Usuario usuario, List<UsuarioRolCompeticion> rolesCompeticion) {
         CustomUserDetails userDetails = new CustomUserDetails(usuario);
@@ -46,7 +175,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
                 .tokenType("Bearer")
-                .expiresIn(jwtService.getAccessTokenExpiration() / 1000) // Convertir a segundos
+                .expiresIn(jwtService.getAccessTokenExpiration() / 1000)
                 .usuario(mapToUsuarioInfo(usuario))
                 .competiciones(mapToCompeticionRolResponse(rolesCompeticion))
                 .build();

@@ -5,6 +5,10 @@
     "description": "Colección completa — happy path todos los endpoints. IDs de datos reales en el environment.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+  },
   "variable": [
     { "key": "createdDeporteId",      "value": "" },
     { "key": "createdTipoEstadId",    "value": "" },
@@ -14,9 +18,174 @@
     { "key": "createdEventoId",       "value": "" },
     { "key": "createdEstadisticaId",  "value": "" },
     { "key": "deleteEventoId",        "value": "" },
-    { "key": "invitacionToken",       "value": "" }
+    { "key": "invitacionToken",       "value": "" },
+    { "key": "accessToken",           "value": "" },
+    { "key": "refreshToken",          "value": "" },
+    { "key": "authTestUsername",      "value": "" },
+    { "key": "authTestEmail",         "value": "" },
+    { "key": "tokenToRevoke",         "value": "" }
   ],
   "item": [
+
+    {
+      "name": "00. Auth",
+      "auth": {"type": "noauth"},
+      "item": [
+        {
+          "name": "POST Registro",
+          "event": [{"listen": "test", "script": {"type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('Tiene accessToken', () => pm.expect(j.accessToken).to.be.a('string'));",
+              "pm.test('refreshToken es UUID', () => pm.expect(j.refreshToken).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test('tokenType es Bearer', () => pm.expect(j.tokenType).to.eql('Bearer'));",
+              "pm.test('expiresIn 900', () => pm.expect(j.expiresIn).to.eql(900));",
+              "pm.test('usuario.id presente', () => pm.expect(j.usuario.id).to.be.a('number'));",
+              "pm.test('competiciones vacío', () => pm.expect(j.competiciones).to.eql([]));",
+              "pm.collectionVariables.set('accessToken', j.accessToken);",
+              "pm.collectionVariables.set('refreshToken', j.refreshToken);",
+              "pm.collectionVariables.set('authTestUsername', j.usuario.username);",
+              "pm.collectionVariables.set('authTestEmail', j.usuario.email);"
+            ]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"username\": \"auth_{{$timestamp}}\", \"email\": \"auth_{{$timestamp}}@test.com\", \"password\": \"Password123\", \"nombre\": \"Auth\", \"apellidos\": \"Test\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/registro", "host": ["{{baseUrl}}"], "path": ["auth", "registro"]}
+          }
+        },
+        {
+          "name": "POST Registro (username duplicado)",
+          "event": [{"listen": "test", "script": {"type": "text/javascript",
+            "exec": ["pm.test('400 Bad Request', () => pm.response.to.have.status(400));"]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"username\": \"{{authTestUsername}}\", \"email\": \"otro_{{$timestamp}}@test.com\", \"password\": \"Password123\", \"nombre\": \"Dup\", \"apellidos\": \"User\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/registro", "host": ["{{baseUrl}}"], "path": ["auth", "registro"]}
+          }
+        },
+        {
+          "name": "POST Login (username)",
+          "event": [{"listen": "test", "script": {"type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('Tiene accessToken', () => pm.expect(j.accessToken).to.be.a('string'));",
+              "pm.test('refreshToken es UUID', () => pm.expect(j.refreshToken).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test('Tiene competiciones', () => pm.expect(j.competiciones).to.be.an('array'));",
+              "pm.collectionVariables.set('accessToken', j.accessToken);",
+              "pm.collectionVariables.set('refreshToken', j.refreshToken);"
+            ]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"usernameOrEmail\": \"{{authTestUsername}}\", \"password\": \"Password123\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "POST Login (email)",
+          "event": [{"listen": "test", "script": {"type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Tiene accessToken', () => pm.expect(pm.response.json().accessToken).to.be.a('string'));",
+              "pm.collectionVariables.set('accessToken', pm.response.json().accessToken);",
+              "pm.collectionVariables.set('refreshToken', pm.response.json().refreshToken);"
+            ]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"usernameOrEmail\": \"{{authTestEmail}}\", \"password\": \"Password123\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "POST Login (credenciales inválidas)",
+          "event": [{"listen": "test", "script": {"type": "text/javascript",
+            "exec": ["pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"usernameOrEmail\": \"{{authTestUsername}}\", \"password\": \"wrongpassword\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "POST Refresh",
+          "event": [{"listen": "test", "script": {"type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "var oldRefresh = pm.collectionVariables.get('refreshToken');",
+              "pm.test('Nuevo accessToken presente', () => pm.expect(j.accessToken).to.be.a('string'));",
+              "pm.test('Refresh token rotado', () => pm.expect(j.refreshToken).to.not.eql(oldRefresh));",
+              "pm.test('Tiene competiciones', () => pm.expect(j.competiciones).to.be.an('array'));",
+              "pm.collectionVariables.set('accessToken', j.accessToken);",
+              "pm.collectionVariables.set('refreshToken', j.refreshToken);"
+            ]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"refreshToken\": \"{{refreshToken}}\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"]}
+          }
+        },
+        {
+          "name": "POST Refresh (token inválido)",
+          "event": [{"listen": "test", "script": {"type": "text/javascript",
+            "exec": ["pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"refreshToken\": \"00000000-0000-0000-0000-000000000000\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"]}
+          }
+        },
+        {
+          "name": "POST Logout",
+          "event": [
+            {"listen": "prerequest", "script": {"type": "text/javascript",
+              "exec": [
+                "pm.collectionVariables.set('tokenToRevoke', pm.collectionVariables.get('refreshToken'));",
+                "pm.request.headers.add({ key: 'Cookie', value: 'refresh_token=' + pm.collectionVariables.get('refreshToken') });"
+              ]
+            }},
+            {"listen": "test", "script": {"type": "text/javascript",
+              "exec": [
+                "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                "pm.test('Mensaje correcto', () => pm.expect(pm.response.json().message).to.eql('Sesión cerrada correctamente'));"
+              ]
+            }}
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"]}
+          }
+        },
+        {
+          "name": "POST Refresh (token revocado)",
+          "event": [{"listen": "test", "script": {"type": "text/javascript",
+            "exec": ["pm.test('401 token revocado', () => pm.response.to.have.status(401));"]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"refreshToken\": \"{{tokenToRevoke}}\"}", "options": {"raw": {"language": "json"}}},
+            "url": {"raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"]}
+          }
+        }
+      ]
+    },
 
     {
       "name": "01. Deportes",
@@ -817,6 +986,241 @@
             "url": { "raw": "{{baseUrl}}/invitaciones/TOKEN-UUID-AQUI/rechazar?usuarioId=2", "host": ["{{baseUrl}}"],
               "path": ["invitaciones", "TOKEN-UUID-AQUI", "rechazar"],
               "query": [{ "key": "usuarioId", "value": "2" }] }}
+        }
+      ]
+    },
+
+    {
+      "name": "10. Logs (Auditoría)",
+      "item": [
+        {
+          "name": "SETUP — Crear competición y equipo para logs",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('Competicion creada (setup)', () => pm.expect([200, 201]).to.include(pm.response.code));",
+              "var j = pm.response.json();",
+              "if (j.id) pm.collectionVariables.set('createdCompeticionId', j.id);"
+            ]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"nombre\":\"Log Test {{$timestamp}}\",\"descripcion\":\"Setup para logs\",\"deporteId\":1,\"publica\":true}", "options": { "raw": { "language": "json" }}},
+            "url": { "raw": "{{baseUrl}}/competiciones", "host": ["{{baseUrl}}"], "path": ["competiciones"] }
+          }
+        },
+        {
+          "name": "SETUP — Crear equipo para logs",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('Equipo creado (setup)', () => pm.expect([200, 201]).to.include(pm.response.code));",
+              "var j = pm.response.json();",
+              "if (j.id) pm.collectionVariables.set('createdEquipoId', j.id);"
+            ]
+          }}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"nombre\":\"Equipo Log Test\",\"descripcion\":\"Setup para logs\",\"tipo\":\"GESTIONADO\"}", "options": { "raw": { "language": "json" }}},
+            "url": { "raw": "{{baseUrl}}/equipos", "host": ["{{baseUrl}}"], "path": ["equipos"] }
+          }
+        },
+        {
+          "name": "SETUP — Esperar log async (actualizar competición)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('Actualizacion OK (genera log EDITAR)', () => pm.expect([200]).to.include(pm.response.code));"
+            ]
+          }}],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"nombre\":\"Log Test Actualizado\"}", "options": { "raw": { "language": "json" }}},
+            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}", "host": ["{{baseUrl}}"], "path": ["competiciones", "{{createdCompeticionId}}"] }
+          }
+        },
+        {
+          "name": "GET Logs de competición (paginado)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('Tiene campo content', () => pm.expect(j).to.have.property('content'));",
+              "pm.test('content es array', () => pm.expect(j.content).to.be.an('array'));",
+              "pm.test('Tiene totalElements', () => pm.expect(j).to.have.property('totalElements'));",
+              "if (j.content.length > 0) {",
+              "  var log = j.content[0];",
+              "  pm.test('Log tiene id', () => pm.expect(log.id).to.be.a('number'));",
+              "  pm.test('Log tiene entidad', () => pm.expect(log.entidad).to.be.a('string'));",
+              "  pm.test('Log tiene accion válida', () => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(log.accion));",
+              "  pm.test('Log tiene fecha', () => pm.expect(log.fecha).to.be.a('string'));",
+              "  pm.test('Log tiene usuarioId', () => pm.expect(log.usuarioId).to.be.a('number'));",
+              "}"
+            ]
+          }}],
+          "request": { "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs/competicion/{{competicionId}}?page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{competicionId}}"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "GET Logs de competición recién creada (verifica CREAR)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('Tiene al menos 1 log', () => pm.expect(j.totalElements).to.be.at.least(1));",
+              "if (j.content.length > 0) {",
+              "  var logs = j.content;",
+              "  var acciones = logs.map(function(l) { return l.accion; });",
+              "  pm.test('Contiene log CREAR', () => pm.expect(acciones).to.include('CREAR'));",
+              "  pm.test('Contiene log EDITAR', () => pm.expect(acciones).to.include('EDITAR'));",
+              "  pm.test('Entidad es Competicion', () => pm.expect(logs[0].entidad).to.eql('Competicion'));",
+              "  pm.test('competicionId coincide', () => pm.expect(logs[0].competicionId).to.eql(parseInt(pm.collectionVariables.get('createdCompeticionId'))));",
+              "  pm.test('usuarioUsername presente', () => pm.expect(logs[0].usuarioUsername).to.be.a('string'));",
+              "  pm.test('competicionNombre presente', () => pm.expect(logs[0].competicionNombre).to.be.a('string'));",
+              "}"
+            ]
+          }}],
+          "request": { "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs/competicion/{{createdCompeticionId}}?page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{createdCompeticionId}}"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "GET Logs de usuario",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('Tiene campo content', () => pm.expect(j).to.have.property('content'));",
+              "pm.test('content es array', () => pm.expect(j.content).to.be.an('array'));",
+              "pm.test('Tiene totalElements', () => pm.expect(j).to.have.property('totalElements'));",
+              "if (j.content.length > 0) {",
+              "  var log = j.content[0];",
+              "  pm.test('usuarioId del log coincide', () => pm.expect(log.usuarioId).to.eql(parseInt(pm.environment.get('usuarioId'))));",
+              "  pm.test('Log tiene accion válida', () => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(log.accion));",
+              "}"
+            ]
+          }}],
+          "request": { "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs/usuario/{{usuarioId}}?page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["logs", "usuario", "{{usuarioId}}"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "GET Logs entidad Competicion — historial completo",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('Es array', () => pm.expect(j).to.be.an('array'));",
+              "if (j.length > 0) {",
+              "  pm.test('Todos son de entidad Competicion', () => j.forEach(l => pm.expect(l.entidad).to.eql('Competicion')));",
+              "  pm.test('Acciones válidas', () => j.forEach(l => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(l.accion)));",
+              "}"
+            ]
+          }}],
+          "request": { "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs/entidad/Competicion/{{competicionId}}",
+              "host": ["{{baseUrl}}"], "path": ["logs", "entidad", "Competicion", "{{competicionId}}"]
+            }
+          }
+        },
+        {
+          "name": "GET Logs entidad Competicion — recién creada (campos completos)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('Es array no vacío', () => pm.expect(j.length).to.be.at.least(1));",
+              "var log = j[j.length - 1];",
+              "pm.test('Último log es CREAR', () => pm.expect(log.accion).to.eql('CREAR'));",
+              "pm.test('Tiene usuarioUsername', () => pm.expect(log.usuarioUsername).to.be.a('string'));",
+              "pm.test('Tiene competicionNombre', () => pm.expect(log.competicionNombre).to.be.a('string'));",
+              "pm.test('Tiene ipAddress', () => pm.expect(log.ipAddress).to.be.a('string'));",
+              "pm.test('datosAnteriores null en CREAR', () => pm.expect(log.datosAnteriores).to.be.null);"
+            ]
+          }}],
+          "request": { "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs/entidad/Competicion/{{createdCompeticionId}}",
+              "host": ["{{baseUrl}}"], "path": ["logs", "entidad", "Competicion", "{{createdCompeticionId}}"]
+            }
+          }
+        },
+        {
+          "name": "GET Logs entidad Equipo — recién creado",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('Es array', () => pm.expect(j).to.be.an('array'));",
+              "pm.test('Al menos 1 log (CREAR equipo)', () => pm.expect(j.length).to.be.at.least(1));",
+              "if (j.length > 0) {",
+              "  pm.test('Todos son de entidad Equipo', () => j.forEach(l => pm.expect(l.entidad).to.eql('Equipo')));",
+              "}"
+            ]
+          }}],
+          "request": { "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs/entidad/Equipo/{{createdEquipoId}}",
+              "host": ["{{baseUrl}}"], "path": ["logs", "entidad", "Equipo", "{{createdEquipoId}}"]
+            }
+          }
+        },
+        {
+          "name": "GET Logs paginación — size=5",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "var j = pm.response.json();",
+              "pm.test('pageSize es 5', () => pm.expect(j.pageSize).to.eql(5));",
+              "pm.test('pageNumber es 0', () => pm.expect(j.pageNumber).to.eql(0));",
+              "pm.test('content.length <= 5', () => pm.expect(j.content.length).to.be.at.most(5));",
+              "pm.test('Tiene first y last', () => { pm.expect(j).to.have.property('first'); pm.expect(j).to.have.property('last'); });"
+            ]
+          }}],
+          "request": { "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs/competicion/{{competicionId}}?page=0&size=5",
+              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{competicionId}}"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "5" }]
+            }
+          }
+        },
+        {
+          "name": "GET Logs sin auth → 401/403",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript",
+              "exec": [
+                "pm.collectionVariables.set('savedToken', pm.collectionVariables.get('accessToken'));",
+                "pm.collectionVariables.set('accessToken', 'INVALID_TOKEN_XYZ');"
+              ]
+            }},
+            { "listen": "test", "script": { "type": "text/javascript",
+              "exec": [
+                "pm.test('401 o 403 sin auth (Spring Security 6 devuelve 403)', () => pm.expect([401, 403]).to.include(pm.response.code));",
+                "pm.collectionVariables.set('accessToken', pm.collectionVariables.get('savedToken'));"
+              ]
+            }}
+          ],
+          "request": { "method": "GET", "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logs/competicion/{{competicionId}}",
+              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{competicionId}}"]
+            }
+          }
         }
       ]
     }
