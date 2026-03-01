@@ -13,6 +13,8 @@ import com.compapption.api.repository.*;
 import com.compapption.api.request.equipo.EquipoCreateRequest;
 import com.compapption.api.request.equipo.EquipoUpdateRequest;
 import com.compapption.api.request.page.PageResponse;
+import com.compapption.api.entity.LogModificacion;
+import com.compapption.api.service.log.LogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,7 @@ public class EquipoService {
     private final UsuarioRepository usuarioRepository;
     private final EquipoMapper equipoMapper;
     private final JugadorMapper jugadorMapper;
+    private final LogService logService;
 
     // === CONSULTAS EQUIPO === //
 
@@ -117,6 +120,7 @@ public class EquipoService {
                 .build();
 
         equipo = equipoRepository.save(equipo);
+        logService.registrar("Equipo", equipo.getId(), LogModificacion.AccionLog.CREAR, null, null, null);
         return equipoMapper.toDetalleDTO(equipo);
     }
 
@@ -129,6 +133,7 @@ public class EquipoService {
             throw new BadRequestException("No se puede eliminar un equipo inscrito en competiciones");
         }
 
+        logService.registrar("Equipo", id, LogModificacion.AccionLog.ELIMINAR, null, null, null);
         equipoRepository.delete(equipo);
     }
 
@@ -148,6 +153,7 @@ public class EquipoService {
         }
 
         equipo = equipoRepository.save(equipo);
+        logService.registrar("Equipo", equipo.getId(), LogModificacion.AccionLog.EDITAR, null, null, null);
         return equipoMapper.toSimpleDTO(equipo);
     }
 
@@ -176,6 +182,7 @@ public class EquipoService {
                 .build();
 
         equipoJugadorRepository.save(equipoJugador);
+        logService.registrar("EquipoJugador", jugadorId, LogModificacion.AccionLog.CREAR, null, null, null);
     }
 
     @Transactional
@@ -187,6 +194,7 @@ public class EquipoService {
         equipoJugador.setActivo(false);
         equipoJugador.setFechaBaja(LocalDateTime.now());
         equipoJugadorRepository.save(equipoJugador);
+        logService.registrar("EquipoJugador", jugadorId, LogModificacion.AccionLog.EDITAR, null, null, null);
     }
 
     @Transactional(readOnly = true)

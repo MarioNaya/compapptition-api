@@ -6,6 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -24,10 +25,11 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+
         String jwt = extractTokenFromRequest(request);
 
         if (jwt == null) {
@@ -44,7 +46,9 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
                 // Construir UserDetails directamente desde los claims del token.
                 // El token ya ha sido verificado criptográficamente — no hace falta ir a BD.
                 Long userId = jwtService.extractUserId(jwt);
-                CustomUserDetails userDetails = new CustomUserDetails(userId, username);
+                Boolean esAdminSistema = jwtService.extractEsAdminSistema(jwt);
+                CustomUserDetails userDetails = new CustomUserDetails(userId, username,
+                        esAdminSistema != null && esAdminSistema);
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -55,7 +59,7 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e) {
-            logger.error("No se pudo establecer la autenticación del usuario: " + e.getMessage());
+            logger.error("Cannot set user authentication: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

@@ -1,5 +1,6 @@
 package com.compapption.api.service;
 
+import com.compapption.api.dto.UsuarioRolCompeticion.UsuarioRolCompeticionDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionDetalleDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionInfoDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionSimpleDTO;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.compapption.api.service.log.LogService;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -32,13 +35,12 @@ public class CompeticionService {
     private final UsuarioRepository usuarioRepository;
     private final CompeticionEquipoRepository competicionEquipoRepository;
     private final EquipoRepository equipoRepository;
-    private final RolRepository rolRepository;
-    private final UsuarioRolCompeticionRepository usuarioRolCompeticionRepository;
     private final CompeticionMapper competicionMapper;
     private final EquipoMapper equipoMapper;
     private final ClasificacionService clasificacionService;
     private final ConfiguracionCompeticionService configuracionCompeticionService;
     private final UsuarioRolCompeticionService usuarioRolCompeticionService;
+    private final LogService logService;
 
     // === CRUD COMPETICIONES === //
 
@@ -122,6 +124,7 @@ public class CompeticionService {
         // Asignar rol de administrador
         usuarioRolCompeticionService.asignarRolAdminCompeticion(creador, competicion);
 
+        logService.registrar("Competicion", competicion.getId(), LogModificacion.AccionLog.CREAR, null, null, competicion.getId());
         return competicionMapper.toDetalleDTO(competicion);
     }
 
@@ -164,6 +167,7 @@ public class CompeticionService {
         }
 
         competicion = competicionRepository.save(competicion);
+        logService.registrar("Competicion", competicion.getId(), LogModificacion.AccionLog.EDITAR, null, null, competicion.getId());
         return competicionMapper.toDetalleDTO(competicion);
     }
 
@@ -180,6 +184,8 @@ public class CompeticionService {
             throw new BadRequestException("No se puede eliminar una competición activa");
         }
 
+        logService.registrar("Competicion", id, LogModificacion.AccionLog.ELIMINAR, null, null, null);
+        logService.clearCompeticion(id);
         competicionRepository.delete(competicion);
     }
 
@@ -240,6 +246,7 @@ public class CompeticionService {
 
         // Inicializar clasificación para el nuevo equipo
         clasificacionService.inicializarClasificacionEquipo(competicion, equipo);
+        logService.registrar("CompeticionEquipo", equipoId, LogModificacion.AccionLog.CREAR, null, null, competicionId);
     }
 
     @Transactional
@@ -255,6 +262,7 @@ public class CompeticionService {
 
         inscripcion.setActivo(false);
         competicionEquipoRepository.save(inscripcion);
+        logService.registrar("CompeticionEquipo", equipoId, LogModificacion.AccionLog.EDITAR, null, null, competicionId);
     }
 
     @Transactional
@@ -338,9 +346,59 @@ public class CompeticionService {
 
     private void validarPermisoEdicion(Competicion competicion, long usuarioId) {
         if (!Objects.equals(competicion.getCreador().getId(), usuarioId) &&
-                !usuarioRolCompeticionRepository.existsByUsuarioIdAndCompeticionIdAndRolNombre(
+                !usuarioRolCompeticionService.tieneRol(
                         usuarioId, competicion.getId(), Rol.RolNombre.ADMIN_COMPETICION)) {
             throw new BadRequestException("No tienes permisos para editar esta competición");
         }
+    }
+
+    // ==================== ESTADO ====================
+
+    @Transactional
+    public CompeticionDetalleDTO cambiarEstado(Long id, Competicion.EstadoCompeticion
+                                                       nuevoEstado,
+                                               Long usuarioId) {
+        Competicion competicion = competicionRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Competición", "id", id));
+
+        validarPermisoEdicion(competicion, usuarioId);
+        validarCambioEstado(competicion, nuevoEstado);
+
+        competicion.setEstado(nuevoEstado);
+        return competicionMapper.toDetalleDTO(competicionRepository.save(competicion));
+    }
+
+    // ==================== GESTIÓN DE USUARIOS ====================
+
+    @Transactional(readOnly = true)
+    public List<UsuarioRolCompeticionDTO> obtenerUsuariosConRol(Long competicionId) {
+        if (!competicionRepository.existsById(competicionId)) {
+            throw new ResourceNotFoundException("Competición", "id", competicionId);
+        }
+        return usuarioRolCompeticionService.obtenerMiembros(competicionId)
+                .stream()
+                .map(urc -> UsuarioRolCompeticionDTO.builder()
+                        .usuarioId(urc.getUsuario().getId())
+                        .username(urc.getUsuario().getUsername())
+                        .email(urc.getUsuario().getEmail())
+                        .rolNombre(urc.getRol().getNombre().name())
+                        .fechaAsignacion(urc.getFechaAsignacion())
+                        .build())
+                .toList();
+    }
+
+    @Transactional
+    public void quitarUsuario(Long competicionId, Long usuarioId, Long solicitanteId) {
+        Competicion competicion = competicionRepository.findById(competicionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Competición", "id",
+                        competicionId));
+
+        validarPermisoEdicion(competicion, solicitanteId);
+
+        if (usuarioRolCompeticionService.obtenerRolesDeUsuario(usuarioId,
+                competicionId).isEmpty()) {
+            throw new ResourceNotFoundException("El usuario no tiene roles en esta competición");
+        }
+        usuarioRolCompeticionService.revocarTodosLosRoles(usuarioId, competicionId);
     }
 }

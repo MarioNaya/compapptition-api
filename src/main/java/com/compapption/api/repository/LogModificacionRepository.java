@@ -8,11 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.jpa.repository.Modifying;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface LogModificacionRepository extends JpaRepository<LogModificacion, Long> {
+
+    @Modifying
+    @Query("UPDATE LogModificacion l SET l.competicion = null WHERE l.competicion.id = :competicionId")
+    void clearCompeticionId(@Param("competicionId") Long competicionId);
 
     @Query("SELECT l FROM LogModificacion l " +
             "WHERE  l.competicion.id = :competicionId " +
@@ -47,4 +53,29 @@ public interface LogModificacionRepository extends JpaRepository<LogModificacion
             @Param("fin") LocalDateTime fin,
             Pageable pageable
     );
+
+    @Query(value = "SELECT l FROM LogModificacion l " +
+            "JOIN FETCH l.usuario " +
+            "LEFT JOIN FETCH l.competicion " +
+            "WHERE l.competicion.id = :compId " +
+            "ORDER BY l.fecha DESC",
+    countQuery = "SELECT COUNT(l) FROM LogModificacion l WHERE l.competicion.id = :compId")
+    Page<LogModificacion> findByCompeticionIdWithDetails(@Param("compId") Long competicionId, Pageable pageable);
+
+    @Query(value = "SELECT l FROM LogModificacion l " +
+            "JOIN FETCH l.usuario " +
+            "LEFT JOIN FETCH l.competicion " +
+            "WHERE l.usuario.id = :userId " +
+            "ORDER BY l.fecha DESC",
+            countQuery = "SELECT COUNT(l) FROM LogModificacion l WHERE l.usuario.id = :userId")
+    Page<LogModificacion> findByUsuarioIdWithDetails(@Param("userId") Long usuarioId, Pageable pageable);
+
+    @Query("SELECT l FROM LogModificacion l " +
+            "JOIN FETCH l.usuario " +
+            "LEFT JOIN FETCH l.competicion " +
+            "WHERE l.entidad = :entidad " +
+            "AND l.entidadId = :entidadId " +
+            "ORDER BY l.fecha DESC")
+    List<LogModificacion> findByEntidadAndEntidadIdWithDetails(@Param("entidad") String entidad,
+                                                               @Param("entidadId") Long entidadId);
 }

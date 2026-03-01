@@ -36,6 +36,10 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("userId", Long.class));
     }
 
+    public Boolean extractEsAdminSistema(String token) {
+        return extractClaim(token, claims -> claims.get("esAdminSistema", Boolean.class));
+    }
+
     public boolean isTokenValid(String token) {
         return !isTokenExpired(token);
     }
@@ -54,6 +58,7 @@ public class JwtService {
 
         if (userDetails instanceof CustomUserDetails customDetails) {
             extraClaims.put("userId", customDetails.getId());
+            extraClaims.put("esAdminSistema", customDetails.isEsAdminSistema());
         }
 
         List<Map<String, Object>> competicionesData = rolesCompeticion.stream()

@@ -4,7 +4,9 @@ import com.compapption.api.dto.jugadorDTO.JugadorDetalleDTO;
 import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
 import com.compapption.api.dto.jugadorDTO.JugadorUsuarioDTO;
 import com.compapption.api.entity.Jugador;
+import com.compapption.api.entity.LogModificacion;
 import com.compapption.api.entity.Usuario;
+import com.compapption.api.service.log.LogService;
 import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.JugadorMapper;
@@ -28,6 +30,7 @@ public class JugadorService {
     private final JugadorRepository jugadorRepository;
     private final UsuarioRepository usuarioRepository;
     private final JugadorMapper jugadorMapper;
+    private final LogService logService;
 
     // === CONSULTAS JUGADOR === //
 
@@ -96,6 +99,7 @@ public class JugadorService {
                 .build();
 
         jugador = jugadorRepository.save(jugador);
+        logService.registrar("Jugador", jugador.getId(), LogModificacion.AccionLog.CREAR, null, null, null);
         return jugadorMapper.toDetalleDTO(jugador);
     }
 
@@ -121,6 +125,7 @@ public class JugadorService {
         }
 
         jugador = jugadorRepository.save(jugador);
+        logService.registrar("Jugador", jugador.getId(), LogModificacion.AccionLog.EDITAR, null, null, null);
         return jugadorMapper.toDetalleDTO(jugador);
     }
 
@@ -132,6 +137,7 @@ public class JugadorService {
         if (!jugador.getEquipos().isEmpty()) {
             throw new BadRequestException("No se puede eliminar un jugador que pertenece a un equipo");
         }
+        logService.registrar("Jugador", id, LogModificacion.AccionLog.ELIMINAR, null, null, null);
         jugadorRepository.delete(jugador);
     }
 
@@ -153,6 +159,7 @@ public class JugadorService {
 
         jugador.setUsuario(usuario);
         jugador = jugadorRepository.save(jugador);
+        logService.registrar("Jugador", jugador.getId(), LogModificacion.AccionLog.EDITAR, null, null, null);
         return jugadorMapper.toUsuarioDTO(jugador);
     }
 }

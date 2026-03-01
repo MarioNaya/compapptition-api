@@ -42,6 +42,10 @@ public class Usuario {
     @Column(nullable = false)
     private boolean activo = true;
 
+    @Builder.Default
+    @Column(name = "es_admin_sistema", nullable = false)
+    private Boolean esAdminSistema = false;
+
     @CreationTimestamp
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;

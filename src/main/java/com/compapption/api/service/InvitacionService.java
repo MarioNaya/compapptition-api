@@ -8,6 +8,7 @@ import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.InvitacionMapper;
 import com.compapption.api.repository.*;
 import com.compapption.api.request.invitacion.InvitacionCreateRequest;
+import com.compapption.api.service.log.LogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class InvitacionService {
     private final JugadorRepository jugadorRepository;
     private final EmailService emailService;
     private final InvitacionMapper invitacionMapper;
+    private final LogService logService;
 
     public static final List<String> ROLES_VALIDOS = List.of("ADMIN_COMPETICION", "MANAGER_EQUIPO", "JUGADOR");
 
@@ -94,6 +96,8 @@ public class InvitacionService {
                 .build();
 
         invitacion = invitacionRepository.save(invitacion);
+        logService.registrar("Invitacion", invitacion.getId(), LogModificacion.AccionLog.CREAR, null, null,
+                competicion != null ? competicion.getId() : null);
 
         // Enviar email de forma asíncrona
         String nombreContexto = competicion != null ? competicion.getNombre()
@@ -149,6 +153,8 @@ public class InvitacionService {
         invitacion.setEstado(Invitacion.EstadoInvitacion.ACEPTADA);
         invitacion.setDestinatario(usuario);
         invitacion = invitacionRepository.save(invitacion);
+        logService.registrar("Invitacion", invitacion.getId(), LogModificacion.AccionLog.EDITAR, null, null,
+                invitacion.getCompeticion() != null ? invitacion.getCompeticion().getId() : null);
 
         return invitacionMapper.toDetalleDTO(invitacion);
     }
@@ -170,6 +176,8 @@ public class InvitacionService {
         invitacion.setEstado(Invitacion.EstadoInvitacion.RECHAZADA);
         invitacion.setDestinatario(usuarioRepository.getReferenceById(usuarioId));
         invitacion = invitacionRepository.save(invitacion);
+        logService.registrar("Invitacion", invitacion.getId(), LogModificacion.AccionLog.EDITAR, null, null,
+                invitacion.getCompeticion() != null ? invitacion.getCompeticion().getId() : null);
 
         return invitacionMapper.toDetalleDTO(invitacion);
     }

@@ -23,7 +23,9 @@
     { "key": "refreshToken",          "value": "" },
     { "key": "authTestUsername",      "value": "" },
     { "key": "authTestEmail",         "value": "" },
-    { "key": "tokenToRevoke",         "value": "" }
+    { "key": "tokenToRevoke",         "value": "" },
+    { "key": "testUserId",            "value": "" },
+    { "key": "savedToken",            "value": "" }
   ],
   "item": [
 
@@ -46,7 +48,8 @@
               "pm.collectionVariables.set('accessToken', j.accessToken);",
               "pm.collectionVariables.set('refreshToken', j.refreshToken);",
               "pm.collectionVariables.set('authTestUsername', j.usuario.username);",
-              "pm.collectionVariables.set('authTestEmail', j.usuario.email);"
+              "pm.collectionVariables.set('authTestEmail', j.usuario.email);",
+              "pm.collectionVariables.set('testUserId', j.usuario.id);"
             ]
           }}],
           "request": {
@@ -1005,8 +1008,8 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\":\"Log Test {{$timestamp}}\",\"descripcion\":\"Setup para logs\",\"deporteId\":1,\"publica\":true}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones", "host": ["{{baseUrl}}"], "path": ["competiciones"] }
+            "body": { "mode": "raw", "raw": "{\"nombre\":\"Log Test {{$timestamp}}\",\"descripcion\":\"Setup para logs\",\"deporteId\":1,\"publica\":true,\"inscripcionAbierta\":true,\"configuracion\":{\"formato\":\"LIGA\",\"puntosVictoria\":3,\"puntosEmpate\":1,\"puntosDerrota\":0}}", "options": { "raw": { "language": "json" }}},
+            "url": { "raw": "{{baseUrl}}/competiciones?usuarioId={{testUserId}}", "host": ["{{baseUrl}}"], "path": ["competiciones"], "query": [{ "key": "usuarioId", "value": "{{testUserId}}" }] }
           }
         },
         {
@@ -1036,7 +1039,7 @@
             "method": "PUT",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": { "mode": "raw", "raw": "{\"nombre\":\"Log Test Actualizado\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}", "host": ["{{baseUrl}}"], "path": ["competiciones", "{{createdCompeticionId}}"] }
+            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}?usuarioId={{testUserId}}", "host": ["{{baseUrl}}"], "path": ["competiciones", "{{createdCompeticionId}}"], "query": [{ "key": "usuarioId", "value": "{{testUserId}}" }] }
           }
         },
         {
@@ -1060,8 +1063,8 @@
           }}],
           "request": { "method": "GET", "header": [],
             "url": {
-              "raw": "{{baseUrl}}/logs/competicion/{{competicionId}}?page=0&size=20",
-              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{competicionId}}"],
+              "raw": "{{baseUrl}}/logs/competicion/{{createdCompeticionId}}?page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{createdCompeticionId}}"],
               "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
             }
           }
@@ -1104,15 +1107,15 @@
               "pm.test('Tiene totalElements', () => pm.expect(j).to.have.property('totalElements'));",
               "if (j.content.length > 0) {",
               "  var log = j.content[0];",
-              "  pm.test('usuarioId del log coincide', () => pm.expect(log.usuarioId).to.eql(parseInt(pm.environment.get('usuarioId'))));",
+              "  pm.test('usuarioId del log coincide', () => pm.expect(log.usuarioId).to.eql(parseInt(pm.collectionVariables.get('testUserId'))));",
               "  pm.test('Log tiene accion válida', () => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(log.accion));",
               "}"
             ]
           }}],
           "request": { "method": "GET", "header": [],
             "url": {
-              "raw": "{{baseUrl}}/logs/usuario/{{usuarioId}}?page=0&size=20",
-              "host": ["{{baseUrl}}"], "path": ["logs", "usuario", "{{usuarioId}}"],
+              "raw": "{{baseUrl}}/logs/usuario/{{testUserId}}?page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["logs", "usuario", "{{testUserId}}"],
               "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
             }
           }
@@ -1132,8 +1135,8 @@
           }}],
           "request": { "method": "GET", "header": [],
             "url": {
-              "raw": "{{baseUrl}}/logs/entidad/Competicion/{{competicionId}}",
-              "host": ["{{baseUrl}}"], "path": ["logs", "entidad", "Competicion", "{{competicionId}}"]
+              "raw": "{{baseUrl}}/logs/entidad/Competicion/{{createdCompeticionId}}",
+              "host": ["{{baseUrl}}"], "path": ["logs", "entidad", "Competicion", "{{createdCompeticionId}}"]
             }
           }
         },
@@ -1193,8 +1196,8 @@
           }}],
           "request": { "method": "GET", "header": [],
             "url": {
-              "raw": "{{baseUrl}}/logs/competicion/{{competicionId}}?page=0&size=5",
-              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{competicionId}}"],
+              "raw": "{{baseUrl}}/logs/competicion/{{createdCompeticionId}}?page=0&size=5",
+              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{createdCompeticionId}}"],
               "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "5" }]
             }
           }
@@ -1217,8 +1220,8 @@
           ],
           "request": { "method": "GET", "header": [],
             "url": {
-              "raw": "{{baseUrl}}/logs/competicion/{{competicionId}}",
-              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{competicionId}}"]
+              "raw": "{{baseUrl}}/logs/competicion/{{createdCompeticionId}}",
+              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{createdCompeticionId}}"]
             }
           }
         }

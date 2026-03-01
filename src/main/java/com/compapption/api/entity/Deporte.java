@@ -26,7 +26,7 @@ public class Deporte {
     private String descripcion;
 
     @Column(columnDefinition = "BLOB")
-    private byte[] icono;
+    private String icono;
 
     @Builder.Default
     @Column(nullable = false)

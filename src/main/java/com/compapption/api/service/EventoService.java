@@ -14,6 +14,7 @@ import com.compapption.api.request.estadistica.EstadisticaRequest;
 import com.compapption.api.request.evento.EventoCreateRequest;
 import com.compapption.api.request.evento.EventoUpdateRequest;
 import com.compapption.api.request.evento.ResultadoRequest;
+import com.compapption.api.service.log.LogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,7 @@ public class EventoService {
     private final EventoMapper eventoMapper;
     private final EstadisticaMapper estadisticaMapper;
     private final ClasificacionService clasificacionService;
+    private final LogService logService;
 
     /// === CONSULTAS EVENTOS === ///
 
@@ -198,6 +200,7 @@ public class EventoService {
         evento.getEquipos().add(eventoLocal);
         evento.getEquipos().add(eventoVisitante);
 
+        logService.registrar("Evento", evento.getId(), LogModificacion.AccionLog.CREAR, null, null, competicionId);
         return eventoMapper.toDetalleDTO(evento);
     }
 
@@ -225,6 +228,7 @@ public class EventoService {
         }
 
         evento = eventoRepository.save(evento);
+        logService.registrar("Evento", evento.getId(), LogModificacion.AccionLog.EDITAR, null, null, evento.getCompeticion().getId());
         return eventoMapper.toDetalleDTO(evento);
     }
 
@@ -251,6 +255,7 @@ public class EventoService {
         // Avance automático de bracket playoff
         procesarAvancePlayoff(evento);
 
+        logService.registrar("Evento", evento.getId(), LogModificacion.AccionLog.EDITAR, null, null, evento.getCompeticion().getId());
         return eventoMapper.toResultadoDTO(evento);
     }
 
@@ -451,6 +456,7 @@ public class EventoService {
             throw new BadRequestException("No se puede eliminar un evento finalizado");
         }
 
+        logService.registrar("Evento", id, LogModificacion.AccionLog.ELIMINAR, null, null, evento.getCompeticion().getId());
         eventoRepository.delete(evento);
     }
 

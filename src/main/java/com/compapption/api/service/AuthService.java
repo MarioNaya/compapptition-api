@@ -3,15 +3,16 @@ package com.compapption.api.service;
 import com.compapption.api.config.CustomUserDetails;
 import com.compapption.api.config.JwtService;
 import com.compapption.api.dto.auth.*;
+import com.compapption.api.entity.PasswordResetToken;
 import com.compapption.api.entity.RefreshToken;
 import com.compapption.api.entity.Usuario;
 import com.compapption.api.entity.UsuarioRolCompeticion;
 import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.exception.UnauthorizedException;
+import com.compapption.api.repository.PasswordResetTokenRepository;
 import com.compapption.api.repository.RefreshTokenRepository;
 import com.compapption.api.repository.UsuarioRepository;
 import com.compapption.api.repository.UsuarioRolCompeticionRepository;
-import com.compapption.api.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +35,7 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UsuarioRolCompeticionRepository usuarioRolCompeticionRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -149,8 +151,17 @@ public class AuthService {
             return;
         }
 
+        // Eliminar tokens anteriores del usuario para evitar acumulación
+        passwordResetTokenRepository.deleteByUsuario(usuario);
+
+        // Crear y persistir nuevo token con expiración de 24 horas
         String token = UUID.randomUUID().toString();
-        // TODO: Almacenar token de recuperación con expiración (tabla PasswordResetToken o Redis)
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .usuario(usuario)
+                .fechaExpiracion(LocalDateTime.now().plusHours(24))
+                .build();
+        passwordResetTokenRepository.save(resetToken);
 
         emailService.enviarEmailRecuperacion(usuario.getEmail(), usuario.getNombre(), token);
         log.info("Email de recuperación enviado a: {}", usuario.getEmail());
@@ -158,8 +169,28 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
-        // TODO: Validar token desde almacenamiento y actualizar contraseña
-        throw new BadRequestException("Funcionalidad pendiente de implementar almacenamiento de tokens");
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new BadRequestException("Token de recuperación inválido"));
+
+        if (Boolean.TRUE.equals(resetToken.getUsado())) {
+            throw new BadRequestException("El token ya ha sido utilizado");
+        }
+
+        if (resetToken.getFechaExpiracion().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("El token de recuperación ha expirado");
+        }
+
+        Usuario usuario = resetToken.getUsuario();
+        usuario.setPassword(passwordEncoder.encode(request.getNuevaPassword()));
+        usuarioRepository.save(usuario);
+
+        resetToken.setUsado(true);
+        passwordResetTokenRepository.save(resetToken);
+
+        // Revocar todos los refresh tokens activos para forzar nuevo login
+        refreshTokenRepository.revocarTodosPorUsuario(usuario);
+
+        log.info("Contraseña restablecida para usuario: {}", usuario.getUsername());
     }
 
     // -------------------------------------------------------------------------

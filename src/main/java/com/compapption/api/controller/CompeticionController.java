@@ -1,10 +1,12 @@
 package com.compapption.api.controller;
-
+import com.compapption.api.config.CustomUserDetails;
+import com.compapption.api.dto.UsuarioRolCompeticion.UsuarioRolCompeticionDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionDetalleDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionInfoDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionSimpleDTO;
 import com.compapption.api.dto.equipoDTO.EquipoDetalleDTO;
 import com.compapption.api.dto.equipoDTO.EquipoSimpleDTO;
+import com.compapption.api.entity.Competicion;
 import com.compapption.api.request.competicion.CompeticionCreateRequest;
 import com.compapption.api.request.competicion.CompeticionUpdateRequest;
 import com.compapption.api.request.page.PageResponse;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -78,9 +82,9 @@ public class CompeticionController {
     @PostMapping
     public ResponseEntity<CompeticionDetalleDTO> crear(
             @Valid @RequestBody CompeticionCreateRequest request,
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(competicionService.crear(request, usuarioId));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        CompeticionDetalleDTO competicion = competicionService.crear(request, userDetails.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(competicion);
     }
 
     @PutMapping("/{id}")
@@ -92,6 +96,7 @@ public class CompeticionController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
     public ResponseEntity<Void> eliminar(
             @PathVariable Long id,
             @RequestParam Long usuarioId) {
@@ -99,29 +104,45 @@ public class CompeticionController {
         return ResponseEntity.noContent().build();
     }
 
+    // ==================== ESTADO ====================
+
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
+    public ResponseEntity<CompeticionDetalleDTO> cambiarEstado(
+            @PathVariable Long id,
+            @RequestParam Competicion.EstadoCompeticion estado,
+            @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(competicionService.cambiarEstado(id, estado, usuarioId));
+    }
+
     // ==================== TEMPORADA ====================
 
     @PostMapping("/{id}/temporada")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
     public ResponseEntity<CompeticionDetalleDTO> cambiarTemporada(
             @PathVariable Long id,
             @RequestParam Integer nuevaTemporada,
             @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(competicionService.cambiarTemporada(id, nuevaTemporada, usuarioId));
+        return ResponseEntity.ok(competicionService.cambiarTemporada(id, nuevaTemporada,
+                usuarioId));
     }
 
     // ==================== GESTIÓN DE EQUIPOS ====================
 
     @GetMapping("/{id}/equipos/simple")
-    public ResponseEntity<List<EquipoSimpleDTO>> listarEquiposSimple(@PathVariable Long id) {
+    public ResponseEntity<List<EquipoSimpleDTO>> listarEquiposSimple(@PathVariable Long id)
+    {
         return ResponseEntity.ok(competicionService.obtenerInscritosSimple(id));
     }
 
     @GetMapping("/{id}/equipos/detalle")
-    public ResponseEntity<List<EquipoDetalleDTO>> listarEquiposDetalle(@PathVariable Long id) {
+    public ResponseEntity<List<EquipoDetalleDTO>> listarEquiposDetalle(@PathVariable Long
+                                                                               id) {
         return ResponseEntity.ok(competicionService.obtenerInscritosDetalle(id));
     }
 
     @PostMapping("/{id}/equipos/{equipoId}")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
     public ResponseEntity<Map<String, String>> inscribirEquipo(
             @PathVariable Long id,
             @PathVariable Long equipoId,
@@ -132,11 +153,31 @@ public class CompeticionController {
     }
 
     @DeleteMapping("/{id}/equipos/{equipoId}")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
     public ResponseEntity<Void> retirarEquipo(
             @PathVariable Long id,
             @PathVariable Long equipoId,
             @RequestParam Long usuarioId) {
         competicionService.bajaEquipo(id, equipoId, usuarioId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ==================== GESTIÓN DE USUARIOS ====================
+
+    @GetMapping("/{id}/usuarios")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
+    public ResponseEntity<List<UsuarioRolCompeticionDTO>> listarUsuarios(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(competicionService.obtenerUsuariosConRol(id));
+    }
+
+    @DeleteMapping("/{id}/usuarios/{usuarioId}")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
+    public ResponseEntity<Void> quitarUsuario(
+            @PathVariable Long id,
+            @PathVariable Long usuarioId,
+            @RequestParam Long solicitanteId) {
+        competicionService.quitarUsuario(id, usuarioId, solicitanteId);
         return ResponseEntity.noContent().build();
     }
 }
