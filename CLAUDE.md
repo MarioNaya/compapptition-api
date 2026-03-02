@@ -1,14 +1,11 @@
 # PROYECTO REAL — Compapption API
 
-## ⚠️ CRITICAL: Claude MUST NOT write to any files in this project
+## Permisos de Claude en este proyecto
 
-Este directorio contiene el **proyecto real del TFG** (el que se entrega a la universidad).
+Claude puede **leer y escribir** en este proyecto — siguiendo el flujo guía → real.
 
-**Claude solo puede LEER** — NUNCA crear, editar ni eliminar ficheros aquí.
-Solo Mario (el usuario) escribe en este proyecto.
-
-Para implementar features: usar el proyecto GUÍA en `C:\Users\mario\.local\bin\proyecto-tfg\`
-Para comparar estado: leer ficheros aquí y reportar diferencias — nunca modificar.
+Para implementar features nuevas: usar el proyecto GUÍA en `C:\Users\mario\.local\bin\proyecto-tfg\`
+Solo portar al real código que ya funciona y ha pasado tests en la guía.
 
 ---
 
@@ -24,7 +21,11 @@ Para comparar estado: leer ficheros aquí y reportar diferencias — nunca modif
 
 ---
 
-## Estado canónico
+## Estado canónico (2 Mar 2026)
+
+- Backend completo: 20 entidades, 13 controllers, ~105 endpoints, JWT + RBAC + Logs ✅
+- Tests JUnit: 149 unit + 40 IT = 189 tests, 0 failures ✅
+- Siguiente: Fase 3 — Frontend Web
 
 Ver `C:\Users\mario\.local\bin\proyecto-tfg\CLAUDE.md` para inventario completo y estado de fases.
 
