@@ -5,6 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO con la posición completa de un equipo en la clasificación, incluyendo todas las
+ * métricas (victorias, empates, derrotas, goles a favor/contra y diferencia de goles).
+ *
+ * @author Mario
+ */
 @Data
 @Builder
 @AllArgsConstructor

@@ -9,6 +9,16 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Representa un usuario registrado en el sistema.
+ * Mapeada a la tabla {@code usuario}, almacena credenciales (username, email, password),
+ * datos personales, y el flag {@code esAdminSistema} para el rol de administrador global.
+ * Se relaciona con {@link UsuarioRolCompeticion} para los roles por competición,
+ * con {@link Jugador} mediante una relación uno a uno, y con {@link EquipoManager}
+ * para los equipos que gestiona.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "usuario")
 @Getter

@@ -10,6 +10,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * DTO con los datos completos de una competición, incluyendo configuración de formato,
+ * fechas, visibilidad y número de equipos inscritos, devuelto en el endpoint de detalle.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -16,6 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Servicio de gestión de deportes.
+ *
+ * <p>Cubre el ciclo de vida completo de un deporte: listado de deportes activos
+ * (simple y detalle), consulta por id, creación, actualización, eliminación y
+ * recuperación de los tipos de estadística asociados a un deporte concreto.</p>
+ *
+ * @author Mario
+ */
 @Service
 @RequiredArgsConstructor
 public class DeporteService {
@@ -27,6 +36,11 @@ public class DeporteService {
 
     // === OBTENER LISTAS DEPORTE POR ACTIVO CON JERAQUÍA DETALLE === //
 
+    /**
+     * Devuelve todos los deportes activos en formato simple.
+     *
+     * @return lista de {@link DeporteSimpleDTO} con los deportes activos
+     */
     @Transactional(readOnly = true)
     public List<DeporteSimpleDTO> obtenerTodosActivosSimple() {
         return deporteRepository.findByActivoTrue().stream()
@@ -34,6 +48,11 @@ public class DeporteService {
                 .toList();
     }
 
+    /**
+     * Devuelve todos los deportes activos en formato detalle (incluye tipos de estadística).
+     *
+     * @return lista de {@link DeporteDetalleDTO} con los deportes activos
+     */
     @Transactional(readOnly = true)
     public List<DeporteDetalleDTO> obtenerTodosActivosDetalle() {
         return deporteRepository.findByActivoTrue().stream()
@@ -43,6 +62,13 @@ public class DeporteService {
 
     // === OBTENER DEPORTE POR ID === //
 
+    /**
+     * Obtiene un deporte en formato simple por su identificador (carga estadísticas asociadas).
+     *
+     * @param id identificador del deporte
+     * @return {@link DeporteSimpleDTO} con los campos básicos del deporte
+     * @throws ResourceNotFoundException si no existe ningún deporte con ese id
+     */
     @Transactional(readOnly = true)
     public DeporteSimpleDTO obtenerPorIdSimple(Long id){
         Deporte deporte = deporteRepository.findByIdWithEstadisticas(id)
@@ -51,6 +77,13 @@ public class DeporteService {
         return deporteMapper.toSimpleDTO(deporte);
     }
 
+    /**
+     * Obtiene un deporte en formato detalle por su identificador (carga estadísticas asociadas).
+     *
+     * @param id identificador del deporte
+     * @return {@link DeporteDetalleDTO} con todos los datos del deporte y sus tipos de estadística
+     * @throws ResourceNotFoundException si no existe ningún deporte con ese id
+     */
     @Transactional(readOnly = true)
     public DeporteDetalleDTO obtenerPorIdDetalle(long id){
         Deporte deporte = deporteRepository.findByIdWithEstadisticas(id)
@@ -61,6 +94,14 @@ public class DeporteService {
 
     // === CREAR, ACTUALIZAR Y ELIMINAR DEPORTE === //
 
+    /**
+     * Crea un nuevo deporte con los datos proporcionados.
+     *
+     * <p>Si {@code activo} no se incluye en el request se establece a {@code true} por defecto.</p>
+     *
+     * @param request datos del deporte (nombre, descripción y activo opcional)
+     * @return {@link DeporteDetalleDTO} con el deporte recién creado
+     */
     @Transactional
     public DeporteDetalleDTO crear(DeporteRequest request) {
         Deporte deporte = Deporte.builder()
@@ -71,6 +112,16 @@ public class DeporteService {
         return deporteMapper.toDetalleDTO(deporteRepository.save(deporte));
     }
 
+    /**
+     * Actualiza los datos de un deporte existente.
+     *
+     * <p>Solo se modifican los campos no nulos del request.</p>
+     *
+     * @param id      identificador del deporte a actualizar
+     * @param request campos a actualizar (nombre, descripción y/o activo)
+     * @return {@link DeporteDetalleDTO} con los datos actualizados
+     * @throws ResourceNotFoundException si no existe ningún deporte con ese id
+     */
     @Transactional
     public DeporteDetalleDTO actualizar(Long id, DeporteRequest request) {
         Deporte deporte = deporteRepository.findById(id)
@@ -83,6 +134,12 @@ public class DeporteService {
         return deporteMapper.toDetalleDTO(deporteRepository.save(deporte));
     }
 
+    /**
+     * Elimina un deporte del sistema.
+     *
+     * @param id identificador del deporte a eliminar
+     * @throws ResourceNotFoundException si no existe ningún deporte con ese id
+     */
     @Transactional
     public void eliminar(Long id) {
         Deporte deporte = deporteRepository.findById(id)
@@ -92,6 +149,13 @@ public class DeporteService {
 
     // === OBTENER ESTADÍSTICAS DEPORTE === //
 
+    /**
+     * Devuelve los tipos de estadística activos de un deporte ordenados por su campo {@code orden}.
+     *
+     * @param deporteId identificador del deporte
+     * @return lista de {@link TipoEstadisticaDTO} activos asociados al deporte
+     * @throws ResourceNotFoundException si no existe ningún deporte con ese id
+     */
     @Transactional(readOnly = true)
     public List<TipoEstadisticaDTO> obtenerEstadisticasPorDeporte(long deporteId) {
         if (!deporteRepository.existsById(deporteId)){

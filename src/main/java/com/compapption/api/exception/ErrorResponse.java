@@ -9,6 +9,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+/**
+ * DTO de respuesta de error estándar devuelto por el {@link GlobalExceptionHandler}. Incluye código HTTP, mensaje y errores de validación opcionales.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

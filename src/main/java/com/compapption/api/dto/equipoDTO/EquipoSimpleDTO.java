@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO con los datos básicos de un equipo (nombre, descripción y escudo), utilizado
+ * en listados de equipos y como referencia ligera en otras entidades.
+ *
+ * @author Mario
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

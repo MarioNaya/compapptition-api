@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO con las estadísticas acumuladas de un jugador en una competición, agrupando el total
+ * de un tipo de estadística concreto a lo largo de todos los eventos de la temporada.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

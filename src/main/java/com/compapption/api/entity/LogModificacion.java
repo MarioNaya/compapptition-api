@@ -6,6 +6,15 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Registro de auditoría que almacena cada modificación realizada sobre las entidades del sistema.
+ * Mapeada a la tabla {@code log_modificacion} con índices por competición y fecha,
+ * guarda la acción (CREAR, EDITAR, ELIMINAR), la entidad afectada, el usuario, la IP y los datos
+ * anteriores/nuevos en formato JSON. Se persiste de forma asíncrona mediante {@code LogAsyncWriter}.
+ * Se relaciona con {@link Usuario} y opcionalmente con {@link Competicion}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "log_modificacion", indexes = {
         @Index(name = "idx_log_competicion", columnList = "competicion_id"),

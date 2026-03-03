@@ -7,6 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Petición para actualizar el perfil de un usuario. Permite modificar nombre, apellidos y correo electrónico.
+ *
+ * @author Mario
+ */
 @Data
 @Builder
 @AllArgsConstructor

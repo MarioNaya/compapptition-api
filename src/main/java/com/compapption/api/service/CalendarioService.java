@@ -21,9 +21,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Orquestador del patrón Strategy para generación de calendarios.
- * Delega el algoritmo concreto al GeneradorCalendario que soporta el formato
- * de la competición, elegido en tiempo de ejecución de la lista de beans inyectados.
+ * Servicio orquestador del patrón Strategy para la generación de calendarios de competición.
+ * <p>
+ * En tiempo de ejecución selecciona el {@link GeneradorCalendario} que soporta
+ * el formato de la competición ({@code LIGA}, {@code LIGA_IDA_VUELTA}, {@code PLAYOFF},
+ * {@code GRUPOS_PLAYOFF}) e invoca su algoritmo. Persiste los eventos generados
+ * y expone dos niveles de API: métodos fachada que aceptan IDs y devuelven DTOs
+ * (para los controllers) y métodos de dominio que trabajan con entidades
+ * (para otros servicios).
+ * </p>
+ *
+ * @author Mario
  */
 @Service
 @RequiredArgsConstructor
@@ -44,8 +52,20 @@ public class CalendarioService {
     /// === MÉTODOS FACHADA PARA EL CONTROLLER (ACEPTAN IDs Y DEVUELVEN DTOS === ///
 
     /**
-     * Genera el calendario completo de una competición según su formato.
-     * Persiste los eventos y devuelve los DTOs.
+     * Genera el calendario completo de una competición según su formato y lo persiste.
+     * <p>
+     * Método fachada orientado al controller: recibe IDs y devuelve DTOs. Delega
+     * la lógica real en {@link #generarCalendario(Competicion, LocalDateTime, Integer)}.
+     * </p>
+     *
+     * @param competicionId  identificador de la competición
+     * @param fechaInicio    fecha y hora del primer evento del calendario
+     * @param diasJornada    número de días entre jornadas consecutivas
+     * @return lista de DTOs detalle de los eventos generados
+     * @throws com.compapption.api.exception.ResourceNotFoundException si la competición no existe
+     * @throws com.compapption.api.exception.BadRequestException       si la competición no tiene
+     *                                                                  configuración o hay menos de
+     *                                                                  2 equipos activos
      */
     @Transactional
     public List<EventoDetalleDTO> generarCalendarioPorIdDetalle(Long competicionId, LocalDateTime fechaInicio, Integer diasJornada) {
@@ -55,10 +75,24 @@ public class CalendarioService {
     }
 
     /**
-     * Genera la fase eliminatoria (playoff seeded) para LIGA_PLAYOFF o GRUPOS_PLAYOFF.
-     * Toma los mejores N equipos de la clasificación actual.
-     * Si rondaInicial es null, se calcula como maxJornada + 1.
-     * diasJornada y partidosEliminatoria se toman de la config si no se pasan explícitamente.
+     * Genera la fase eliminatoria (playoff seeded) para los formatos {@code LIGA_PLAYOFF}
+     * o {@code GRUPOS_PLAYOFF} y la persiste.
+     * <p>
+     * Toma los mejores N equipos de la clasificación actual según
+     * {@code ConfiguracionCompeticion.numEquiposPlayoff}. Si {@code rondaInicial} es
+     * {@code null}, se calcula como {@code maxJornada + 1} para continuar la numeración
+     * del calendario de liga. Los parámetros opcionales se leen de la configuración
+     * si no se proporcionan.
+     * </p>
+     *
+     * @param competicionId identificador de la competición
+     * @param fechaInicio   fecha y hora del primer partido de la fase eliminatoria
+     * @param rondaInicial  número de jornada asignado a la primera ronda; {@code null} para
+     *                      calcular automáticamente
+     * @param diasJornada   días entre rondas; {@code null} para usar el valor de la configuración
+     * @return lista de DTOs detalle de los eventos del playoff generados
+     * @throws com.compapption.api.exception.ResourceNotFoundException si la competición no existe
+     * @throws com.compapption.api.exception.BadRequestException       si no hay equipos clasificados
      */
     @Transactional
     public List<EventoDetalleDTO> generarPlayoffSeededPorIdDetalle(Long competicionId,
@@ -94,6 +128,22 @@ public class CalendarioService {
 
     ///  === MÉTODOS DE DOMINIO - TRABAJA CON ENTIDADES - SE PUEDE LLAMAR DESDE OTROS SERVICIOS === ///
 
+    /**
+     * Genera y persiste el calendario de la competición trabajando directamente con entidades.
+     * <p>
+     * Selecciona el {@link GeneradorCalendario} adecuado según el formato de la configuración,
+     * genera los eventos e invoca {@code saveAll}. Para el formato {@code EVENTO_UNICO}
+     * devuelve una lista vacía sin generar nada.
+     * </p>
+     *
+     * @param competicion competición con configuración cargada
+     * @param fechaInicio fecha y hora del primer evento
+     * @param diasJornada días entre jornadas consecutivas; no puede ser negativo
+     * @return lista de entidades {@link com.compapption.api.entity.Evento} persistidas
+     * @throws com.compapption.api.exception.BadRequestException    si no hay configuración, menos de
+     *                                                               2 equipos o días negativos
+     * @throws com.compapption.api.exception.InternalStateException si no existe generador para el formato
+     */
     @Transactional
     public List<Evento> generarCalendario(Competicion competicion, LocalDateTime fechaInicio, Integer diasJornada) {
         ConfiguracionCompeticion config = competicion.getConfiguracion();
@@ -131,6 +181,16 @@ public class CalendarioService {
         return eventos;
     }
 
+    /**
+     * Genera y persiste la fase de playoff seeded con valores por defecto
+     * (7 días entre rondas, partido único).
+     *
+     * @param competicion  competición que recibe el playoff
+     * @param clasificados lista de equipos ordenada por clasificación (índice 0 = 1.o puesto)
+     * @param fechaInicio  fecha y hora del primer partido
+     * @param rondaInicial número de jornada de inicio del bracket
+     * @return lista de entidades {@link com.compapption.api.entity.Evento} persistidas
+     */
     @Transactional
     public List<Evento> generarPlayoffSeeded(Competicion competicion,
                                              List<Equipo> clasificados,
@@ -139,6 +199,17 @@ public class CalendarioService {
         return generarPlayoffSeeded(competicion, clasificados, fechaInicio, rondaInicial, 7, 1);
     }
 
+    /**
+     * Genera y persiste la fase de playoff seeded con control total de los parámetros.
+     *
+     * @param competicion          competición que recibe el playoff
+     * @param clasificados         lista de equipos ordenada por clasificación (índice 0 = 1.o puesto)
+     * @param fechaInicio          fecha y hora del primer partido
+     * @param rondaInicial         número de jornada de inicio del bracket
+     * @param diasJornada          días entre rondas del bracket
+     * @param partidosEliminatoria número de partidos por eliminatoria (1 = partido único, 2 = ida/vuelta)
+     * @return lista de entidades {@link com.compapption.api.entity.Evento} persistidas
+     */
     @Transactional
     public List<Evento> generarPlayoffSeeded(Competicion competicion,
                                              List<Equipo> clasificados,

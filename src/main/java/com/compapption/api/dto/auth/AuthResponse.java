@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * DTO de respuesta de autenticación con los tokens JWT (access y refresh), información
+ * del usuario autenticado y sus roles en cada competición, devuelto tras login o refresh.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de petición de login con el nombre de usuario o email y la contraseña,
+ * utilizado en el endpoint POST /auth/login.
+ *
+ * @author Mario
+ */
 @Data
 @Builder
 @AllArgsConstructor

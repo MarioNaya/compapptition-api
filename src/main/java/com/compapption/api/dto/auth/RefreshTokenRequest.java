@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de petición para refrescar el access token JWT usando el refresh token activo,
+ * utilizado en el endpoint POST /auth/refresh.
+ *
+ * @author Mario
+ */
 @Data
 @Builder
 @AllArgsConstructor

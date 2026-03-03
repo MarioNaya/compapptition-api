@@ -5,6 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Petición para actualizar un equipo existente. Permite modificar nombre, descripción y escudo del equipo.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

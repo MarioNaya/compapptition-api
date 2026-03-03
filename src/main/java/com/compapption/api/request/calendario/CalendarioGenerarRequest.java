@@ -7,6 +7,11 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Petición para generar el calendario de una competición. Contiene la fecha de inicio y los días entre jornadas.
+ *
+ * @author Mario
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

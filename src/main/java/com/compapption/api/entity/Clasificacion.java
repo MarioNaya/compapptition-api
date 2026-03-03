@@ -6,6 +6,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Representa la posición de un equipo en la tabla de clasificación de una competición para una temporada concreta.
+ * Mapeada a la tabla {@code clasificacion} con restricción de unicidad sobre (competicion_id, equipo_id, temporada),
+ * almacena puntos, partidos jugados, victorias, empates, derrotas y diferencia de goles.
+ * Se relaciona con {@link Competicion} y {@link Equipo}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(
         name = "clasificacion",

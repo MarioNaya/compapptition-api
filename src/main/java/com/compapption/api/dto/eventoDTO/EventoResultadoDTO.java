@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO con el resultado de un evento, devolviendo el marcador local/visitante y el estado
+ * del partido tras registrar o consultar el resultado vía el endpoint de resultado.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

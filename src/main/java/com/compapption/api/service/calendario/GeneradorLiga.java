@@ -8,14 +8,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Algoritmo round-robin (rotación circular).
- * Soporta: LIGA (solo ida), LIGA_IDA_VUELTA, LIGA_PLAYOFF (fase de liga).
- * El metodo generarRoundRobin es público para reutilización desde GeneradorGruposPlayoff.
+ * Implementación del patrón Strategy que genera calendarios mediante el algoritmo
+ * de rotación circular (round-robin).
+ * <p>
+ * Soporta los formatos {@code LIGA} (solo ida), {@code LIGA_IDA_VUELTA} (ida y vuelta)
+ * y {@code LIGA_PLAYOFF} (fase de liga previa al playoff). Cuando el número de equipos
+ * es impar, añade un equipo fantasma ({@code null}) para que cada equipo descanse
+ * una jornada. El método {@link #generarRoundRobin} es público para su reutilización
+ * desde {@link GeneradorGruposPlayoff}.
+ * </p>
+ *
+ * @author Mario
  */
 @Component
 public class GeneradorLiga implements GeneradorCalendario{
 
 
+    /**
+     * {@inheritDoc}
+     * Devuelve {@code true} para {@code LIGA}, {@code LIGA_IDA_VUELTA} y {@code LIGA_PLAYOFF}.
+     */
     @Override
     public boolean soporta(ConfiguracionCompeticion.FormatoCompeticion formato) {
         return formato == ConfiguracionCompeticion.FormatoCompeticion.LIGA
@@ -23,6 +35,10 @@ public class GeneradorLiga implements GeneradorCalendario{
                 || formato == ConfiguracionCompeticion.FormatoCompeticion.LIGA_PLAYOFF;
     }
 
+    /**
+     * {@inheritDoc}
+     * Determina si el formato requiere vuelta y delega en {@link #generarRoundRobin}.
+     */
     @Override
     public List<Evento> generar(Competicion competicion,
                                 List<Equipo> equipos,
@@ -34,9 +50,22 @@ public class GeneradorLiga implements GeneradorCalendario{
     }
 
     /**
-     * Algoritmo de rotación circular (round-robin).
-     * Fija el primer equipo y rota los demás para generar jornadas sin repetir enfrentamientos.
-     * Si el número de equipos es impar, añade un equipo fantasma (null = descanso).
+     * Genera todos los eventos mediante el algoritmo de rotación circular (round-robin).
+     * <p>
+     * Fija el primer equipo de la lista y rota los demás en cada jornada, garantizando
+     * que cada par de equipos se enfrenta exactamente una vez en la fase de ida.
+     * Si el número de equipos es impar, añade un equipo fantasma ({@code null}) que
+     * actúa como descanso; los partidos contra ese equipo se omiten.
+     * Si {@code idaYVuelta} es {@code true}, se generan las jornadas de vuelta
+     * invirtiendo los roles de local y visitante respecto a la ida.
+     * </p>
+     *
+     * @param competicion  competición para la que se generan los eventos
+     * @param equipos      lista de equipos participantes
+     * @param fechaInicio  fecha y hora de la primera jornada
+     * @param diasJornada  número de días entre jornadas consecutivas
+     * @param idaYVuelta   {@code true} para generar también la segunda vuelta
+     * @return lista de entidades {@link Evento} generadas (sin persistir)
      */
     public List<Evento> generarRoundRobin(Competicion competicion,
                                           List<Equipo> equipos,

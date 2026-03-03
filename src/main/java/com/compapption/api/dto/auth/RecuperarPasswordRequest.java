@@ -7,6 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de petición de recuperación de contraseña con el email del usuario, que desencadena
+ * el envío de un email con el token de reseteo, utilizado en POST /auth/recuperar-password.
+ *
+ * @author Mario
+ */
 @Data
 @Builder
 @AllArgsConstructor

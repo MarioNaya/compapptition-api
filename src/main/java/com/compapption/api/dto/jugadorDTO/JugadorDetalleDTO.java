@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO con los datos completos de un jugador, incluyendo el usuario vinculado y la fecha
+ * de creación, devuelto en el endpoint de detalle y creación/edición de jugador.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

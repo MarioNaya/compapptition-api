@@ -10,6 +10,17 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+/**
+ * Servicio de envío de correos electrónicos transaccionales.
+ * <p>
+ * Proporciona métodos {@code @Async} para enviar emails de recuperación de contraseña
+ * e invitaciones a competiciones. Los mensajes se componen en formato HTML y se
+ * despachan mediante {@link JavaMailSender}. Los errores de envío se capturan y
+ * registran sin propagar la excepción al hilo llamador.
+ * </p>
+ *
+ * @author Mario
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,6 +34,17 @@ public class EmailService {
     @Value("${spring.mail.username:noreply@compapptition.com}")
     private String fromEmail;
 
+    /**
+     * Envía de forma asíncrona un email HTML con el enlace de restablecimiento de contraseña.
+     * <p>
+     * El enlace generado apunta a {@code {frontendUrl}/auth/reset-password?token=...}
+     * y es válido durante 24 horas.
+     * </p>
+     *
+     * @param to     dirección de correo del destinatario
+     * @param nombre nombre del usuario para personalizar el saludo (puede ser {@code null})
+     * @param token  token de recuperación de contraseña generado previamente
+     */
     @Async
     public void enviarEmailRecuperacion(String to, String nombre, String token) {
         String subject = "Recuperación de contraseña - CompAPPtition";
@@ -70,6 +92,20 @@ public class EmailService {
         enviarEmail(to, subject, content);
     }
 
+    /**
+     * Envía de forma asíncrona un email HTML con la invitación a una competición.
+     * <p>
+     * El email incluye el nombre del emisor, la competición de destino, el rol
+     * ofrecido y un botón de aceptación que apunta a
+     * {@code {frontendUrl}/invitaciones/aceptar?token=...}. La invitación caduca en 7 días.
+     * </p>
+     *
+     * @param to               dirección de correo del destinatario
+     * @param emisorNombre     nombre del usuario que envía la invitación
+     * @param competicionNombre nombre de la competición (o del equipo/contexto) al que se invita
+     * @param rolOfrecido      rol que se ofrece al destinatario (p.ej. {@code JUGADOR})
+     * @param token            token UUID único de la invitación
+     */
     @Async
     public void enviarInvitacion(String to,
                                  String emisorNombre,

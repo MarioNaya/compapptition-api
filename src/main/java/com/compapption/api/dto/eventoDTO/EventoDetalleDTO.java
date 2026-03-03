@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO con la vista completa de un evento/partido, incluyendo lugar, estado, resultado,
+ * observaciones, equipos participantes y datos del bracket de playoff.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

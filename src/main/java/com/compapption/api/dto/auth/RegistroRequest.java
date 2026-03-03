@@ -8,6 +8,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de petición de registro de un nuevo usuario con username, email, contraseña
+ * y datos personales opcionales, utilizado en el endpoint POST /auth/registro.
+ *
+ * @author Mario
+ */
 @Data
 @Builder
 @AllArgsConstructor

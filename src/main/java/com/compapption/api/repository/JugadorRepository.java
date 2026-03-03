@@ -11,11 +11,31 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repositorio JPA para la entidad Jugador.
+ * Gestiona la búsqueda de jugadores por usuario, equipo y texto libre,
+ * así como la carga eager de equipos y estadísticas asociadas.
+ *
+ * @author Mario
+ */
 @Repository
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
 
+    /**
+     * Busca el perfil de jugador vinculado a un usuario concreto.
+     *
+     * @param usuarioId identificador del usuario
+     * @return Optional con el jugador del usuario, vacío si no existe
+     */
     Optional<Jugador> findByUsuarioId(long usuarioId);
 
+    /**
+     * Busca un jugador por su identificador cargando en la misma consulta
+     * la colección de equipos a los que pertenece (evita N+1).
+     *
+     * @param id identificador del jugador
+     * @return Optional con el jugador y sus equipos, vacío si no existe
+     */
     @Query("SELECT j FROM Jugador j " +
             "LEFT JOIN FETCH  j.equipos ej " +
             "LEFT JOIN FETCH ej.equipo " +
@@ -24,6 +44,12 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
             @Param("id") long id
     );
 
+    /**
+     * Obtiene los jugadores activos de un equipo concreto.
+     *
+     * @param equipoId identificador del equipo
+     * @return lista de jugadores activos en el equipo
+     */
     @Query("SELECT DISTINCT j FROM Jugador j " +
             "JOIN j.equipos ej " +
             "WHERE ej.equipo.id = :equipoId " +
@@ -32,6 +58,14 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
             @Param("equipoId") long equipoId
     );
 
+    /**
+     * Busca jugadores cuyo nombre o apellidos contengan el texto indicado
+     * (insensible a mayúsculas), de forma paginada.
+     *
+     * @param search   texto a buscar en nombre o apellidos
+     * @param pageable parámetros de paginación y ordenación
+     * @return página de jugadores que coinciden con la búsqueda
+     */
     @Query("SELECT j FROM Jugador j " +
             "WHERE LOWER(j.nombre) " +
             "LIKE LOWER(CONCAT('%', :search, '%')) " +
@@ -42,6 +76,13 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
             Pageable pageable
     );
 
+    /**
+     * Busca un jugador por su identificador cargando en la misma consulta
+     * sus estadísticas y el tipo de cada estadística (evita N+1).
+     *
+     * @param id identificador del jugador
+     * @return Optional con el jugador y sus estadísticas, vacío si no existe
+     */
     @Query("SELECT j FROM Jugador j " +
             "LEFT  JOIN  FETCH  j.estadisticas e " +
             "LEFT JOIN FETCH e.tipoEstadistica " +

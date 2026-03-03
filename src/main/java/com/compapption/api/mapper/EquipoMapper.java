@@ -10,6 +10,14 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
+/**
+ * Mapper MapStruct para convertir entre entidades Equipo y sus DTOs.
+ * Gestiona la transformacion del escudo de {@code byte[]} a Base64 y
+ * el calculo del numero de jugadores activos. Utiliza {@link EquipoJugadorMapper}
+ * para mapear la coleccion de jugadores.
+ *
+ * @author Mario
+ */
 @Mapper(
         componentModel = "spring",
         uses = EquipoJugadorMapper.class,
@@ -19,7 +27,14 @@ public interface EquipoMapper {
 
     // === ENTITY TO DTO === //
 
-    // Equipo con todos los datos para uso detalle
+    /**
+     * Convierte una entidad Equipo a su DTO de detalle completo.
+     * Calcula el numero de jugadores activos mediante expresion Java e incluye
+     * la lista de jugadores delegando en {@link EquipoJugadorMapper}.
+     *
+     * @param equipo entidad de origen
+     * @return DTO con todos los datos del equipo, incluyendo jugadores activos
+     */
     @Mapping(target = "numJugadores",
             expression = "java(equipo.getJugadores() != null ? " +
                     "(int) equipo.getJugadores().stream()" +
@@ -27,14 +42,37 @@ public interface EquipoMapper {
     @Mapping(target = "jugadores", source = "jugadores")
     EquipoDetalleDTO toDetalleDTO(Equipo equipo);
 
-    // Equipo con datos simplificados para uso en listas y vistas
+    /**
+     * Convierte una entidad Equipo a su DTO simple para listados y vistas.
+     *
+     * @param equipo entidad de origen
+     * @return DTO con los datos minimos del equipo
+     */
     EquipoSimpleDTO toSimpleDTO(Equipo equipo);
 
-    // Listas equipos con los 2 formatos
+    /**
+     * Convierte una lista de entidades Equipo a una lista de DTOs de detalle.
+     *
+     * @param equipos lista de entidades de origen
+     * @return lista de DTOs de detalle
+     */
     List<EquipoDetalleDTO> toDetalleDTOList(List<Equipo> equipos);
+
+    /**
+     * Convierte una lista de entidades Equipo a una lista de DTOs simples.
+     *
+     * @param equipos lista de entidades de origen
+     * @return lista de DTOs simples
+     */
     List<EquipoSimpleDTO> toSimpleDTOList(List<Equipo> equipos);
 
-    // Metodo para convertir byte[] a String Base64
+    /**
+     * Convierte un array de bytes que representa un escudo a su representacion Base64.
+     * Devuelve {@code null} si el array es nulo o vacio.
+     *
+     * @param escudo imagen del escudo en bytes
+     * @return cadena Base64 del escudo, o null si no hay imagen
+     */
     default String map(byte[] escudo) {
         if (escudo == null || escudo.length == 0) {
             return null;

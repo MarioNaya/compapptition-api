@@ -16,6 +16,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio que gestiona el cálculo y la consulta de clasificaciones de competiciones.
+ * Implementa la lógica de recálculo completo: resetea los acumuladores de todos los
+ * equipos, procesa los eventos finalizados de la temporada actual y recalcula puntos,
+ * victorias, empates, derrotas, goles y diferencia de goles antes de asignar posiciones.
+ * Depende de {@link CompeticionRepository}, {@link EventoRepository} y
+ * {@link EventoEquipoRepository} para obtener los datos necesarios.
+ *
+ * @author Mario
+ */
 @Service
 @RequiredArgsConstructor
 public class ClasificacionService {
@@ -26,6 +36,14 @@ public class ClasificacionService {
     private final EventoEquipoRepository eventoEquipoRepository;
     private final ClasificacionMapper clasificacionMapper;
 
+    /**
+     * Devuelve la tabla de clasificación completa (formato detalle) de la temporada actual
+     * de una competición.
+     *
+     * @param competicionId identificador de la competición
+     * @return lista ordenada de entradas de clasificación con todos los campos estadísticos
+     * @throws ResourceNotFoundException si la competición no existe
+     */
     @Transactional(readOnly = true)
     public List<ClasificacionDetalleDTO> obtenerClasificacionDetalle(Long competicionId){
         Competicion competicion = competicionRepository.findById(competicionId)
@@ -36,6 +54,14 @@ public class ClasificacionService {
         );
     }
 
+    /**
+     * Devuelve la tabla de clasificación en formato simple (posición, puntos y equipo)
+     * de la temporada actual de una competición.
+     *
+     * @param competicionId identificador de la competición
+     * @return lista ordenada de entradas de clasificación en formato resumido
+     * @throws ResourceNotFoundException si la competición no existe
+     */
     @Transactional(readOnly = true)
     public List<ClasificacionSimpleDTO> obtenerClasificacionSimple(Long competicionId){
         Competicion competicion = competicionRepository.findById(competicionId)
@@ -46,6 +72,15 @@ public class ClasificacionService {
         );
     }
 
+    /**
+     * Obtiene la entrada de clasificación detallada de un equipo concreto en la temporada
+     * actual de una competición.
+     *
+     * @param competicionId identificador de la competición
+     * @param equipoId identificador del equipo
+     * @return DTO con todos los datos estadísticos del equipo en la clasificación
+     * @throws ResourceNotFoundException si la competición o la entrada de clasificación no existen
+     */
     @Transactional(readOnly = true)
     public ClasificacionDetalleDTO obtenerPorEquipoDetalle(Long competicionId, Long equipoId) {
         Competicion competicion = competicionRepository.findById(competicionId)
@@ -56,6 +91,15 @@ public class ClasificacionService {
                         .orElseThrow(()-> new ResourceNotFoundException("Clasificación", "equipo", equipoId)));
     }
 
+    /**
+     * Obtiene la entrada de clasificación en formato simple de un equipo concreto en la
+     * temporada actual de una competición.
+     *
+     * @param competicionId identificador de la competición
+     * @param equipoId identificador del equipo
+     * @return DTO simple con la posición y puntos del equipo
+     * @throws ResourceNotFoundException si la competición o la entrada de clasificación no existen
+     */
     @Transactional(readOnly = true)
     public ClasificacionSimpleDTO obtenerPorEquipoSimple(Long competicionId, Long equipoId) {
         Competicion competicion = competicionRepository.findById(competicionId)
@@ -66,6 +110,14 @@ public class ClasificacionService {
                         .orElseThrow(()-> new ResourceNotFoundException("Clasificación", "equipo", equipoId)));
     }
 
+    /**
+     * Devuelve la tabla de clasificación detallada de una temporada histórica concreta.
+     *
+     * @param competicionId identificador de la competición
+     * @param temporada número de temporada a consultar
+     * @return lista de entradas de clasificación en formato detalle para esa temporada
+     * @throws ResourceNotFoundException si la competición no existe
+     */
     @Transactional(readOnly = true)
     public List<ClasificacionDetalleDTO> obtenerPorTemporadaDetalle(
             Long competicionId, Integer temporada) {
@@ -76,6 +128,14 @@ public class ClasificacionService {
                 clasificacionRepository.findByCompeticionIdAndTemporada(competicionId, temporada));
     }
 
+    /**
+     * Devuelve la tabla de clasificación en formato simple de una temporada histórica concreta.
+     *
+     * @param competicionId identificador de la competición
+     * @param temporada número de temporada a consultar
+     * @return lista de entradas de clasificación en formato simple para esa temporada
+     * @throws ResourceNotFoundException si la competición no existe
+     */
     @Transactional(readOnly = true)
     public List<ClasificacionSimpleDTO> obtenerPorTemporadaSimple(
             Long competicionId, Integer temporada) {
@@ -86,6 +146,14 @@ public class ClasificacionService {
                 clasificacionRepository.findByCompeticionIdAndTemporada(competicionId, temporada));
     }
 
+    /**
+     * Crea la entrada de clasificación para un equipo en la temporada actual de la competición,
+     * inicializando todos los contadores a cero. Si ya existe una entrada para ese equipo y
+     * temporada, no se realiza ninguna acción (idempotente).
+     *
+     * @param competicion entidad de la competición a la que pertenece el equipo
+     * @param equipo entidad del equipo para el que se crea la entrada
+     */
     @Transactional
     public void inicializarClasificacionEquipo(Competicion competicion, Equipo equipo){
         if (clasificacionRepository.findByCompeticionIdAndEquipoIdAndTemporada (
@@ -113,6 +181,15 @@ public class ClasificacionService {
         }
     }
 
+    /**
+     * Pone a cero todos los contadores de clasificación de una competición para una temporada
+     * concreta. Devuelve un mapa indexado por id de equipo para uso eficiente durante el
+     * recálculo posterior.
+     *
+     * @param competicionId identificador de la competición
+     * @param temporada número de temporada cuyos datos se van a resetear
+     * @return mapa de equipoId a entidad Clasificacion con los contadores a cero
+     */
     @Transactional
     public Map<Long, Clasificacion> resetearClasificacion(Long competicionId, Integer temporada) {
         List<Clasificacion> clasificaciones = clasificacionRepository
@@ -133,6 +210,17 @@ public class ClasificacionService {
                 .collect(Collectors.toMap(c -> c.getEquipo().getId(), c -> c));
     }
 
+    /**
+     * Recalcula completamente la tabla de clasificación de la temporada actual de una
+     * competición. El proceso es: (1) resetear todos los contadores a cero, (2) procesar
+     * cada evento finalizado aplicando los puntos de la configuración (victoria, empate,
+     * derrota), (3) calcular la diferencia de goles, (4) ordenar por puntos, diferencia de
+     * goles y goles a favor, y (5) asignar posiciones. Este método es llamado automáticamente
+     * tras registrar el resultado de un evento.
+     *
+     * @param competicionId identificador de la competición cuya clasificación se recalcula
+     * @throws ResourceNotFoundException si la competición no existe
+     */
     @Transactional
     public void calcularClasificacion(Long competicionId){
         Competicion competicion = competicionRepository.findByIdWithDetails(competicionId)

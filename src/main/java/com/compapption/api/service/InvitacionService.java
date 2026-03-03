@@ -17,6 +17,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Servicio para la gestión completa del ciclo de vida de las invitaciones.
+ * <p>
+ * Cubre la creación de invitaciones con token UUID, el envío del email de notificación,
+ * la aceptación (que asigna el rol y/o vincula al usuario al equipo/competición)
+ * y el rechazo. También proporciona consultas por usuario, emisor y competición,
+ * y un método de mantenimiento para marcar las invitaciones expiradas.
+ * </p>
+ *
+ * @author Mario
+ */
 @Service
 @RequiredArgsConstructor
 public class InvitacionService {
@@ -38,6 +49,24 @@ public class InvitacionService {
 
     /// === CREACIÓN DE INVITACIÓN === ///
 
+    /**
+     * Crea una nueva invitación y envía el email de notificación al destinatario.
+     * <p>
+     * Valida que el rol ofrecido sea válido, que no exista ya una invitación pendiente
+     * para el mismo email en la misma competición/equipo, y genera un token UUID único
+     * con expiración de 7 días. Si el destinatario ya está registrado, se vincula
+     * directamente; en caso contrario, se vincula al aceptar.
+     * </p>
+     *
+     * @param emisorId identificador del usuario que emite la invitación
+     * @param request  datos de la invitación: email destinatario, rol, competición y/o equipo
+     * @return DTO detalle de la invitación creada
+     * @throws com.compapption.api.exception.BadRequestException       si el rol no es válido,
+     *                                                                  faltan campos obligatorios
+     *                                                                  o ya existe una invitación pendiente
+     * @throws com.compapption.api.exception.ResourceNotFoundException  si el emisor, la competición
+     *                                                                  o el equipo no existen
+     */
     @Transactional
     public InvitacionDetalleDTO crearInvitacion(Long emisorId, InvitacionCreateRequest request) {
         String rol = request.getRolOfrecido();
@@ -109,6 +138,21 @@ public class InvitacionService {
 
     /// === ACEPTAR Y RECHAZAR INVITACIÓN === ///
 
+    /**
+     * Acepta una invitación identificada por su token y asigna el rol correspondiente al usuario.
+     * <p>
+     * Según el rol ofrecido, puede: asignar {@code ADMIN_COMPETICION} en la competición,
+     * asignar {@code MANAGER_EQUIPO} y vincular al equipo, o crear/obtener el jugador
+     * y añadirlo al equipo. La invitación pasa a estado {@code ACEPTADA}.
+     * </p>
+     *
+     * @param token     token UUID de la invitación
+     * @param usuarioId identificador del usuario que acepta
+     * @return DTO detalle de la invitación actualizada
+     * @throws com.compapption.api.exception.BadRequestException      si la invitación no está pendiente,
+     *                                                                 ha expirado, o el rol es desconocido
+     * @throws com.compapption.api.exception.ResourceNotFoundException si el token o el usuario no existen
+     */
     @Transactional
     public InvitacionDetalleDTO aceptarPorToken(String token, Long usuarioId) {
         Invitacion invitacion = invitacionRepository.findByToken(token)
@@ -159,6 +203,16 @@ public class InvitacionService {
         return invitacionMapper.toDetalleDTO(invitacion);
     }
 
+    /**
+     * Rechaza una invitación identificada por su token y la marca como {@code RECHAZADA}.
+     *
+     * @param token     token UUID de la invitación
+     * @param usuarioId identificador del usuario que rechaza
+     * @return DTO detalle de la invitación actualizada
+     * @throws com.compapption.api.exception.BadRequestException      si la invitación no está pendiente
+     *                                                                 o ha expirado
+     * @throws com.compapption.api.exception.ResourceNotFoundException si el token no existe
+     */
     @Transactional
     public InvitacionDetalleDTO rechazarPorToken(String token, Long usuarioId) {
         Invitacion invitacion = invitacionRepository.findByToken(token)
@@ -184,6 +238,13 @@ public class InvitacionService {
 
     /// === CONSULTAS POR PENDIENTES, ENVIADAS, COMPETICIÓN === ///
 
+    /**
+     * Devuelve las invitaciones pendientes dirigidas al email del usuario indicado.
+     *
+     * @param usuarioId identificador del usuario destinatario
+     * @return lista de invitaciones en estado {@code PENDIENTE}
+     * @throws com.compapption.api.exception.ResourceNotFoundException si el usuario no existe
+     */
     @Transactional(readOnly = true)
     public List<InvitacionSimpleDTO> obtenerPendientes(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
@@ -192,12 +253,25 @@ public class InvitacionService {
                 invitacionRepository.findPendientesByEmail(usuario.getEmail()));
     }
 
+    /**
+     * Devuelve todas las invitaciones enviadas por un emisor, independientemente de su estado.
+     *
+     * @param emisorId identificador del usuario emisor
+     * @return lista de invitaciones emitidas por el usuario
+     */
     @Transactional(readOnly = true)
     public List<InvitacionSimpleDTO> obtenerEnviadas(Long emisorId) {
         return invitacionMapper.toSimpleDTOList(
                 invitacionRepository.findByEmisorId(emisorId));
     }
 
+    /**
+     * Devuelve todas las invitaciones asociadas a una competición concreta.
+     *
+     * @param competicionId identificador de la competición
+     * @return lista de invitaciones de la competición
+     * @throws com.compapption.api.exception.ResourceNotFoundException si la competición no existe
+     */
     @Transactional(readOnly = true)
     public List<InvitacionSimpleDTO> obtenerPorCompeticion(Long competicionId) {
         if (!competicionRepository.existsById(competicionId)) {
@@ -209,6 +283,12 @@ public class InvitacionService {
 
     /// === CADUCAR INVITACIONES === ///
 
+    /**
+     * Marca como {@code EXPIRADA} todas las invitaciones pendientes cuya fecha de expiración
+     * sea anterior al momento actual. Pensado para ser invocado por un scheduler periódico.
+     *
+     * @return número de invitaciones actualizadas
+     */
     @Transactional
     public int marcarExpiradas() { return invitacionRepository.marcarExpiradas(LocalDateTime.now());}
 

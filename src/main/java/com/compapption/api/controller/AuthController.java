@@ -13,6 +13,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * Controlador REST para autenticación y gestión de sesión. Expone endpoints bajo la ruta base /auth.
+ * Gestiona el registro de nuevos usuarios, inicio de sesión, refresco de tokens JWT,
+ * cierre de sesión y recuperación/restablecimiento de contraseña.
+ *
+ * @author Mario
+ */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -23,6 +30,14 @@ public class AuthController {
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
+    /**
+     * POST /auth/registro — registra un nuevo usuario en el sistema.
+     * Crea la cuenta, genera los tokens JWT y establece la cookie HTTP-only del refresh token.
+     *
+     * @param request datos de registro del nuevo usuario (nombre, email, password)
+     * @param response respuesta HTTP para adjuntar la cookie del refresh token
+     * @return ResponseEntity con el AuthResponse que contiene access token y datos del usuario
+     */
     @PostMapping("/registro")
     public ResponseEntity<AuthResponse> registro(
             @Valid @RequestBody RegistroRequest request,
@@ -32,6 +47,14 @@ public class AuthController {
         return ResponseEntity.ok(authResponse);
     }
 
+    /**
+     * POST /auth/login — autentica a un usuario con sus credenciales.
+     * Genera nuevos tokens JWT y establece la cookie HTTP-only del refresh token.
+     *
+     * @param request credenciales de acceso (email y password)
+     * @param response respuesta HTTP para adjuntar la cookie del refresh token
+     * @return ResponseEntity con el AuthResponse que contiene access token y datos del usuario
+     */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request,
@@ -41,6 +64,16 @@ public class AuthController {
         return ResponseEntity.ok(authResponse);
     }
 
+    /**
+     * POST /auth/refresh — renueva el access token usando el refresh token.
+     * Acepta el refresh token desde el cuerpo de la petición o desde la cookie HTTP-only.
+     * Aplica rotación de refresh token: invalida el antiguo y emite uno nuevo.
+     *
+     * @param request cuerpo opcional con el refresh token
+     * @param cookieRefreshToken refresh token leído de la cookie HTTP-only (alternativa al cuerpo)
+     * @param response respuesta HTTP para actualizar la cookie con el nuevo refresh token
+     * @return ResponseEntity con el AuthResponse que contiene el nuevo access token
+     */
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(
             @RequestBody(required = false) RefreshTokenRequest request,
@@ -55,6 +88,14 @@ public class AuthController {
         return ResponseEntity.ok(authResponse);
     }
 
+    /**
+     * POST /auth/logout — cierra la sesión del usuario actual.
+     * Revoca el refresh token en base de datos y elimina la cookie HTTP-only.
+     *
+     * @param cookieRefreshToken refresh token leído de la cookie HTTP-only
+     * @param response respuesta HTTP para limpiar la cookie del refresh token
+     * @return ResponseEntity con mensaje de confirmación de cierre de sesión
+     */
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(
             @CookieValue(name = "refresh_token", required = false) String cookieRefreshToken,
@@ -68,6 +109,14 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Sesión cerrada correctamente"));
     }
 
+    /**
+     * POST /auth/recuperar-password — inicia el flujo de recuperación de contraseña.
+     * Genera un token de un solo uso con validez de 24 horas y envía un email al usuario.
+     * La respuesta es siempre la misma independientemente de si el email existe (seguridad).
+     *
+     * @param request objeto con el email del usuario que solicita recuperar la contraseña
+     * @return ResponseEntity con mensaje genérico de confirmación
+     */
     @PostMapping("/recuperar-password")
     public ResponseEntity<Map<String, String>> recuperarPassword(
             @Valid @RequestBody RecuperarPasswordRequest request) {
@@ -77,6 +126,13 @@ public class AuthController {
         ));
     }
 
+    /**
+     * POST /auth/reset-password — establece una nueva contraseña usando el token de recuperación.
+     * Valida el token (no expirado, no usado) y actualiza la contraseña del usuario.
+     *
+     * @param request objeto con el token de recuperación y la nueva contraseña
+     * @return ResponseEntity con mensaje de confirmación del cambio de contraseña
+     */
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {

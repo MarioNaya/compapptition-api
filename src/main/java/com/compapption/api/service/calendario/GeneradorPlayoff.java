@@ -12,19 +12,34 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Algoritmo de eliminación directa (bracket) completo.
- * Genera TODAS las rondas de golpe: ronda 1 con equipos reales,
- * rondas 2+ con eventos placeholder (sin equipos asignados).
- * Soporta partido único, ida/vuelta y best-of N (3/5/7).
+ * Implementación del patrón Strategy que genera calendarios de eliminación directa (bracket).
+ * <p>
+ * Genera todas las rondas de golpe: la primera ronda con equipos reales (con seeding
+ * o barajados), y las rondas posteriores con eventos placeholder cuyos equipos se
+ * rellenan automáticamente cuando se registra el resultado de la ronda anterior.
+ * Soporta partido único, ida/vuelta y series best-of N (3, 5, 7).
+ * El tamaño del bracket se expande automáticamente a la siguiente potencia de 2;
+ * los huecos sobrantes se tratan como "bye" (el equipo pasa directamente).
+ * </p>
+ *
+ * @author Mario
  */
 @Component
 public class GeneradorPlayoff implements GeneradorCalendario {
 
+    /**
+     * {@inheritDoc}
+     * Devuelve {@code true} únicamente para el formato {@code PLAYOFF}.
+     */
     @Override
     public boolean soporta(ConfiguracionCompeticion.FormatoCompeticion formato) {
         return formato == ConfiguracionCompeticion.FormatoCompeticion.PLAYOFF;
     }
 
+    /**
+     * {@inheritDoc}
+     * Baraja aleatoriamente los equipos antes de generar el bracket para evitar seeding fijo.
+     */
     @Override
     public List<Evento> generar(Competicion competicion,
                                 List<Equipo> equipos,
@@ -39,12 +54,23 @@ public class GeneradorPlayoff implements GeneradorCalendario {
     }
 
     /**
-     * Genera el bracket completo (todas las rondas) a partir de equipos ya ordenados (seeded).
-     * Ronda 1: partidos con equipos reales.
-     * Rondas 2+: eventos placeholder referenciando los "eventos decisivos" de la ronda anterior.
+     * Genera el bracket completo de eliminación directa a partir de equipos ya ordenados (seeded).
+     * <p>
+     * La ronda 1 se genera con equipos reales. Las rondas posteriores se generan como eventos
+     * placeholder que referencian los eventos decisivos (último partido) de la ronda anterior,
+     * de forma que el sistema puede rellenar los equipos automáticamente al registrar resultados.
+     * El bracket se empareja respetando el seeding estándar (1 vs N, 2 vs N-1...) usando
+     * la función {@link #generarOrdenBracket}.
+     * </p>
      *
-     * @param rondaInicial número de jornada asignado a la primera ronda del bracket
-     * @param partidosEliminatoria 1=partido único, 2=ida/vuelta, 3/5/7=best-of
+     * @param competicion          competición para la que se genera el bracket
+     * @param equipos              lista de equipos ordenada por seeding (índice 0 = cabeza de serie 1)
+     * @param fechaInicio          fecha y hora del primer partido
+     * @param diasJornada          días entre rondas del bracket
+     * @param rondaInicial         número de jornada asignado a la primera ronda del bracket
+     * @param partidosEliminatoria número de partidos por eliminatoria:
+     *                             1 = partido único, 2 = ida/vuelta, 3/5/7 = best-of
+     * @return lista de entidades {@link Evento} generadas (sin persistir)
      */
     public List<Evento> generarBracketCompleto(Competicion competicion,
                                                List<Equipo> equipos,
@@ -193,8 +219,18 @@ public class GeneradorPlayoff implements GeneradorCalendario {
     }
 
     /**
-     * Genera el bracket completo seeded (sin shuffle) desde CalendarioService.
-     * Mantiene firma compatible con usos anteriores; usa partido único por defecto.
+     * Genera el bracket completo seeded sin barajado aleatorio de los equipos.
+     * <p>
+     * Método de conveniencia que mantiene compatibilidad con usos anteriores;
+     * usa partido único por defecto ({@code partidosEliminatoria = 1}).
+     * </p>
+     *
+     * @param competicion  competición para la que se genera el bracket
+     * @param equipos      lista de equipos ordenada por seeding
+     * @param fechaInicio  fecha y hora del primer partido
+     * @param diasJornada  días entre rondas; {@code null} equivale a 7 días
+     * @param rondaInicial número de jornada de inicio del bracket
+     * @return lista de entidades {@link Evento} generadas (sin persistir)
      */
     public List<Evento> generarBracket(Competicion competicion,
                                        List<Equipo> equipos,

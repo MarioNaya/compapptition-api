@@ -8,6 +8,11 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * Petición para registrar una estadística de un jugador en un evento. Contiene el jugador, el tipo de estadística y el valor registrado.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -3,6 +3,11 @@ package com.compapption.api.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+/**
+ * Excepción lanzada cuando un recurso solicitado no existe en el sistema. Devuelve HTTP 404.
+ *
+ * @author Mario
+ */
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class ResourceNotFoundException extends RuntimeException{
 

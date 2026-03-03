@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * DTO con los datos completos de un deporte, incluyendo descripción, icono y la lista
+ * de tipos de estadística configurados, devuelto en el endpoint de detalle de deporte.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

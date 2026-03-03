@@ -6,6 +6,14 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Representa una invitación enviada a un usuario para unirse a un equipo o competición con un rol concreto.
+ * Mapeada a la tabla {@code invitacion}, almacena el token UUID único, el email del destinatario,
+ * la fecha de expiración (7 días) y el estado (PENDIENTE, ACEPTADA, RECHAZADA, EXPIRADA).
+ * Se relaciona con {@link Usuario} (emisor y destinatario), {@link Competicion} y {@link Equipo}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "invitacion")
 @Getter

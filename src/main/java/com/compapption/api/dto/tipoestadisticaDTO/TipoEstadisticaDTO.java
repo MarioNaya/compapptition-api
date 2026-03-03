@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO con la definición de un tipo de estadística (nombre, descripción, tipo de valor y orden),
+ * utilizado en la gestión de estadísticas por deporte y en DeporteDetalleDTO.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

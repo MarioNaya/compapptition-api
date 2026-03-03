@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO con los datos básicos de una competición (nombre, deporte y estado), utilizado
+ * en listados de competiciones del usuario y referencias en otras entidades.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

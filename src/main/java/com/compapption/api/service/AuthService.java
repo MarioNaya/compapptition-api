@@ -27,6 +27,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Servicio de autenticación y gestión de sesiones JWT.
+ *
+ * <p>Centraliza todas las operaciones relacionadas con el ciclo de vida de la
+ * autenticación: registro de nuevos usuarios, login, rotación de refresh tokens,
+ * logout y flujo completo de recuperación/restablecimiento de contraseña.</p>
+ *
+ * @author Mario
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -41,6 +50,17 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
+    /**
+     * Registra un nuevo usuario en el sistema y devuelve tokens de acceso inmediatos.
+     *
+     * <p>Valida que el username y el email no estén ya en uso, crea el usuario con
+     * la contraseña codificada y genera un par access/refresh token sin roles de
+     * competición (el usuario acaba de registrarse).</p>
+     *
+     * @param request datos del nuevo usuario (username, email, password, nombre, apellidos)
+     * @return {@link AuthResponse} con access token, refresh token e información del usuario
+     * @throws BadRequestException si el username o el email ya están registrados
+     */
     @Transactional
     public AuthResponse registro(RegistroRequest request) {
         if (usuarioRepository.existsByUsername(request.getUsername())) {
@@ -66,6 +86,17 @@ public class AuthService {
         return buildAuthResponse(usuario, Collections.emptyList());
     }
 
+    /**
+     * Autentica a un usuario con sus credenciales y emite un par de tokens JWT.
+     *
+     * <p>Localiza al usuario por username o email, verifica que la cuenta esté activa,
+     * delega la validación de la contraseña al {@code AuthenticationManager} de Spring
+     * Security y carga los roles actuales de competición antes de construir la respuesta.</p>
+     *
+     * @param request credenciales del usuario (usernameOrEmail y password)
+     * @return {@link AuthResponse} con access token, refresh token, datos del usuario y sus roles
+     * @throws UnauthorizedException si las credenciales son inválidas o la cuenta está desactivada
+     */
     @Transactional
     public AuthResponse login(LoginRequest request) {
         // 1. Localizar usuario (query simple, solo para comprobar activo y obtener username)
@@ -90,6 +121,18 @@ public class AuthService {
         return buildAuthResponse(usuario, rolesCompeticion);
     }
 
+    /**
+     * Renueva el access token a partir de un refresh token válido (rotación de tokens).
+     *
+     * <p>Valida que el refresh token exista en base de datos, no esté revocado y no
+     * haya expirado. A continuación recarga los roles actuales del usuario desde BD
+     * (garantiza que el nuevo access token refleje cambios de roles recientes), revoca
+     * el refresh token usado y emite uno nuevo.</p>
+     *
+     * @param refreshTokenStr valor opaco del refresh token (UUID almacenado en BD)
+     * @return {@link AuthResponse} con el nuevo access token, nuevo refresh token y datos actualizados
+     * @throws UnauthorizedException si el token no existe, está revocado o ha expirado
+     */
     @Transactional
     public AuthResponse refreshToken(String refreshTokenStr) {
         // 1. Buscar en BD (no validar como JWT — ya no es un JWT)
@@ -131,6 +174,13 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Cierra la sesión del usuario revocando su refresh token.
+     *
+     * <p>Si el token no existe en BD la operación se completa sin error (idempotente).</p>
+     *
+     * @param refreshTokenStr valor opaco del refresh token a revocar
+     */
     @Transactional
     public void logout(String refreshTokenStr) {
         refreshTokenRepository.findByTokenWithUsuario(refreshTokenStr)
@@ -141,6 +191,16 @@ public class AuthService {
                 });
     }
 
+    /**
+     * Inicia el flujo de recuperación de contraseña enviando un email con un token de un solo uso.
+     *
+     * <p>Si el email no existe en el sistema, la operación termina sin error para no
+     * revelar qué direcciones están registradas (seguridad por oscuridad). En caso de
+     * existir, elimina tokens previos del usuario, genera un nuevo token UUID con
+     * expiración de 24 horas y envía el email de recuperación.</p>
+     *
+     * @param request objeto que contiene el email del usuario
+     */
     @Transactional
     public void recuperarPassword(RecuperarPasswordRequest request) {
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail()).orElse(null);
@@ -167,6 +227,16 @@ public class AuthService {
         log.info("Email de recuperación enviado a: {}", usuario.getEmail());
     }
 
+    /**
+     * Restablece la contraseña del usuario usando el token recibido por email.
+     *
+     * <p>Valida que el token exista, no haya sido usado y no haya expirado. Tras
+     * actualizar la contraseña marca el token como usado y revoca todos los refresh
+     * tokens activos del usuario para forzar un nuevo inicio de sesión.</p>
+     *
+     * @param request objeto con el token de recuperación y la nueva contraseña
+     * @throws BadRequestException si el token no existe, ya fue usado o ha expirado
+     */
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())

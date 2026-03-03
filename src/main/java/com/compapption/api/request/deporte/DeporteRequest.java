@@ -7,6 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Petición para crear o actualizar un deporte. Contiene nombre, descripción, icono y estado de activación.
+ *
+ * @author Mario
+ */
 @Data
 @Builder
 @AllArgsConstructor

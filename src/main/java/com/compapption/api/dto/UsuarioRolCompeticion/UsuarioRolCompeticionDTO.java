@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO con los datos de la asignación de un rol a un usuario en una competición concreta,
+ * utilizado en los endpoints de gestión de roles de CompeticionController.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

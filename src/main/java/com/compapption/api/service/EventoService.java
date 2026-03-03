@@ -26,6 +26,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Servicio que gestiona el ciclo de vida completo de los eventos (partidos) de una
+ * competición. Cubre la creación y actualización de eventos, el registro de resultados
+ * con recálculo automático de clasificación, el avance automático del bracket en
+ * competiciones de tipo playoff (partido único, serie ida/vuelta y best-of-N) y la
+ * gestión de estadísticas individuales de jugador por evento. Depende de
+ * {@link ClasificacionService} para actualizar la tabla tras cada resultado y de
+ * {@link LogService} para la auditoría de operaciones.
+ *
+ * @author Mario
+ */
 @Service
 @RequiredArgsConstructor
 public class EventoService {
@@ -46,6 +57,13 @@ public class EventoService {
 
     // Por Id
 
+    /**
+     * Obtiene el resumen simple de un evento por su identificador.
+     *
+     * @param id identificador del evento
+     * @return DTO simple con los campos mínimos del evento (equipos, marcador, estado)
+     * @throws ResourceNotFoundException si no existe ningún evento con ese id
+     */
     @Transactional(readOnly = true)
     public EventoSimpleDTO obtenerPorIdSimple(Long id){
         Evento evento = eventoRepository.findByIdWithEquipos(id)
@@ -53,6 +71,13 @@ public class EventoService {
         return eventoMapper.toSimpleDTO(evento);
     }
 
+    /**
+     * Obtiene el detalle completo de un evento por su identificador.
+     *
+     * @param id identificador del evento
+     * @return DTO con todos los campos del evento, incluidas estadísticas y equipos participantes
+     * @throws ResourceNotFoundException si no existe ningún evento con ese id
+     */
     @Transactional(readOnly = true)
     public EventoDetalleDTO obtenerPorIdDetalle(Long id){
         Evento evento = eventoRepository.findByIdWithEquipos(id)
@@ -62,6 +87,14 @@ public class EventoService {
 
     // Por competición
 
+    /**
+     * Lista todos los eventos de una competición en formato simple, ordenados por jornada
+     * y fecha.
+     *
+     * @param competicionId identificador de la competición
+     * @return lista de eventos en formato simple
+     * @throws ResourceNotFoundException si la competición no existe
+     */
     @Transactional(readOnly = true)
     public List<EventoSimpleDTO> obtenerPorCompeticionSimple(Long competicionId){
         if (!competicionRepository.existsById(competicionId)){
@@ -70,6 +103,14 @@ public class EventoService {
         return eventoMapper.toSimpleDTOList(eventoRepository.findByCompeticionIdOrdered(competicionId));
     }
 
+    /**
+     * Lista todos los eventos de una competición en formato detalle, ordenados por jornada
+     * y fecha.
+     *
+     * @param competicionId identificador de la competición
+     * @return lista de eventos en formato detalle
+     * @throws ResourceNotFoundException si la competición no existe
+     */
     @Transactional(readOnly = true)
     public List<EventoDetalleDTO> obtenerPorCompeticionDetalle(Long competicionId){
         if (!competicionRepository.existsById(competicionId)){
@@ -80,12 +121,26 @@ public class EventoService {
 
     // Por jornada
 
+    /**
+     * Lista los eventos de una jornada concreta de una competición en formato simple.
+     *
+     * @param competicionId identificador de la competición
+     * @param jornada número de jornada a consultar
+     * @return lista de eventos de esa jornada en formato simple
+     */
     @Transactional(readOnly = true)
     public List<EventoSimpleDTO> obtenerPorJornadaSimple(Long competicionId, Integer jornada){
         return eventoMapper.toSimpleDTOList(
                 eventoRepository.findByCompeticionIdAndJornada(competicionId, jornada));
     }
 
+    /**
+     * Lista los eventos de una jornada concreta de una competición en formato detalle.
+     *
+     * @param competicionId identificador de la competición
+     * @param jornada número de jornada a consultar
+     * @return lista de eventos de esa jornada en formato detalle
+     */
     @Transactional(readOnly = true)
     public List<EventoDetalleDTO> obtenerPorJornadaDetalle(Long competicionId, Integer jornada){
         return eventoMapper.toDetalleDTOList(
@@ -94,6 +149,13 @@ public class EventoService {
 
     // Por equipo
 
+    /**
+     * Lista todos los eventos en los que ha participado un equipo, en formato simple.
+     *
+     * @param equipoId identificador del equipo
+     * @return lista de eventos del equipo en formato simple
+     * @throws ResourceNotFoundException si el equipo no existe
+     */
     @Transactional(readOnly = true)
     public List<EventoSimpleDTO> obtenerPorEquipoSimple(Long equipoId){
         if (!equipoRepository.existsById(equipoId)){
@@ -103,6 +165,13 @@ public class EventoService {
                 eventoRepository.findByEquipoId(equipoId));
     }
 
+    /**
+     * Lista todos los eventos en los que ha participado un equipo, en formato detalle.
+     *
+     * @param equipoId identificador del equipo
+     * @return lista de eventos del equipo en formato detalle
+     * @throws ResourceNotFoundException si el equipo no existe
+     */
     @Transactional(readOnly = true)
     public List<EventoDetalleDTO> obtenerPorEquipoDetalle(Long equipoId){
         if (!equipoRepository.existsById(equipoId)){
@@ -112,6 +181,14 @@ public class EventoService {
                 eventoRepository.findByEquipoId(equipoId));
     }
 
+    /**
+     * Lista los eventos de un equipo dentro de una competición concreta, en formato simple.
+     *
+     * @param competicionId identificador de la competición
+     * @param equipoId identificador del equipo
+     * @return lista de eventos del equipo en esa competición en formato simple
+     * @throws ResourceNotFoundException si la competición o el equipo no existen
+     */
     @Transactional(readOnly = true)
     public List<EventoSimpleDTO> obtenerPorCompeticionYEquipo(
             Long competicionId,
@@ -128,6 +205,15 @@ public class EventoService {
 
     // Por fecha
 
+    /**
+     * Lista los eventos de una competición cuya fecha y hora se encuentran dentro de un
+     * rango determinado, en formato simple.
+     *
+     * @param competicionId identificador de la competición
+     * @param inicio inicio del rango de fechas (inclusivo)
+     * @param fin fin del rango de fechas (inclusivo)
+     * @return lista de eventos dentro del rango en formato simple
+     */
     @Transactional(readOnly = true)
     public List<EventoSimpleDTO> obtenerPorRangoFechasSimple(
             Long competicionId,
@@ -140,6 +226,15 @@ public class EventoService {
                         fin));
     }
 
+    /**
+     * Lista los eventos de una competición cuya fecha y hora se encuentran dentro de un
+     * rango determinado, en formato detalle.
+     *
+     * @param competicionId identificador de la competición
+     * @param inicio inicio del rango de fechas (inclusivo)
+     * @param fin fin del rango de fechas (inclusivo)
+     * @return lista de eventos dentro del rango en formato detalle
+     */
     @Transactional(readOnly = true)
     public List<EventoDetalleDTO> obtenerPorRangoFechasDetalle(
             Long competicionId,
@@ -154,6 +249,17 @@ public class EventoService {
 
     /// === CREAR, ACTUALIZAR Y ELIMINAR EVENTO === ///
 
+    /**
+     * Crea un nuevo evento (partido) en una competición, asignando los equipos local y
+     * visitante. El evento se crea en estado PROGRAMADO. Regla de negocio: el equipo local
+     * y el visitante no pueden ser el mismo equipo.
+     *
+     * @param competicionId identificador de la competición a la que pertenece el evento
+     * @param request datos del nuevo evento: equipos, jornada, fecha, lugar y observaciones
+     * @return DTO con el detalle del evento creado, incluyendo los equipos participantes
+     * @throws ResourceNotFoundException si la competición o alguno de los equipos no existen
+     * @throws BadRequestException si el equipo local y el visitante son el mismo
+     */
     @Transactional
     public EventoDetalleDTO crear(Long competicionId, EventoCreateRequest request){
 
@@ -204,6 +310,16 @@ public class EventoService {
         return eventoMapper.toDetalleDTO(evento);
     }
 
+    /**
+     * Actualiza los datos generales de un evento (jornada, fecha, lugar, estado u
+     * observaciones). Solo se modifican los campos no nulos del request (actualización
+     * parcial). No modifica el resultado: para ello usar {@link #registrarResultado}.
+     *
+     * @param id identificador del evento a actualizar
+     * @param request campos a modificar; los nulos se ignoran
+     * @return DTO con el detalle actualizado del evento
+     * @throws ResourceNotFoundException si el evento no existe
+     */
     // Actualizar datos generales del evento
     @Transactional
     public EventoDetalleDTO actualizar(Long id, EventoUpdateRequest request){
@@ -232,6 +348,19 @@ public class EventoService {
         return eventoMapper.toDetalleDTO(evento);
     }
 
+    /**
+     * Registra el resultado de un evento y lo marca como FINALIZADO. Tras guardar el
+     * resultado, recalcula automáticamente la clasificación de la competición y, si la
+     * competición tiene bracket de playoff, ejecuta el avance automático del ganador a la
+     * siguiente ronda. Regla de negocio: no se puede registrar resultado en un evento ya
+     * finalizado.
+     *
+     * @param id identificador del evento
+     * @param request marcadores final del equipo local y del visitante
+     * @return DTO con el resultado registrado y el estado final del evento
+     * @throws ResourceNotFoundException si el evento no existe
+     * @throws BadRequestException si el evento ya está en estado FINALIZADO
+     */
     // Actualiza únicamente el resultado y el estado a finalizado
     @Transactional
     public EventoResultadoDTO registrarResultado(Long id, ResultadoRequest request){
@@ -375,6 +504,14 @@ public class EventoService {
         return determinarGanadorBestOf(finalizados, threshold);
     }
 
+    /**
+     * Determina el ganador de un partido único comparando los marcadores. Si el resultado
+     * está empatado o no se han registrado aún los goles, devuelve vacío y no se produce
+     * avance automático.
+     *
+     * @param e evento finalizado con sus equipos cargados
+     * @return el equipo ganador, o vacío si hay empate o resultado nulo
+     */
     private Optional<Equipo> determinarGanadorPartidoUnico(Evento e) {
         if (e.getResultadoLocal() == null || e.getResultadoVisitante() == null) return Optional.empty();
         if (e.getResultadoLocal() > e.getResultadoVisitante()) {
@@ -392,6 +529,14 @@ public class EventoService {
         return Optional.empty(); // Empate → sin avance automático
     }
 
+    /**
+     * Determina el ganador de una eliminatoria de ida y vuelta sumando los goles totales
+     * de ambos partidos (marcador agregado). Si el agregado está empatado, devuelve vacío
+     * y no se produce avance automático.
+     *
+     * @param finalizados lista con exactamente los dos partidos finalizados de la eliminatoria
+     * @return el equipo con mayor marcador agregado, o vacío si hay empate
+     */
     private Optional<Equipo> determinarGanadorAgregado(List<Evento> finalizados) {
         Map<Long, Integer> totalGoles = new HashMap<>();
         for (Evento e : finalizados) {
@@ -418,6 +563,15 @@ public class EventoService {
                 .findFirst();
     }
 
+    /**
+     * Determina el ganador de una serie best-of-N contando victorias de cada equipo. Un
+     * equipo gana la serie en cuanto alcanza el umbral de victorias necesarias (threshold).
+     * Los empates en partidos individuales no se contabilizan como victoria para ningún equipo.
+     *
+     * @param finalizados lista de partidos ya finalizados de la serie
+     * @param threshold número de victorias necesarias para ganar la serie (ej. 2 en un best-of-3)
+     * @return el equipo que ha alcanzado el umbral de victorias, o vacío si ninguno lo ha hecho aún
+     */
     private Optional<Equipo> determinarGanadorBestOf(List<Evento> finalizados, int threshold) {
         Map<Long, Integer> victorias = new HashMap<>();
         for (Evento e : finalizados) {
@@ -447,6 +601,15 @@ public class EventoService {
         return Optional.empty();
     }
 
+    /**
+     * Elimina permanentemente un evento. Regla de negocio: no se puede eliminar un evento
+     * que ya está en estado FINALIZADO para preservar la integridad histórica de resultados
+     * y clasificaciones.
+     *
+     * @param id identificador del evento a eliminar
+     * @throws ResourceNotFoundException si el evento no existe
+     * @throws BadRequestException si el evento ya está finalizado
+     */
     @Transactional
     public void eliminar(Long id){
         Evento evento = eventoRepository.findById(id)
@@ -463,6 +626,13 @@ public class EventoService {
     /// === GESTIÓN DE ESTADÍSTICAS === ///
 
     // Obtener estadísticas jugador
+    /**
+     * Devuelve todas las estadísticas individuales de jugadores registradas para un evento.
+     *
+     * @param eventoId identificador del evento
+     * @return lista de estadísticas de jugadores en ese evento
+     * @throws ResourceNotFoundException si el evento no existe
+     */
     @Transactional(readOnly = true)
     public List<EstadisticaJugadorDTO> obtenerEstadisticas(Long eventoId){
         if (!eventoRepository.existsById(eventoId)) {
@@ -472,6 +642,16 @@ public class EventoService {
     }
 
     // Registrar estadísticas en jugador
+    /**
+     * Registra o actualiza una estadística individual de un jugador en un evento. Si ya
+     * existe un registro para la combinación evento + jugador + tipo de estadística, se
+     * sobreescribe el valor; en caso contrario se crea uno nuevo (upsert).
+     *
+     * @param eventoId identificador del evento
+     * @param request datos de la estadística: jugador, tipo y valor numérico
+     * @return DTO con la estadística creada o actualizada
+     * @throws ResourceNotFoundException si el evento, el jugador o el tipo de estadística no existen
+     */
     @Transactional
     public EstadisticaJugadorDTO registrarEstadistica(Long eventoId, EstadisticaRequest request){
         Evento evento = eventoRepository.findById(eventoId)
@@ -499,6 +679,16 @@ public class EventoService {
     }
 
     // Eliminar estadística
+    /**
+     * Elimina una estadística individual de un jugador en un evento. Verifica que la
+     * estadística pertenezca al evento indicado antes de borrarla para evitar borrados
+     * cruzados entre eventos.
+     *
+     * @param eventoId identificador del evento al que debe pertenecer la estadística
+     * @param estadisticaId identificador de la estadística a eliminar
+     * @throws ResourceNotFoundException si la estadística no existe
+     * @throws BadRequestException si la estadística no pertenece al evento indicado
+     */
     @Transactional
     public void eliminarEstadistica(Long eventoId, Long estadisticaId){
         EstadisticaJugadorEvento estadistica = estadisticaJugadorEventoRepository.findById(estadisticaId)

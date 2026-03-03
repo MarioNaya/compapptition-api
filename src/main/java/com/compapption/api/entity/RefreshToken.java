@@ -6,6 +6,14 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Almacena el token de refresco JWT utilizado para renovar el access token sin reautenticación.
+ * Mapeada a la tabla {@code refresh_tokens}, registra el token UUID, la fecha de expiración
+ * y un flag de revocación para implementar rotación y cierre de sesión seguro.
+ * Se relaciona con {@link Usuario} mediante una relación muchos-a-uno.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "refresh_tokens")
 @Getter

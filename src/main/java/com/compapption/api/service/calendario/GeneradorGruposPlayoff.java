@@ -12,17 +12,42 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Implementación del patrón Strategy que genera calendarios de fase de grupos seguida de playoff.
+ * <p>
+ * Distribuye los equipos en grupos equilibrados mediante un sistema de bombos y genera
+ * un calendario round-robin para cada grupo (delegando en {@link GeneradorLiga}).
+ * El número de grupos se calcula automáticamente a partir del total de equipos y del
+ * número de clasificados para el playoff definido en la configuración.
+ * La fase eliminatoria posterior se genera mediante
+ * {@link com.compapption.api.service.CalendarioService#generarPlayoffSeededPorIdDetalle}.
+ * </p>
+ *
+ * @author Mario
+ */
 @Component
 @RequiredArgsConstructor
 public class GeneradorGruposPlayoff implements GeneradorCalendario {
 
     private final GeneradorLiga generadorLiga;
 
+    /**
+     * {@inheritDoc}
+     * Devuelve {@code true} únicamente para el formato {@code GRUPOS_PLAYOFF}.
+     */
     @Override
     public boolean soporta(ConfiguracionCompeticion.FormatoCompeticion formato) {
         return formato == ConfiguracionCompeticion.FormatoCompeticion.GRUPOS_PLAYOFF;
     }
 
+    /**
+     * {@inheritDoc}
+     * Calcula el número de grupos, sortea los equipos mediante bombos y genera el calendario
+     * round-robin de la fase de grupos. Los eventos de cada grupo se etiquetan con
+     * {@code "Grupo N"} en el campo observaciones.
+     *
+     * @throws IllegalStateException si hay menos de 6 equipos (no se pueden formar al menos 2 grupos de 3)
+     */
     @Override
     public List<Evento> generar(Competicion competicion,
                                 List<Equipo> equipos,

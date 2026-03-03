@@ -15,10 +15,19 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manejador global de excepciones de la aplicación. Intercepta todas las excepciones no controladas
+ * y las transforma en respuestas HTTP estructuradas mediante {@link ErrorResponse}.
+ *
+ * @author Mario
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Maneja {@link ResourceNotFoundException} y devuelve HTTP 404 cuando un recurso no se encuentra.
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException exception) {
         ErrorResponse error = ErrorResponse.builder()
@@ -30,6 +39,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Maneja {@link BadRequestException} y devuelve HTTP 400 cuando la petición contiene datos inválidos.
+     */
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
         ErrorResponse error = ErrorResponse.builder()
@@ -41,6 +53,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Maneja {@link UnauthorizedException} y devuelve HTTP 401 cuando el usuario no tiene autorización.
+     */
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
         ErrorResponse error = ErrorResponse.builder()
@@ -52,6 +67,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
+    /**
+     * Maneja {@link BadCredentialsException} y {@link AuthenticationException} y devuelve HTTP 401 para credenciales inválidas.
+     */
     @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
     public ResponseEntity<ErrorResponse> handleAuthenticationException(Exception ex) {
         ErrorResponse error = ErrorResponse.builder()
@@ -63,6 +81,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
+    /**
+     * Maneja {@link MethodArgumentNotValidException} y devuelve HTTP 400 con el detalle de los errores de validación por campo.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -82,6 +103,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Maneja {@link InternalStateException} y devuelve HTTP 500 cuando el sistema alcanza un estado interno inconsistente.
+     */
     @ExceptionHandler(InternalStateException.class)
     public ResponseEntity<ErrorResponse> handleInternalStateException(InternalStateException ex) {
         log.error("Error de estado interno: {}", ex.getMessage());
@@ -94,6 +118,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Maneja {@link AccessDeniedException} de Spring Security y devuelve HTTP 403 cuando el acceso al recurso está prohibido.
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
         ErrorResponse error = ErrorResponse.builder()
@@ -105,6 +132,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
+    /**
+     * Manejador de último recurso para cualquier excepción no controlada; devuelve HTTP 500 con un mensaje genérico.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Error no controlado: ", ex);

@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * DTO con la información general de una competición para listados públicos, incluyendo
+ * nombre, deporte, creador, visibilidad, estado y número de equipos inscritos.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

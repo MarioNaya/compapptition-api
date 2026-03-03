@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO con los datos de una entrada del log de auditoría, incluyendo usuario, competición,
+ * entidad afectada, acción realizada y datos anteriores/nuevos, devuelto por LogController.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

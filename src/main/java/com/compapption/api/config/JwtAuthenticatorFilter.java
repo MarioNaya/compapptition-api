@@ -16,6 +16,24 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * Filtro de autenticación JWT que se ejecuta una sola vez por petición HTTP.
+ *
+ * <p>Extiende {@link OncePerRequestFilter} y se registra en la cadena de seguridad
+ * <em>antes</em> del filtro estándar {@code UsernamePasswordAuthenticationFilter}.
+ *
+ * <p>Estrategia de extracción del token:
+ * <ol>
+ *   <li>Cabecera {@code Authorization: Bearer <token>}.</li>
+ *   <li>Cookie {@code access_token} (fallback para clientes que no pueden inyectar cabeceras).</li>
+ * </ol>
+ *
+ * <p>Si el token es válido, construye un {@link CustomUserDetails} directamente desde los
+ * claims del JWT —sin consultar la base de datos— y establece la autenticación en el
+ * {@link org.springframework.security.core.context.SecurityContextHolder}.
+ *
+ * @author Mario
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticatorFilter extends OncePerRequestFilter {
@@ -23,6 +41,28 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
 
+    /**
+     * Lógica principal del filtro: extrae el JWT de la petición, lo valida y,
+     * si es correcto, autentica al usuario en el {@code SecurityContext}.
+     *
+     * <p>Flujo:
+     * <ol>
+     *   <li>Extrae el token de la cabecera {@code Authorization} o de la cookie
+     *       {@code access_token}.</li>
+     *   <li>Si no hay token, delega directamente al siguiente filtro.</li>
+     *   <li>Verifica la firma y la expiración del token con {@link JwtService#isTokenValid}.</li>
+     *   <li>Si el token es válido y el contexto no tiene autenticación previa, construye un
+     *       {@link CustomUserDetails} a partir de los claims (sin ir a BD) y lo establece
+     *       en el {@code SecurityContextHolder}.</li>
+     *   <li>Siempre invoca {@code filterChain.doFilter()} para continuar la cadena.</li>
+     * </ol>
+     *
+     * @param request     la petición HTTP entrante.
+     * @param response    la respuesta HTTP saliente.
+     * @param filterChain la cadena de filtros restante.
+     * @throws ServletException si ocurre un error en el procesamiento del servlet.
+     * @throws IOException      si ocurre un error de E/S.
+     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

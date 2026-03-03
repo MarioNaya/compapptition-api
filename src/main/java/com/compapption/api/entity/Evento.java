@@ -9,6 +9,15 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Representa un partido o encuentro dentro de una competición deportiva.
+ * Mapeada a la tabla {@code evento}, almacena la jornada, temporada, fecha/hora, lugar y estado
+ * (PROGRAMADO, EN_CURSO, FINALIZADO, SUSPENDIDO, APLAZADO), así como referencias al bracket de playoff
+ * mediante {@code partidoAnteriorLocal} y {@code partidoAnteriorVisitante}.
+ * Se relaciona con {@link Competicion}, {@link EventoEquipo} y {@link EstadisticaJugadorEvento}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "evento")
 @Getter

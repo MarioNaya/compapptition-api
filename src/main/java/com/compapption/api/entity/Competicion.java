@@ -9,6 +9,15 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Entidad central del sistema que representa una competición deportiva.
+ * Mapeada a la tabla {@code competicion}, agrupa el estado (BORRADOR, ACTIVA, FINALIZADA, CANCELADA),
+ * el formato, las fechas y las relaciones con equipos inscritos, eventos, clasificaciones y configuración.
+ * Se relaciona con {@link Deporte}, {@link ConfiguracionCompeticion}, {@link CompeticionEquipo},
+ * {@link Evento}, {@link Clasificacion} y {@link UsuarioRolCompeticion}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "competicion")
 @Getter

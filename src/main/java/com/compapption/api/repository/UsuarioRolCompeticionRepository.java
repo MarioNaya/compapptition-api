@@ -11,6 +11,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repositorio JPA para la entidad {@link UsuarioRolCompeticion}.
+ * Gestiona la asignación de roles de usuario en competiciones concretas,
+ * con consultas optimizadas mediante JOIN FETCH para la generación de JWT.
+ *
+ * @author Mario
+ */
 @Repository
 public interface UsuarioRolCompeticionRepository extends JpaRepository<UsuarioRolCompeticion, Long> {
 

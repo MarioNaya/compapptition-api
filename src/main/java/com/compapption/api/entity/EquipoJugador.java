@@ -7,6 +7,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Tabla de unión que representa la pertenencia de un jugador a un equipo con su dorsal asignado.
+ * Mapeada a la tabla {@code equipo_jugador} con restricción de unicidad sobre (equipo_id, jugador_id),
+ * almacena el dorsal específico en ese equipo, el estado activo y las fechas de alta y baja.
+ * Se relaciona con {@link Equipo} y {@link Jugador}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "equipo_jugador", uniqueConstraints = @UniqueConstraint(columnNames = {"equipo_id","jugador_id"}))
 @Getter

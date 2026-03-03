@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO con los datos completos de una invitación, incluyendo IDs de emisor, destinatario,
+ * competición y equipo, utilizado al crear una invitación o consultarla por token.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

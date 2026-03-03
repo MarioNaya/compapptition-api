@@ -4,6 +4,14 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
+/**
+ * Almacena los parámetros de formato y puntuación específicos de una competición.
+ * Mapeada a la tabla {@code configuracion_competicion} con relación uno-a-uno con {@link Competicion},
+ * define el formato (LIGA, PLAYOFF, GRUPOS_PLAYOFF, etc.), los puntos por resultado,
+ * los días entre jornadas, el número de equipos en playoff y los partidos por eliminatoria.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "configuracion_competicion")
 @Getter

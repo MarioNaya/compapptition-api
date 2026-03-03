@@ -6,6 +6,14 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Almacena el token temporal para el proceso de recuperación de contraseña.
+ * Mapeada a la tabla {@code password_reset_token}, registra un token único, la fecha de expiración
+ * (24 horas desde su creación) y un flag {@code usado} para invalidarlo tras el primer uso.
+ * Se relaciona con {@link Usuario} para identificar al propietario de la cuenta que lo solicita.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "password_reset_token")
 @Getter

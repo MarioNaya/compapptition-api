@@ -5,6 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO con la posición resumida de un equipo en la tabla de clasificación, incluyendo
+ * puntos y partidos jugados, utilizado en listados públicos de clasificación.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

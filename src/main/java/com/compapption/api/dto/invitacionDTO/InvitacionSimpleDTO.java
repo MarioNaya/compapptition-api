@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO con la vista resumida de una invitación, incluyendo emisor, destinatario, competición,
+ * rol ofrecido y estado, utilizado en listados de invitaciones enviadas y recibidas.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

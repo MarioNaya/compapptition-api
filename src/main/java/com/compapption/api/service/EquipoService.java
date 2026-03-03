@@ -24,6 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Servicio de gestión de equipos deportivos.
+ *
+ * <p>Cubre el ciclo de vida completo de un equipo: creación, consulta (simple y
+ * detalle, paginada por nombre), actualización, eliminación y las operaciones de
+ * composición del plantel (agregar/quitar jugadores) y asignación de managers por
+ * competición. Todas las mutaciones quedan registradas en el log de auditoría a
+ * través de {@code LogService}.</p>
+ *
+ * @author Mario
+ */
 @Service
 @RequiredArgsConstructor
 public class EquipoService {
@@ -39,8 +50,11 @@ public class EquipoService {
 
     // === CONSULTAS EQUIPO === //
 
-    // Obtener todos por jerarquía detalle
-
+    /**
+     * Devuelve todos los equipos en formato detalle (incluye jugadores y relaciones).
+     *
+     * @return lista de {@link EquipoDetalleDTO} con todos los equipos
+     */
     @Transactional(readOnly = true)
     public List<EquipoDetalleDTO> obtenerTodosDetalle() {
         return equipoRepository.findAll()
@@ -49,6 +63,11 @@ public class EquipoService {
                 .toList();
     }
 
+    /**
+     * Devuelve todos los equipos en formato simple (campos mínimos, sin relaciones pesadas).
+     *
+     * @return lista de {@link EquipoSimpleDTO} con todos los equipos
+     */
     @Transactional(readOnly = true)
     public List<EquipoSimpleDTO> obtenerTodosSimple() {
         return equipoRepository.findAll()
@@ -57,8 +76,13 @@ public class EquipoService {
                 .toList();
     }
 
-    // Obtener deporte específico por jerarquía detalle
-
+    /**
+     * Obtiene un equipo en formato detalle (con jugadores) por su identificador.
+     *
+     * @param id identificador del equipo
+     * @return {@link EquipoDetalleDTO} con todos los datos del equipo
+     * @throws ResourceNotFoundException si no existe ningún equipo con ese id
+     */
     @Transactional(readOnly = true)
     public EquipoDetalleDTO obtenerPorIdDetalle(Long id) {
         Equipo equipo = equipoRepository.findByIdWithJugadores(id)
@@ -66,6 +90,13 @@ public class EquipoService {
         return equipoMapper.toDetalleDTO(equipo);
     }
 
+    /**
+     * Obtiene un equipo en formato simple por su identificador.
+     *
+     * @param id identificador del equipo
+     * @return {@link EquipoSimpleDTO} con los campos básicos del equipo
+     * @throws ResourceNotFoundException si no existe ningún equipo con ese id
+     */
     @Transactional(readOnly = true)
     public EquipoSimpleDTO obtenerPorIdSimple(Long id) {
         Equipo equipo = equipoRepository.findByIdWithJugadores(id)
@@ -73,8 +104,13 @@ public class EquipoService {
         return equipoMapper.toSimpleDTO(equipo);
     }
 
-    // Busqueda de equipo paginada por nombre
-
+    /**
+     * Realiza una búsqueda paginada de equipos por nombre.
+     *
+     * @param nombre   cadena a buscar (puede ser parcial o nula para devolver todos)
+     * @param pageable parámetros de paginación y ordenación
+     * @return {@link PageResponse} con la página de {@link EquipoSimpleDTO} resultante
+     */
     @Transactional(readOnly = true)
     public PageResponse<EquipoSimpleDTO> buscar(String nombre, Pageable pageable){
         Page<Equipo> page = equipoRepository.searchByNombre(nombre, pageable);
@@ -89,8 +125,12 @@ public class EquipoService {
                 .build();
     }
 
-    // Obtener lista de equipos por manager
-
+    /**
+     * Devuelve los equipos en los que un usuario ejerce como manager.
+     *
+     * @param usuarioId identificador del usuario manager
+     * @return lista de {@link EquipoSimpleDTO} gestionados por el usuario
+     */
     @Transactional(readOnly = true)
     public List<EquipoSimpleDTO> obtenerPorManager(Long usuarioId){
         return equipoRepository.findByManagersId(usuarioId)
@@ -99,8 +139,12 @@ public class EquipoService {
                 .toList();
     }
 
-    // Obtener lista de equipos por jugador
-
+    /**
+     * Devuelve los equipos a los que pertenece un jugador vinculado a un usuario.
+     *
+     * @param usuarioId identificador del usuario jugador
+     * @return lista de {@link EquipoSimpleDTO} en los que participa el jugador
+     */
     @Transactional(readOnly = true)
     public List<EquipoSimpleDTO> obtenerPorJugador(Long usuarioId){
         return equipoRepository.findByJugadoresId(usuarioId)
@@ -111,6 +155,12 @@ public class EquipoService {
 
     // === CREAR, ELIMINAR Y ACTUALIZAR EQUIPO === //
 
+    /**
+     * Crea un nuevo equipo y registra la acción en el log de auditoría.
+     *
+     * @param request datos del equipo a crear (nombre, descripción, escudo)
+     * @return {@link EquipoDetalleDTO} con el equipo recién creado
+     */
     @Transactional
     public EquipoDetalleDTO crear(EquipoCreateRequest request) {
         Equipo equipo = Equipo.builder()
@@ -124,6 +174,13 @@ public class EquipoService {
         return equipoMapper.toDetalleDTO(equipo);
     }
 
+    /**
+     * Elimina un equipo del sistema tras verificar que no esté inscrito en ninguna competición.
+     *
+     * @param id identificador del equipo a eliminar
+     * @throws ResourceNotFoundException si no existe ningún equipo con ese id
+     * @throws BadRequestException       si el equipo está inscrito en alguna competición activa
+     */
     @Transactional
     public void eliminar(Long id) {
         Equipo equipo = equipoRepository.findById(id)
@@ -137,6 +194,16 @@ public class EquipoService {
         equipoRepository.delete(equipo);
     }
 
+    /**
+     * Actualiza los datos de un equipo (nombre, descripción y/o escudo).
+     *
+     * <p>Solo se modifican los campos no nulos del request.</p>
+     *
+     * @param id      identificador del equipo a actualizar
+     * @param request campos a actualizar (todos opcionales)
+     * @return {@link EquipoSimpleDTO} con los datos actualizados
+     * @throws ResourceNotFoundException si no existe ningún equipo con ese id
+     */
     @Transactional
     public EquipoSimpleDTO actualizar(Long id, EquipoUpdateRequest request) {
         Equipo equipo = equipoRepository.findById(id)
@@ -159,6 +226,18 @@ public class EquipoService {
 
     // === GESTIÓN DE USUARIOS === //
 
+    /**
+     * Agrega un jugador a un equipo con un dorsal específico.
+     *
+     * <p>Verifica que el jugador no pertenezca ya al equipo (relación activa) y que
+     * el dorsal no esté ocupado por otro jugador en ese equipo.</p>
+     *
+     * @param equipoId  identificador del equipo
+     * @param jugadorId identificador del jugador
+     * @param dorsal    número de dorsal a asignar en el equipo
+     * @throws ResourceNotFoundException si el equipo o el jugador no existen
+     * @throws BadRequestException       si el jugador ya pertenece al equipo o el dorsal está en uso
+     */
     @Transactional
     public void agregarJugador(Long equipoId, Long jugadorId, Integer dorsal) {
         Equipo equipo = equipoRepository.findById(equipoId)
@@ -185,6 +264,13 @@ public class EquipoService {
         logService.registrar("EquipoJugador", jugadorId, LogModificacion.AccionLog.CREAR, null, null, null);
     }
 
+    /**
+     * Da de baja a un jugador de un equipo (soft-delete: marca la relación como inactiva).
+     *
+     * @param equipoId  identificador del equipo
+     * @param jugadorId identificador del jugador
+     * @throws ResourceNotFoundException si el jugador no pertenece al equipo
+     */
     @Transactional
     public void quitarJugador(Long equipoId, Long jugadorId) {
         EquipoJugador equipoJugador = equipoJugadorRepository
@@ -197,6 +283,13 @@ public class EquipoService {
         logService.registrar("EquipoJugador", jugadorId, LogModificacion.AccionLog.EDITAR, null, null, null);
     }
 
+    /**
+     * Devuelve la lista de jugadores de un equipo en formato simple.
+     *
+     * @param equipoId identificador del equipo
+     * @return lista de {@link JugadorSimpleDTO} pertenecientes al equipo
+     * @throws ResourceNotFoundException si no existe ningún equipo con ese id
+     */
     @Transactional(readOnly = true)
     public List<JugadorSimpleDTO> obtenerJugadoresSimple(long equipoId){
         if (!equipoRepository.existsById(equipoId)){
@@ -209,6 +302,13 @@ public class EquipoService {
                 .toList();
     }
 
+    /**
+     * Devuelve la lista de jugadores de un equipo en formato detalle.
+     *
+     * @param equipoId identificador del equipo
+     * @return lista de {@link JugadorDetalleDTO} pertenecientes al equipo
+     * @throws ResourceNotFoundException si no existe ningún equipo con ese id
+     */
     @Transactional(readOnly = true)
     public List<JugadorDetalleDTO> obtenerJugadoresDetalle(long equipoId){
         if (!equipoRepository.existsById(equipoId)){
@@ -221,8 +321,18 @@ public class EquipoService {
                 .toList();
     }
 
-    // Asignación de manager
-
+    /**
+     * Asigna un usuario como manager de un equipo en una competición concreta.
+     *
+     * <p>La relación manager es específica de la competición: el mismo usuario puede
+     * ser manager del mismo equipo en distintas competiciones.</p>
+     *
+     * @param equipoId     identificador del equipo
+     * @param competicionId identificador de la competición
+     * @param usuarioId    identificador del usuario a asignar como manager
+     * @throws ResourceNotFoundException si el equipo o el usuario no existen
+     * @throws BadRequestException       si el usuario ya es manager del equipo en esa competición
+     */
     @Transactional
     public void asignarManager(long equipoId, long competicionId, long usuarioId) {
         if (!equipoRepository.existsById(equipoId)) {

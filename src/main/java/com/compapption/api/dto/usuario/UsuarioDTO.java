@@ -5,6 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO con los datos de un usuario del sistema (identificador, credenciales, nombre y estado),
+ * utilizado en los endpoints de gestión de usuarios de UsuarioController.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

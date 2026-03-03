@@ -3,6 +3,14 @@ package com.compapption.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Define un tipo de estadística medible dentro de un deporte (por ejemplo, goles, asistencias, rebotes).
+ * Mapeada a la tabla {@code tipo_estadistica} con unicidad sobre (deporte_id, nombre),
+ * especifica el tipo de valor (ENTERO, DECIMAL, BOOLEANO, TIEMPO), el orden de presentación y si está activo.
+ * Se relaciona con {@link Deporte} y es referenciada por {@link EstadisticaJugadorEvento}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "tipo_estadistica", uniqueConstraints = @UniqueConstraint(columnNames = {
         "deporte_id", "nombre"

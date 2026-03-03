@@ -9,6 +9,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 
+/**
+ * Representa un jugador deportivo dentro del sistema.
+ * Mapeada a la tabla {@code jugador}, almacena nombre, apellidos, dorsal, posición y foto como BLOB ({@code byte[]}).
+ * Puede vincularse opcionalmente a un {@link Usuario} del sistema, y se relaciona con
+ * {@link EquipoJugador} para los equipos en los que participa y con {@link EstadisticaJugadorEvento}
+ * para las estadísticas por partido.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "jugador")
 @Getter

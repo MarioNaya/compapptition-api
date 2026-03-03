@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO con la estadística individual de un jugador en un evento específico, incluyendo
+ * el tipo de estadística y el valor registrado para ese partido.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

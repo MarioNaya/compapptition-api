@@ -5,6 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO con los datos para actualizar manualmente una entrada de clasificación, permitiendo
+ * ajustar puntos, victorias, empates, derrotas y diferencia de goles de un equipo.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

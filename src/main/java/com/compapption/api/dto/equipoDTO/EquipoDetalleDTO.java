@@ -10,6 +10,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DTO con los datos completos de un equipo, incluyendo tipo, fecha de creación y la lista
+ * de jugadores inscritos, devuelto en el endpoint de detalle y creación/edición de equipo.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -6,6 +6,15 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Representa un equipo deportivo dentro del sistema.
+ * Mapeada a la tabla {@code equipo}, almacena el nombre, descripción, escudo como BLOB ({@code byte[]})
+ * y el tipo de equipo (GESTIONADO o ESTANDAR).
+ * Se relaciona con {@link EquipoJugador}, {@link CompeticionEquipo}, {@link EventoEquipo},
+ * {@link EquipoManager} y {@link Clasificacion}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "equipo")
 @Getter

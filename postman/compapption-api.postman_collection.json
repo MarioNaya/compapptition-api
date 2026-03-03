@@ -7,1226 +7,4273 @@
   },
   "auth": {
     "type": "bearer",
-    "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
   },
   "variable": [
-    { "key": "createdDeporteId",      "value": "" },
-    { "key": "createdTipoEstadId",    "value": "" },
-    { "key": "createdJugadorId",      "value": "" },
-    { "key": "createdEquipoId",       "value": "" },
-    { "key": "createdCompeticionId",  "value": "" },
-    { "key": "createdEventoId",       "value": "" },
-    { "key": "createdEstadisticaId",  "value": "" },
-    { "key": "deleteEventoId",        "value": "" },
-    { "key": "invitacionToken",       "value": "" },
-    { "key": "accessToken",           "value": "" },
-    { "key": "refreshToken",          "value": "" },
-    { "key": "authTestUsername",      "value": "" },
-    { "key": "authTestEmail",         "value": "" },
-    { "key": "tokenToRevoke",         "value": "" },
-    { "key": "testUserId",            "value": "" },
-    { "key": "savedToken",            "value": "" }
+    {
+      "key": "createdDeporteId",
+      "value": ""
+    },
+    {
+      "key": "createdTipoEstadId",
+      "value": ""
+    },
+    {
+      "key": "createdJugadorId",
+      "value": ""
+    },
+    {
+      "key": "createdEquipoId",
+      "value": ""
+    },
+    {
+      "key": "createdCompeticionId",
+      "value": ""
+    },
+    {
+      "key": "createdEventoId",
+      "value": ""
+    },
+    {
+      "key": "createdEstadisticaId",
+      "value": ""
+    },
+    {
+      "key": "deleteEventoId",
+      "value": ""
+    },
+    {
+      "key": "invitacionToken",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "authTestUsername",
+      "value": ""
+    },
+    {
+      "key": "authTestEmail",
+      "value": ""
+    },
+    {
+      "key": "tokenToRevoke",
+      "value": ""
+    },
+    {
+      "key": "testUserId",
+      "value": ""
+    },
+    {
+      "key": "savedToken",
+      "value": ""
+    }
   ],
   "item": [
-
     {
       "name": "00. Auth",
-      "auth": {"type": "noauth"},
+      "auth": {
+        "type": "noauth"
+      },
       "item": [
         {
           "name": "POST Registro",
-          "event": [{"listen": "test", "script": {"type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('Tiene accessToken', () => pm.expect(j.accessToken).to.be.a('string'));",
-              "pm.test('refreshToken es UUID', () => pm.expect(j.refreshToken).to.match(/^[0-9a-f-]{36}$/));",
-              "pm.test('tokenType es Bearer', () => pm.expect(j.tokenType).to.eql('Bearer'));",
-              "pm.test('expiresIn 900', () => pm.expect(j.expiresIn).to.eql(900));",
-              "pm.test('usuario.id presente', () => pm.expect(j.usuario.id).to.be.a('number'));",
-              "pm.test('competiciones vacío', () => pm.expect(j.competiciones).to.eql([]));",
-              "pm.collectionVariables.set('accessToken', j.accessToken);",
-              "pm.collectionVariables.set('refreshToken', j.refreshToken);",
-              "pm.collectionVariables.set('authTestUsername', j.usuario.username);",
-              "pm.collectionVariables.set('authTestEmail', j.usuario.email);",
-              "pm.collectionVariables.set('testUserId', j.usuario.id);"
-            ]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('Tiene accessToken', () => pm.expect(j.accessToken).to.be.a('string'));",
+                  "pm.test('refreshToken es UUID', () => pm.expect(j.refreshToken).to.match(/^[0-9a-f-]{36}$/));",
+                  "pm.test('tokenType es Bearer', () => pm.expect(j.tokenType).to.eql('Bearer'));",
+                  "pm.test('expiresIn 900', () => pm.expect(j.expiresIn).to.eql(900));",
+                  "pm.test('usuario.id presente', () => pm.expect(j.usuario.id).to.be.a('number'));",
+                  "pm.test('competiciones vacío', () => pm.expect(j.competiciones).to.eql([]));",
+                  "pm.collectionVariables.set('accessToken', j.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', j.refreshToken);",
+                  "pm.collectionVariables.set('authTestUsername', j.usuario.username);",
+                  "pm.collectionVariables.set('authTestEmail', j.usuario.email);",
+                  "pm.collectionVariables.set('testUserId', j.usuario.id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\"username\": \"auth_{{$timestamp}}\", \"email\": \"auth_{{$timestamp}}@test.com\", \"password\": \"Password123\", \"nombre\": \"Auth\", \"apellidos\": \"Test\"}", "options": {"raw": {"language": "json"}}},
-            "url": {"raw": "{{baseUrl}}/auth/registro", "host": ["{{baseUrl}}"], "path": ["auth", "registro"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"auth_{{$timestamp}}\", \"email\": \"auth_{{$timestamp}}@test.com\", \"password\": \"Password123\", \"nombre\": \"Auth\", \"apellidos\": \"Test\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            }
           }
         },
         {
           "name": "POST Registro (username duplicado)",
-          "event": [{"listen": "test", "script": {"type": "text/javascript",
-            "exec": ["pm.test('400 Bad Request', () => pm.response.to.have.status(400));"]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\"username\": \"{{authTestUsername}}\", \"email\": \"otro_{{$timestamp}}@test.com\", \"password\": \"Password123\", \"nombre\": \"Dup\", \"apellidos\": \"User\"}", "options": {"raw": {"language": "json"}}},
-            "url": {"raw": "{{baseUrl}}/auth/registro", "host": ["{{baseUrl}}"], "path": ["auth", "registro"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"{{authTestUsername}}\", \"email\": \"otro_{{$timestamp}}@test.com\", \"password\": \"Password123\", \"nombre\": \"Dup\", \"apellidos\": \"User\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            }
           }
         },
         {
           "name": "POST Login (username)",
-          "event": [{"listen": "test", "script": {"type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('Tiene accessToken', () => pm.expect(j.accessToken).to.be.a('string'));",
-              "pm.test('refreshToken es UUID', () => pm.expect(j.refreshToken).to.match(/^[0-9a-f-]{36}$/));",
-              "pm.test('Tiene competiciones', () => pm.expect(j.competiciones).to.be.an('array'));",
-              "pm.collectionVariables.set('accessToken', j.accessToken);",
-              "pm.collectionVariables.set('refreshToken', j.refreshToken);"
-            ]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('Tiene accessToken', () => pm.expect(j.accessToken).to.be.a('string'));",
+                  "pm.test('refreshToken es UUID', () => pm.expect(j.refreshToken).to.match(/^[0-9a-f-]{36}$/));",
+                  "pm.test('Tiene competiciones', () => pm.expect(j.competiciones).to.be.an('array'));",
+                  "pm.collectionVariables.set('accessToken', j.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', j.refreshToken);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\"usernameOrEmail\": \"{{authTestUsername}}\", \"password\": \"Password123\"}", "options": {"raw": {"language": "json"}}},
-            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{authTestUsername}}\", \"password\": \"Password123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
           }
         },
         {
           "name": "POST Login (email)",
-          "event": [{"listen": "test", "script": {"type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "pm.test('Tiene accessToken', () => pm.expect(pm.response.json().accessToken).to.be.a('string'));",
-              "pm.collectionVariables.set('accessToken', pm.response.json().accessToken);",
-              "pm.collectionVariables.set('refreshToken', pm.response.json().refreshToken);"
-            ]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene accessToken', () => pm.expect(pm.response.json().accessToken).to.be.a('string'));",
+                  "pm.collectionVariables.set('accessToken', pm.response.json().accessToken);",
+                  "pm.collectionVariables.set('refreshToken', pm.response.json().refreshToken);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\"usernameOrEmail\": \"{{authTestEmail}}\", \"password\": \"Password123\"}", "options": {"raw": {"language": "json"}}},
-            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{authTestEmail}}\", \"password\": \"Password123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
           }
         },
         {
           "name": "POST Login (credenciales inválidas)",
-          "event": [{"listen": "test", "script": {"type": "text/javascript",
-            "exec": ["pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\"usernameOrEmail\": \"{{authTestUsername}}\", \"password\": \"wrongpassword\"}", "options": {"raw": {"language": "json"}}},
-            "url": {"raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usernameOrEmail\": \"{{authTestUsername}}\", \"password\": \"wrongpassword\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
           }
         },
         {
           "name": "POST Refresh",
-          "event": [{"listen": "test", "script": {"type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "var oldRefresh = pm.collectionVariables.get('refreshToken');",
-              "pm.test('Nuevo accessToken presente', () => pm.expect(j.accessToken).to.be.a('string'));",
-              "pm.test('Refresh token rotado', () => pm.expect(j.refreshToken).to.not.eql(oldRefresh));",
-              "pm.test('Tiene competiciones', () => pm.expect(j.competiciones).to.be.an('array'));",
-              "pm.collectionVariables.set('accessToken', j.accessToken);",
-              "pm.collectionVariables.set('refreshToken', j.refreshToken);"
-            ]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "var oldRefresh = pm.collectionVariables.get('refreshToken');",
+                  "pm.test('Nuevo accessToken presente', () => pm.expect(j.accessToken).to.be.a('string'));",
+                  "pm.test('Refresh token rotado', () => pm.expect(j.refreshToken).to.not.eql(oldRefresh));",
+                  "pm.test('Tiene competiciones', () => pm.expect(j.competiciones).to.be.an('array'));",
+                  "pm.collectionVariables.set('accessToken', j.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', j.refreshToken);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\"refreshToken\": \"{{refreshToken}}\"}", "options": {"raw": {"language": "json"}}},
-            "url": {"raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\": \"{{refreshToken}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
           }
         },
         {
           "name": "POST Refresh (token inválido)",
-          "event": [{"listen": "test", "script": {"type": "text/javascript",
-            "exec": ["pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\"refreshToken\": \"00000000-0000-0000-0000-000000000000\"}", "options": {"raw": {"language": "json"}}},
-            "url": {"raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\": \"00000000-0000-0000-0000-000000000000\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
           }
         },
         {
           "name": "POST Logout",
           "event": [
-            {"listen": "prerequest", "script": {"type": "text/javascript",
-              "exec": [
-                "pm.collectionVariables.set('tokenToRevoke', pm.collectionVariables.get('refreshToken'));",
-                "pm.request.headers.add({ key: 'Cookie', value: 'refresh_token=' + pm.collectionVariables.get('refreshToken') });"
-              ]
-            }},
-            {"listen": "test", "script": {"type": "text/javascript",
-              "exec": [
-                "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                "pm.test('Mensaje correcto', () => pm.expect(pm.response.json().message).to.eql('Sesión cerrada correctamente'));"
-              ]
-            }}
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('tokenToRevoke', pm.collectionVariables.get('refreshToken'));",
+                  "pm.request.headers.add({ key: 'Cookie', value: 'refresh_token=' + pm.collectionVariables.get('refreshToken') });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Mensaje correcto', () => pm.expect(pm.response.json().message).to.eql('Sesión cerrada correctamente'));"
+                ]
+              }
+            }
           ],
           "request": {
             "method": "POST",
             "header": [],
-            "url": {"raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"]}
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
           }
         },
         {
           "name": "POST Refresh (token revocado)",
-          "event": [{"listen": "test", "script": {"type": "text/javascript",
-            "exec": ["pm.test('401 token revocado', () => pm.response.to.have.status(401));"]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 token revocado', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\"refreshToken\": \"{{tokenToRevoke}}\"}", "options": {"raw": {"language": "json"}}},
-            "url": {"raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"]}
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\": \"{{tokenToRevoke}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Recuperar password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Mensaje genérico de seguridad', () => pm.expect(pm.response.json().message).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{authTestEmail}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/recuperar-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "recuperar-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Reset password (token inválido → 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request (token inexistente)', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\": \"00000000-0000-0000-0000-000000000000\", \"nuevaPassword\": \"NuevoPassword123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            }
           }
         }
       ]
     },
-
     {
       "name": "01. Deportes",
       "item": [
         {
           "name": "GET Listar todos",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Array no vacío', () => { var j = pm.response.json(); pm.expect(j).to.be.an('array').that.is.not.empty; });"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/deportes", "host": ["{{baseUrl}}"], "path": ["deportes"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Array no vacío', () => { var j = pm.response.json(); pm.expect(j).to.be.an('array').that.is.not.empty; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deportes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deportes"
+              ]
+            }
+          }
         },
         {
           "name": "GET Obtener por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene nombre', () => { pm.expect(pm.response.json().nombre).to.exist; });"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/deportes/{{deporteId}}", "host": ["{{baseUrl}}"], "path": ["deportes", "{{deporteId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene nombre', () => { pm.expect(pm.response.json().nombre).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deportes/{{deporteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deportes",
+                "{{deporteId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET TiposEstadistica del deporte",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/deportes/{{deporteId}}/estadisticas", "host": ["{{baseUrl}}"], "path": ["deportes", "{{deporteId}}", "estadisticas"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deportes/{{deporteId}}/estadisticas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deportes",
+                "{{deporteId}}",
+                "estadisticas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Crear deporte (ADMIN_SISTEMA → 403 con usuario test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 Forbidden (no es ADMIN_SISTEMA)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\": \"Deporte Test {{}}\", \"descripcion\": \"Creado en test\", \"icono\": \"test\", \"activo\": true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/deportes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deportes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT Actualizar deporte (ADMIN_SISTEMA → 403 con usuario test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 Forbidden (no es ADMIN_SISTEMA)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\": \"Deporte Actualizado\", \"descripcion\": \"Actualizado\", \"icono\": \"upd\", \"activo\": true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/deportes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deportes",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE Eliminar deporte (ADMIN_SISTEMA → 403 con usuario test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 Forbidden (no es ADMIN_SISTEMA)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deportes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deportes",
+                "1"
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "02. TiposEstadistica",
       "item": [
         {
           "name": "GET Listar por deporte",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/tipos-estadistica/deporte/{{deporteId}}", "host": ["{{baseUrl}}"], "path": ["tipos-estadistica", "deporte", "{{deporteId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tipos-estadistica/deporte/{{deporteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos-estadistica",
+                "deporte",
+                "{{deporteId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Obtener por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene nombre', () => pm.expect(pm.response.json().nombre).to.exist);"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/tipos-estadistica/{{tipoEstadisticaId}}", "host": ["{{baseUrl}}"], "path": ["tipos-estadistica", "{{tipoEstadisticaId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene nombre', () => pm.expect(pm.response.json().nombre).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tipos-estadistica/{{tipoEstadisticaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos-estadistica",
+                "{{tipoEstadisticaId}}"
+              ]
+            }
+          }
         },
         {
           "name": "POST Crear",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));",
-                     "var j = pm.response.json(); pm.collectionVariables.set('createdTipoEstadId', j.id); pm.test('ID generado', () => pm.expect(j.id).to.exist);"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\": \"Asistencias {{$timestamp}}\", \"descripcion\": \"Pases de gol\", \"unidad\": \"asist\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/tipos-estadistica/deporte/{{deporteId}}", "host": ["{{baseUrl}}"], "path": ["tipos-estadistica", "deporte", "{{deporteId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "var j = pm.response.json(); pm.collectionVariables.set('createdTipoEstadId', j.id); pm.test('ID generado', () => pm.expect(j.id).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\": \"Asistencias {{$timestamp}}\", \"descripcion\": \"Pases de gol\", \"unidad\": \"asist\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tipos-estadistica/deporte/{{deporteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos-estadistica",
+                "deporte",
+                "{{deporteId}}"
+              ]
+            }
+          }
         },
         {
           "name": "PUT Actualizar",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\": \"Asistencias v2 {{$timestamp}}\", \"descripcion\": \"Pases de gol actualizados\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/tipos-estadistica/{{createdTipoEstadId}}", "host": ["{{baseUrl}}"], "path": ["tipos-estadistica", "{{createdTipoEstadId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\": \"Asistencias v2 {{$timestamp}}\", \"descripcion\": \"Pases de gol actualizados\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tipos-estadistica/{{createdTipoEstadId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos-estadistica",
+                "{{createdTipoEstadId}}"
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Eliminar",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/tipos-estadistica/{{createdTipoEstadId}}", "host": ["{{baseUrl}}"], "path": ["tipos-estadistica", "{{createdTipoEstadId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tipos-estadistica/{{createdTipoEstadId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos-estadistica",
+                "{{createdTipoEstadId}}"
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "03. Usuarios",
       "item": [
         {
           "name": "GET Obtener por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene username', () => pm.expect(pm.response.json().username).to.exist);"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/usuarios/{{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["usuarios", "{{usuarioId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene username', () => pm.expect(pm.response.json().username).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Buscar por username",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/usuarios/buscar?username={{username}}", "host": ["{{baseUrl}}"], "path": ["usuarios", "buscar"],
-              "query": [{ "key": "username", "value": "{{username}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/buscar?username={{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "{{username}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "PUT Actualizar usuario",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\": \"Admin\", \"apellidos\": \"Sistema\", \"email\": \"admin@compapption.com\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/usuarios/{{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["usuarios", "{{usuarioId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\": \"Admin\", \"apellidos\": \"Sistema\", \"email\": \"admin@compapption.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}"
+              ]
+            }
+          }
         },
         {
           "name": "POST Cambiar password",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 o 400 (pass incorrecta esperada en test)', () => { pm.expect([204, 400]).to.include(pm.response.code); });"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"passwordActual\": \"password123\", \"passwordNuevo\": \"password123\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/usuarios/{{usuarioId}}/cambiar-password", "host": ["{{baseUrl}}"], "path": ["usuarios", "{{usuarioId}}", "cambiar-password"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 o 400 (pass incorrecta esperada en test)', () => { pm.expect([204, 400]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"passwordActual\": \"password123\", \"passwordNuevo\": \"password123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}/cambiar-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}",
+                "cambiar-password"
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Desactivar usuario (apunta a ID 999 inexistente — protege datos reales)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 o 404 (ID 999 no existe — comportamiento esperado)', () => { pm.expect([204, 404]).to.include(pm.response.code); });"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/usuarios/999", "host": ["{{baseUrl}}"], "path": ["usuarios", "999"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 o 404 (ID 999 no existe — comportamiento esperado)', () => { pm.expect([204, 404]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "999"
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "04. Jugadores",
       "item": [
         {
           "name": "GET Buscar",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene content', () => pm.expect(pm.response.json().content).to.be.an('array'));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/jugadores/buscar?search=Mario", "host": ["{{baseUrl}}"], "path": ["jugadores", "buscar"],
-              "query": [{ "key": "search", "value": "Mario" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene content', () => pm.expect(pm.response.json().content).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jugadores/buscar?search=Mario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jugadores",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Mario"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Detalle por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene nombre y apellidos', () => { var j = pm.response.json(); pm.expect(j.nombre).to.exist; pm.expect(j.apellidos).to.exist; });"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/jugadores/detalle/{{jugadorId}}", "host": ["{{baseUrl}}"], "path": ["jugadores", "detalle", "{{jugadorId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene nombre y apellidos', () => { var j = pm.response.json(); pm.expect(j.nombre).to.exist; pm.expect(j.apellidos).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jugadores/detalle/{{jugadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jugadores",
+                "detalle",
+                "{{jugadorId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Simple por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/jugadores/simple/{{jugadorId}}", "host": ["{{baseUrl}}"], "path": ["jugadores", "simple", "{{jugadorId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jugadores/simple/{{jugadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jugadores",
+                "simple",
+                "{{jugadorId}}"
+              ]
+            }
+          }
         },
         {
           "name": "POST Crear jugador",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));",
-                     "var j = pm.response.json(); pm.collectionVariables.set('createdJugadorId', j.id);"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\": \"Carlos\", \"apellidos\": \"García López\", \"posicion\": \"Delantero\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/jugadores", "host": ["{{baseUrl}}"], "path": ["jugadores"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "var j = pm.response.json(); pm.collectionVariables.set('createdJugadorId', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\": \"Carlos\", \"apellidos\": \"García López\", \"posicion\": \"Delantero\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/jugadores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jugadores"
+              ]
+            }
+          }
         },
         {
           "name": "PUT Actualizar jugador",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"posicion\": \"Centrocampista\", \"dorsal\": 8}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/jugadores/{{createdJugadorId}}", "host": ["{{baseUrl}}"], "path": ["jugadores", "{{createdJugadorId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"posicion\": \"Centrocampista\", \"dorsal\": 8}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/jugadores/{{createdJugadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jugadores",
+                "{{createdJugadorId}}"
+              ]
+            }
+          }
         },
         {
           "name": "POST Vincular usuario a jugador",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 o 400 (usuario puede estar ya vinculado a otro jugador)', () => { pm.expect([200, 400]).to.include(pm.response.code); });"] }}],
-          "request": { "method": "POST", "header": [],
-            "url": { "raw": "{{baseUrl}}/jugadores/{{createdJugadorId}}/vincular/{{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["jugadores", "{{createdJugadorId}}", "vincular", "{{usuarioId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 o 400 (usuario puede estar ya vinculado a otro jugador)', () => { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jugadores/{{createdJugadorId}}/vincular/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jugadores",
+                "{{createdJugadorId}}",
+                "vincular",
+                "{{usuarioId}}"
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Eliminar jugador",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/jugadores/{{createdJugadorId}}", "host": ["{{baseUrl}}"], "path": ["jugadores", "{{createdJugadorId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jugadores/{{createdJugadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "jugadores",
+                "{{createdJugadorId}}"
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "05. Equipos",
       "item": [
         {
           "name": "GET Buscar equipos",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene content paginado', () => pm.expect(pm.response.json().content).to.be.an('array'));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos?search=Madrid", "host": ["{{baseUrl}}"], "path": ["equipos"],
-              "query": [{ "key": "search", "value": "Madrid" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene content paginado', () => pm.expect(pm.response.json().content).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos?search=Madrid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Madrid"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Simple por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/{{equipoId}}/simple", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoId}}", "simple"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{equipoId}}/simple",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{equipoId}}",
+                "simple"
+              ]
+            }
+          }
         },
         {
           "name": "GET Detalle por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene jugadores', () => pm.expect(pm.response.json().jugadores).to.be.an('array'));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/{{equipoId}}/detalle", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoId}}", "detalle"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene jugadores', () => pm.expect(pm.response.json().jugadores).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{equipoId}}/detalle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{equipoId}}",
+                "detalle"
+              ]
+            }
+          }
         },
         {
           "name": "GET Mis equipos (manager)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/mis-equipos/manager?id={{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["equipos", "mis-equipos", "manager"],
-              "query": [{ "key": "id", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/mis-equipos/manager?id={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "mis-equipos",
+                "manager"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Mis equipos (jugador)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/mis-equipos/jugador?id={{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["equipos", "mis-equipos", "jugador"],
-              "query": [{ "key": "id", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/mis-equipos/jugador?id={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "mis-equipos",
+                "jugador"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "POST Crear equipo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));",
-                     "var j = pm.response.json(); pm.collectionVariables.set('createdEquipoId', j.id);"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\": \"Deportivo Test FC\", \"descripcion\": \"Equipo creado por colección Postman\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/equipos?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["equipos"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "var j = pm.response.json(); pm.collectionVariables.set('createdEquipoId', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\": \"Deportivo Test FC\", \"descripcion\": \"Equipo creado por colección Postman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/equipos?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "PUT Actualizar equipo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"descripcion\": \"Descripción actualizada por Postman\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["equipos", "{{createdEquipoId}}"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"descripcion\": \"Descripción actualizada por Postman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{createdEquipoId}}"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Jugadores del equipo (simple)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/{{equipoId}}/jugadores-simple", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoId}}", "jugadores-simple"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{equipoId}}/jugadores-simple",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{equipoId}}",
+                "jugadores-simple"
+              ]
+            }
+          }
         },
         {
           "name": "GET Jugadores del equipo (detalle)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/{{equipoId}}/jugadores-detalle", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoId}}", "jugadores-detalle"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{equipoId}}/jugadores-detalle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{equipoId}}",
+                "jugadores-detalle"
+              ]
+            }
+          }
         },
         {
           "name": "POST Agregar jugador al equipo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "POST", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}/jugadores/{{jugadorId}}?dorsal=99", "host": ["{{baseUrl}}"],
-              "path": ["equipos", "{{createdEquipoId}}", "jugadores", "{{jugadorId}}"],
-              "query": [{ "key": "dorsal", "value": "99" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}/jugadores/{{jugadorId}}?dorsal=99",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{createdEquipoId}}",
+                "jugadores",
+                "{{jugadorId}}"
+              ],
+              "query": [
+                {
+                  "key": "dorsal",
+                  "value": "99"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Quitar jugador del equipo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}/jugadores/{{jugadorId}}", "host": ["{{baseUrl}}"],
-              "path": ["equipos", "{{createdEquipoId}}", "jugadores", "{{jugadorId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}/jugadores/{{jugadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{createdEquipoId}}",
+                "jugadores",
+                "{{jugadorId}}"
+              ]
+            }
+          }
         },
         {
           "name": "POST Asignar manager",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "POST", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}/managers?competicionId={{competicionId}}&usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["equipos", "{{createdEquipoId}}", "managers"],
-              "query": [{ "key": "competicionId", "value": "{{competicionId}}" }, { "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}/managers?competicionId={{competicionId}}&usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{createdEquipoId}}",
+                "managers"
+              ],
+              "query": [
+                {
+                  "key": "competicionId",
+                  "value": "{{competicionId}}"
+                },
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Eliminar equipo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["equipos", "{{createdEquipoId}}"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipos/{{createdEquipoId}}?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos",
+                "{{createdEquipoId}}"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "06. Competiciones",
       "item": [
         {
           "name": "GET Públicas (simple)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/publicas/simple", "host": ["{{baseUrl}}"], "path": ["competiciones", "publicas", "simple"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/publicas/simple",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "publicas",
+                "simple"
+              ]
+            }
+          }
         },
         {
           "name": "GET Buscar públicas",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/publicas/buscar?search=Liga", "host": ["{{baseUrl}}"], "path": ["competiciones", "publicas", "buscar"],
-              "query": [{ "key": "search", "value": "Liga" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/publicas/buscar?search=Liga",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "publicas",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Liga"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Detalle por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene configuracion', () => pm.expect(pm.response.json().configuracion).to.exist);"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/detalle", "host": ["{{baseUrl}}"], "path": ["competiciones", "{{competicionId}}", "detalle"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene configuracion', () => pm.expect(pm.response.json().configuracion).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/detalle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "detalle"
+              ]
+            }
+          }
         },
         {
           "name": "GET Info por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/info", "host": ["{{baseUrl}}"], "path": ["competiciones", "{{competicionId}}", "info"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "info"
+              ]
+            }
+          }
         },
         {
           "name": "GET Simple por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/simple", "host": ["{{baseUrl}}"], "path": ["competiciones", "{{competicionId}}", "simple"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/simple",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "simple"
+              ]
+            }
+          }
         },
         {
           "name": "GET Mis competiciones (creador)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/mis-competiciones/creador?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "mis-competiciones", "creador"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/mis-competiciones/creador?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "mis-competiciones",
+                "creador"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Mis competiciones (participante)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/mis-competiciones/participante?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "mis-competiciones", "participante"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/mis-competiciones/participante?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "mis-competiciones",
+                "participante"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "POST Crear competición (Liga)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));",
-                     "var j = pm.response.json(); pm.collectionVariables.set('createdCompeticionId', j.id);",
-                     "pm.test('Tiene ID y configuracion', () => { pm.expect(j.id).to.exist; pm.expect(j.configuracion).to.exist; });"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "var j = pm.response.json(); pm.collectionVariables.set('createdCompeticionId', j.id);",
+                  "pm.test('Tiene ID y configuracion', () => { pm.expect(j.id).to.exist; pm.expect(j.configuracion).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
               "raw": "{\"nombre\": \"Liga Postman Test\", \"descripcion\": \"Creada automáticamente\", \"deporteId\": 1, \"publica\": true, \"inscripcionAbierta\": true, \"configuracion\": {\"formato\": \"LIGA\", \"puntosVictoria\": 3, \"puntosEmpate\": 1, \"puntosDerrota\": 0}}",
-              "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["competiciones"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "PUT Actualizar competición",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"descripcion\": \"Descripción actualizada por Postman\", \"inscripcionAbierta\": true}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{createdCompeticionId}}"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"descripcion\": \"Descripción actualizada por Postman\", \"inscripcionAbierta\": true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}?usuarioId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "POST Alta equipo en competición",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));"] }}],
-          "request": { "method": "POST", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/{{equipoId}}?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{createdCompeticionId}}", "equipos", "{{equipoId}}"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/{{equipoId}}?usuarioId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}",
+                "equipos",
+                "{{equipoId}}"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Equipos inscritos (simple)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/simple", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{createdCompeticionId}}", "equipos", "simple"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/simple",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}",
+                "equipos",
+                "simple"
+              ]
+            }
+          }
         },
         {
           "name": "GET Equipos inscritos (detalle)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/detalle", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{createdCompeticionId}}", "equipos", "detalle"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/detalle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}",
+                "equipos",
+                "detalle"
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Baja equipo de competición",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/{{equipoId}}?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{createdCompeticionId}}", "equipos", "{{equipoId}}"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/{{equipoId}}?usuarioId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}",
+                "equipos",
+                "{{equipoId}}"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "POST Cambiar temporada",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "POST", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/temporada?nuevaTemporada=2&usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{createdCompeticionId}}", "temporada"],
-              "query": [{ "key": "nuevaTemporada", "value": "2" }, { "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/temporada?nuevaTemporada=2&usuarioId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}",
+                "temporada"
+              ],
+              "query": [
+                {
+                  "key": "nuevaTemporada",
+                  "value": "2"
+                },
+                {
+                  "key": "usuarioId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Cambiar estado (BORRADOR → ACTIVA)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Business rule (liga necesita ≥3 equipos para activarse)', () => pm.response.to.have.status(400));",
+                  "pm.test('Mensaje de validación de negocio', () => pm.expect(pm.response.json().message).to.include('equipos'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/estado?estado=ACTIVA&usuarioId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}",
+                "estado"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "ACTIVA"
+                },
+                {
+                  "key": "usuarioId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Usuarios con roles en competición",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Es un array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}",
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE Quitar usuario de competición (usuario inexistente → 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found (usuario no está en la competición)', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/usuarios/99999?solicitanteId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}",
+                "usuarios",
+                "99999"
+              ],
+              "query": [
+                {
+                  "key": "solicitanteId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Eliminar competición",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{createdCompeticionId}}"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}?usuarioId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "07. Calendario",
       "item": [
         {
           "name": "POST Generar calendario liga (comp 6)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Devuelve array de eventos', () => pm.expect(pm.response.json()).to.be.an('array'));"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"fechaInicio\": \"2027-09-01T18:00:00\", \"diasJornada\": 7}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/calendario", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "calendario"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Devuelve array de eventos', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fechaInicio\": \"2027-09-01T18:00:00\", \"diasJornada\": 7}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/calendario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "calendario"
+              ]
+            }
+          }
         },
         {
           "name": "POST Generar playoff seeded (comp 8 — ya tiene equipos)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK o 400 (sin clasificaciones previas)', () => pm.expect([200, 400]).to.include(pm.response.code));"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"fechaInicio\": \"2027-06-01T18:00:00\", \"diasJornada\": 7}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{playoffCompeticionId}}/calendario/playoff", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{playoffCompeticionId}}", "calendario", "playoff"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK o 400 (sin clasificaciones previas)', () => pm.expect([200, 400]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fechaInicio\": \"2027-06-01T18:00:00\", \"diasJornada\": 7}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{playoffCompeticionId}}/calendario/playoff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{playoffCompeticionId}}",
+                "calendario",
+                "playoff"
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "08. Eventos",
       "item": [
         {
           "name": "GET Listar simple (comp 6)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Es array', () => pm.expect(pm.response.json()).to.be.an('array'));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/simple", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "simple"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Es array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/simple",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "simple"
+              ]
+            }
+          }
         },
         {
           "name": "GET Listar detalle (comp 6)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/detalle", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "detalle"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/detalle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "detalle"
+              ]
+            }
+          }
         },
         {
           "name": "GET Por jornada (simple)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/jornada/{{jornadaNum}}/simple", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "jornada", "{{jornadaNum}}", "simple"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/jornada/{{jornadaNum}}/simple",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "jornada",
+                "{{jornadaNum}}",
+                "simple"
+              ]
+            }
+          }
         },
         {
           "name": "GET Por jornada (detalle)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/jornada/{{jornadaNum}}/detalle", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "jornada", "{{jornadaNum}}", "detalle"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/jornada/{{jornadaNum}}/detalle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "jornada",
+                "{{jornadaNum}}",
+                "detalle"
+              ]
+            }
+          }
         },
         {
           "name": "GET Por rango de fechas (simple)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/calendariosimple?inicio=2026-01-01T00:00:00&fin=2028-12-31T23:59:59", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "calendariosimple"],
-              "query": [{ "key": "inicio", "value": "2026-01-01T00:00:00" }, { "key": "fin", "value": "2028-12-31T23:59:59" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/calendariosimple?inicio=2026-01-01T00:00:00&fin=2028-12-31T23:59:59",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "calendariosimple"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-01-01T00:00:00"
+                },
+                {
+                  "key": "fin",
+                  "value": "2028-12-31T23:59:59"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Por rango de fechas (detalle)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/calendariodetalle?inicio=2026-01-01T00:00:00&fin=2028-12-31T23:59:59", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "calendariodetalle"],
-              "query": [{ "key": "inicio", "value": "2026-01-01T00:00:00" }, { "key": "fin", "value": "2028-12-31T23:59:59" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/calendariodetalle?inicio=2026-01-01T00:00:00&fin=2028-12-31T23:59:59",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "calendariodetalle"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-01-01T00:00:00"
+                },
+                {
+                  "key": "fin",
+                  "value": "2028-12-31T23:59:59"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Por equipo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/equipo/9", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "equipo", "9"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/equipo/9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "equipo",
+                "9"
+              ]
+            }
+          }
         },
         {
           "name": "GET Por ID",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Tiene equipoLocal', () => pm.expect(pm.response.json().equipoLocal).to.exist);"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{eventoId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "{{eventoId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Tiene equipoLocal', () => pm.expect(pm.response.json().equipoLocal).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{eventoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "{{eventoId}}"
+              ]
+            }
+          }
         },
         {
           "name": "POST Crear evento",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));",
-                     "var j = pm.response.json(); pm.collectionVariables.set('createdEventoId', j.id);"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "var j = pm.response.json(); pm.collectionVariables.set('createdEventoId', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
               "raw": "{\"fechaHora\": \"2027-10-15T20:00:00\", \"jornada\": 99, \"equipoLocalId\": 9, \"equipoVisitanteId\": 10, \"lugar\": \"Estadio Test\"}",
-              "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos"] }}
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos"
+              ]
+            }
+          }
         },
         {
           "name": "PUT Actualizar evento",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"lugar\": \"Estadio Actualizado\", \"observaciones\": \"Partido modificado\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{createdEventoId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "{{createdEventoId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"lugar\": \"Estadio Actualizado\", \"observaciones\": \"Partido modificado\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{createdEventoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "{{createdEventoId}}"
+              ]
+            }
+          }
         },
         {
           "name": "POST Registrar resultado",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Evento FINALIZADO', () => pm.expect(pm.response.json().estado).to.equal('FINALIZADO'));"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"resultadoLocal\": 3, \"resultadoVisitante\": 1}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{createdEventoId}}/resultado", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "{{createdEventoId}}", "resultado"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Evento FINALIZADO', () => pm.expect(pm.response.json().estado).to.equal('FINALIZADO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"resultadoLocal\": 3, \"resultadoVisitante\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{createdEventoId}}/resultado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "{{createdEventoId}}",
+                "resultado"
+              ]
+            }
+          }
         },
         {
           "name": "GET Estadísticas del evento",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{eventoId}}/estadisticas", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "{{eventoId}}", "estadisticas"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{eventoId}}/estadisticas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "{{eventoId}}",
+                "estadisticas"
+              ]
+            }
+          }
         },
         {
           "name": "POST Registrar estadística en evento",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));",
-                     "var j = pm.response.json(); pm.collectionVariables.set('createdEstadisticaId', j.id);"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"jugadorId\": 1, \"tipoEstadisticaId\": 1, \"valor\": 2}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{createdEventoId}}/estadisticas", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "{{createdEventoId}}", "estadisticas"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "var j = pm.response.json(); pm.collectionVariables.set('createdEstadisticaId', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jugadorId\": 1, \"tipoEstadisticaId\": 1, \"valor\": 2}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{createdEventoId}}/estadisticas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "{{createdEventoId}}",
+                "estadisticas"
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Eliminar estadística",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{createdEventoId}}/estadisticas/{{createdEstadisticaId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "{{createdEventoId}}", "estadisticas", "{{createdEstadisticaId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{createdEventoId}}/estadisticas/{{createdEstadisticaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "{{createdEventoId}}",
+                "estadisticas",
+                "{{createdEstadisticaId}}"
+              ]
+            }
+          }
         },
         {
           "name": "POST Crear evento (para DELETE)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));",
-                     "var j = pm.response.json(); pm.collectionVariables.set('deleteEventoId', j.id);"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "var j = pm.response.json(); pm.collectionVariables.set('deleteEventoId', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
               "raw": "{\"fechaHora\": \"2027-12-31T20:00:00\", \"jornada\": 199, \"equipoLocalId\": 9, \"equipoVisitanteId\": 10, \"lugar\": \"Estadio Delete Test\"}",
-              "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos"] }}
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos"
+              ]
+            }
+          }
         },
         {
           "name": "DELETE Eliminar evento",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('204 No Content', () => pm.response.to.have.status(204));"] }}],
-          "request": { "method": "DELETE", "header": [],
-            "url": { "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{deleteEventoId}}", "host": ["{{baseUrl}}"],
-              "path": ["competiciones", "{{competicionId}}", "eventos", "{{deleteEventoId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/{{deleteEventoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{competicionId}}",
+                "eventos",
+                "{{deleteEventoId}}"
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "09. Clasificación",
       "item": [
         {
           "name": "GET Detalle por competición",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Es array', () => pm.expect(pm.response.json()).to.be.an('array'));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/clasificaciones/competiciondetalle/{{competicionId}}", "host": ["{{baseUrl}}"],
-              "path": ["clasificaciones", "competiciondetalle", "{{competicionId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Es array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clasificaciones/competiciondetalle/{{competicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clasificaciones",
+                "competiciondetalle",
+                "{{competicionId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Simple por competición",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/clasificaciones/competicionsimple/{{competicionId}}", "host": ["{{baseUrl}}"],
-              "path": ["clasificaciones", "competicionsimple", "{{competicionId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clasificaciones/competicionsimple/{{competicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clasificaciones",
+                "competicionsimple",
+                "{{competicionId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Detalle por temporada",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/clasificaciones/competiciondetalle/{{competicionId}}/temporada/{{temporada}}", "host": ["{{baseUrl}}"],
-              "path": ["clasificaciones", "competiciondetalle", "{{competicionId}}", "temporada", "{{temporada}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clasificaciones/competiciondetalle/{{competicionId}}/temporada/{{temporada}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clasificaciones",
+                "competiciondetalle",
+                "{{competicionId}}",
+                "temporada",
+                "{{temporada}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Simple por temporada",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/clasificaciones/competicionsimple/{{competicionId}}/temporada/{{temporada}}", "host": ["{{baseUrl}}"],
-              "path": ["clasificaciones", "competicionsimple", "{{competicionId}}", "temporada", "{{temporada}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clasificaciones/competicionsimple/{{competicionId}}/temporada/{{temporada}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clasificaciones",
+                "competicionsimple",
+                "{{competicionId}}",
+                "temporada",
+                "{{temporada}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Detalle por equipo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/clasificaciones/competiciondetalle/{{competicionId}}/equipo/9", "host": ["{{baseUrl}}"],
-              "path": ["clasificaciones", "competiciondetalle", "{{competicionId}}", "equipo", "9"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clasificaciones/competiciondetalle/{{competicionId}}/equipo/9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clasificaciones",
+                "competiciondetalle",
+                "{{competicionId}}",
+                "equipo",
+                "9"
+              ]
+            }
+          }
         },
         {
           "name": "GET Simple por equipo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/clasificaciones/competicionsimple/{{competicionId}}/equipo/9", "host": ["{{baseUrl}}"],
-              "path": ["clasificaciones", "competicionsimple", "{{competicionId}}", "equipo", "9"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clasificaciones/competicionsimple/{{competicionId}}/equipo/9",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clasificaciones",
+                "competicionsimple",
+                "{{competicionId}}",
+                "equipo",
+                "9"
+              ]
+            }
+          }
         },
         {
           "name": "POST Recalcular clasificación",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "POST", "header": [],
-            "url": { "raw": "{{baseUrl}}/clasificaciones/competicion/{{competicionId}}/recalcular", "host": ["{{baseUrl}}"],
-              "path": ["clasificaciones", "competicion", "{{competicionId}}", "recalcular"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clasificaciones/competicion/{{competicionId}}/recalcular",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clasificaciones",
+                "competicion",
+                "{{competicionId}}",
+                "recalcular"
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "10. Estadísticas",
       "item": [
         {
           "name": "GET Por jugador",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/estadisticas/jugador/{{jugadorId}}", "host": ["{{baseUrl}}"],
-              "path": ["estadisticas", "jugador", "{{jugadorId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/jugador/{{jugadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "jugador",
+                "{{jugadorId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Por jugador y temporada",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/estadisticas/jugador/{{jugadorId}}/temporada/{{temporada}}", "host": ["{{baseUrl}}"],
-              "path": ["estadisticas", "jugador", "{{jugadorId}}", "temporada", "{{temporada}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/jugador/{{jugadorId}}/temporada/{{temporada}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "jugador",
+                "{{jugadorId}}",
+                "temporada",
+                "{{temporada}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Por evento y jugador",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/estadisticas/jugador/{{eventoId}}/jugador/{{jugadorId}}", "host": ["{{baseUrl}}"],
-              "path": ["estadisticas", "jugador", "{{eventoId}}", "jugador", "{{jugadorId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/jugador/{{eventoId}}/jugador/{{jugadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "jugador",
+                "{{eventoId}}",
+                "jugador",
+                "{{jugadorId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Por competición y jugador",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/estadisticas/competicion/{{competicionId}}/jugador/{{jugadorId}}", "host": ["{{baseUrl}}"],
-              "path": ["estadisticas", "competicion", "{{competicionId}}", "jugador", "{{jugadorId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/competicion/{{competicionId}}/jugador/{{jugadorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "competicion",
+                "{{competicionId}}",
+                "jugador",
+                "{{jugadorId}}"
+              ]
+            }
+          }
         },
         {
           "name": "GET Acumulado por competición y jugador",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/estadisticas/competicion/{{competicionId}}/jugador/{{jugadorId}}/acumulado", "host": ["{{baseUrl}}"],
-              "path": ["estadisticas", "competicion", "{{competicionId}}", "jugador", "{{jugadorId}}", "acumulado"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/competicion/{{competicionId}}/jugador/{{jugadorId}}/acumulado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "competicion",
+                "{{competicionId}}",
+                "jugador",
+                "{{jugadorId}}",
+                "acumulado"
+              ]
+            }
+          }
         },
         {
           "name": "GET Ranking por tipo estadística",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/estadisticas/competicion/{{competicionId}}/ranking/{{tipoEstadisticaId}}", "host": ["{{baseUrl}}"],
-              "path": ["estadisticas", "competicion", "{{competicionId}}", "ranking", "{{tipoEstadisticaId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas/competicion/{{competicionId}}/ranking/{{tipoEstadisticaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "estadisticas",
+                "competicion",
+                "{{competicionId}}",
+                "ranking",
+                "{{tipoEstadisticaId}}"
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "11. Invitaciones",
       "item": [
         {
           "name": "POST Crear invitación (ADMIN_COMPETICION)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('201 Created', () => pm.response.to.have.status(201));",
-                     "var j = pm.response.json(); pm.test('Estado PENDIENTE', () => pm.expect(j.estado).to.equal('PENDIENTE'));"] }}],
-          "request": { "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "var j = pm.response.json(); pm.test('Estado PENDIENTE', () => pm.expect(j.estado).to.equal('PENDIENTE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
               "raw": "{\"competicionId\": 6, \"destinatarioEmail\": \"test-{{$timestamp}}@example.com\", \"rolOfrecido\": \"ADMIN_COMPETICION\"}",
-              "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/invitaciones?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["invitaciones"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitaciones?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitaciones"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Invitaciones pendientes del usuario",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/invitaciones/pendientes?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["invitaciones", "pendientes"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invitaciones/pendientes?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitaciones",
+                "pendientes"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Invitaciones enviadas del usuario",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));",
-                     "pm.test('Es array', () => pm.expect(pm.response.json()).to.be.an('array'));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/invitaciones/enviadas?usuarioId={{usuarioId}}", "host": ["{{baseUrl}}"], "path": ["invitaciones", "enviadas"],
-              "query": [{ "key": "usuarioId", "value": "{{usuarioId}}" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Es array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invitaciones/enviadas?usuarioId={{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitaciones",
+                "enviadas"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{usuarioId}}"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "GET Invitaciones de competición",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] }}],
-          "request": { "method": "GET", "header": [],
-            "url": { "raw": "{{baseUrl}}/invitaciones/competicion/{{competicionId}}", "host": ["{{baseUrl}}"],
-              "path": ["invitaciones", "competicion", "{{competicionId}}"] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invitaciones/competicion/{{competicionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitaciones",
+                "competicion",
+                "{{competicionId}}"
+              ]
+            }
+          }
         },
         {
           "name": "PUT Aceptar invitación (rellenar token manualmente)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK o 400 (token inválido esperado sin token real)', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"] }}],
-          "request": { "method": "PUT", "header": [],
-            "url": { "raw": "{{baseUrl}}/invitaciones/TOKEN-UUID-AQUI/aceptar?usuarioId=2", "host": ["{{baseUrl}}"],
-              "path": ["invitaciones", "TOKEN-UUID-AQUI", "aceptar"],
-              "query": [{ "key": "usuarioId", "value": "2" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK o 400 (token inválido esperado sin token real)', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invitaciones/TOKEN-UUID-AQUI/aceptar?usuarioId=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitaciones",
+                "TOKEN-UUID-AQUI",
+                "aceptar"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "2"
+                }
+              ]
+            }
+          }
         },
         {
           "name": "PUT Rechazar invitación (rellenar token manualmente)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": ["pm.test('200 OK o 400 (token inválido esperado sin token real)', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"] }}],
-          "request": { "method": "PUT", "header": [],
-            "url": { "raw": "{{baseUrl}}/invitaciones/TOKEN-UUID-AQUI/rechazar?usuarioId=2", "host": ["{{baseUrl}}"],
-              "path": ["invitaciones", "TOKEN-UUID-AQUI", "rechazar"],
-              "query": [{ "key": "usuarioId", "value": "2" }] }}
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK o 400 (token inválido esperado sin token real)', () => pm.expect([200, 400, 404]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invitaciones/TOKEN-UUID-AQUI/rechazar?usuarioId=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitaciones",
+                "TOKEN-UUID-AQUI",
+                "rechazar"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "2"
+                }
+              ]
+            }
+          }
         }
       ]
     },
-
     {
       "name": "10. Logs (Auditoría)",
       "item": [
         {
           "name": "SETUP — Crear competición y equipo para logs",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('Competicion creada (setup)', () => pm.expect([200, 201]).to.include(pm.response.code));",
-              "var j = pm.response.json();",
-              "if (j.id) pm.collectionVariables.set('createdCompeticionId', j.id);"
-            ]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Competicion creada (setup)', () => pm.expect([200, 201]).to.include(pm.response.code));",
+                  "var j = pm.response.json();",
+                  "if (j.id) pm.collectionVariables.set('createdCompeticionId', j.id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\":\"Log Test {{$timestamp}}\",\"descripcion\":\"Setup para logs\",\"deporteId\":1,\"publica\":true,\"inscripcionAbierta\":true,\"configuracion\":{\"formato\":\"LIGA\",\"puntosVictoria\":3,\"puntosEmpate\":1,\"puntosDerrota\":0}}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones?usuarioId={{testUserId}}", "host": ["{{baseUrl}}"], "path": ["competiciones"], "query": [{ "key": "usuarioId", "value": "{{testUserId}}" }] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\":\"Log Test {{$timestamp}}\",\"descripcion\":\"Setup para logs\",\"deporteId\":1,\"publica\":true,\"inscripcionAbierta\":true,\"configuracion\":{\"formato\":\"LIGA\",\"puntosVictoria\":3,\"puntosEmpate\":1,\"puntosDerrota\":0}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones?usuarioId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
           }
         },
         {
           "name": "SETUP — Crear equipo para logs",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('Equipo creado (setup)', () => pm.expect([200, 201]).to.include(pm.response.code));",
-              "var j = pm.response.json();",
-              "if (j.id) pm.collectionVariables.set('createdEquipoId', j.id);"
-            ]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Equipo creado (setup)', () => pm.expect([200, 201]).to.include(pm.response.code));",
+                  "var j = pm.response.json();",
+                  "if (j.id) pm.collectionVariables.set('createdEquipoId', j.id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\":\"Equipo Log Test\",\"descripcion\":\"Setup para logs\",\"tipo\":\"GESTIONADO\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/equipos", "host": ["{{baseUrl}}"], "path": ["equipos"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\":\"Equipo Log Test\",\"descripcion\":\"Setup para logs\",\"tipo\":\"GESTIONADO\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/equipos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipos"
+              ]
+            }
           }
         },
         {
           "name": "SETUP — Esperar log async (actualizar competición)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('Actualizacion OK (genera log EDITAR)', () => pm.expect([200]).to.include(pm.response.code));"
-            ]
-          }}],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Actualizacion OK (genera log EDITAR)', () => pm.expect([200]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"nombre\":\"Log Test Actualizado\"}", "options": { "raw": { "language": "json" }}},
-            "url": { "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}?usuarioId={{testUserId}}", "host": ["{{baseUrl}}"], "path": ["competiciones", "{{createdCompeticionId}}"], "query": [{ "key": "usuarioId", "value": "{{testUserId}}" }] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\":\"Log Test Actualizado\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}?usuarioId={{testUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "competiciones",
+                "{{createdCompeticionId}}"
+              ],
+              "query": [
+                {
+                  "key": "usuarioId",
+                  "value": "{{testUserId}}"
+                }
+              ]
+            }
           }
         },
         {
           "name": "GET Logs de competición (paginado)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('Tiene campo content', () => pm.expect(j).to.have.property('content'));",
-              "pm.test('content es array', () => pm.expect(j.content).to.be.an('array'));",
-              "pm.test('Tiene totalElements', () => pm.expect(j).to.have.property('totalElements'));",
-              "if (j.content.length > 0) {",
-              "  var log = j.content[0];",
-              "  pm.test('Log tiene id', () => pm.expect(log.id).to.be.a('number'));",
-              "  pm.test('Log tiene entidad', () => pm.expect(log.entidad).to.be.a('string'));",
-              "  pm.test('Log tiene accion válida', () => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(log.accion));",
-              "  pm.test('Log tiene fecha', () => pm.expect(log.fecha).to.be.a('string'));",
-              "  pm.test('Log tiene usuarioId', () => pm.expect(log.usuarioId).to.be.a('number'));",
-              "}"
-            ]
-          }}],
-          "request": { "method": "GET", "header": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('Tiene campo content', () => pm.expect(j).to.have.property('content'));",
+                  "pm.test('content es array', () => pm.expect(j.content).to.be.an('array'));",
+                  "pm.test('Tiene totalElements', () => pm.expect(j).to.have.property('totalElements'));",
+                  "if (j.content.length > 0) {",
+                  "  var log = j.content[0];",
+                  "  pm.test('Log tiene id', () => pm.expect(log.id).to.be.a('number'));",
+                  "  pm.test('Log tiene entidad', () => pm.expect(log.entidad).to.be.a('string'));",
+                  "  pm.test('Log tiene accion válida', () => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(log.accion));",
+                  "  pm.test('Log tiene fecha', () => pm.expect(log.fecha).to.be.a('string'));",
+                  "  pm.test('Log tiene usuarioId', () => pm.expect(log.usuarioId).to.be.a('number'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/logs/competicion/{{createdCompeticionId}}?page=0&size=20",
-              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{createdCompeticionId}}"],
-              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logs",
+                "competicion",
+                "{{createdCompeticionId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
             }
           }
         },
         {
           "name": "GET Logs de competición recién creada (verifica CREAR)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('Tiene al menos 1 log', () => pm.expect(j.totalElements).to.be.at.least(1));",
-              "if (j.content.length > 0) {",
-              "  var logs = j.content;",
-              "  var acciones = logs.map(function(l) { return l.accion; });",
-              "  pm.test('Contiene log CREAR', () => pm.expect(acciones).to.include('CREAR'));",
-              "  pm.test('Contiene log EDITAR', () => pm.expect(acciones).to.include('EDITAR'));",
-              "  pm.test('Entidad es Competicion', () => pm.expect(logs[0].entidad).to.eql('Competicion'));",
-              "  pm.test('competicionId coincide', () => pm.expect(logs[0].competicionId).to.eql(parseInt(pm.collectionVariables.get('createdCompeticionId'))));",
-              "  pm.test('usuarioUsername presente', () => pm.expect(logs[0].usuarioUsername).to.be.a('string'));",
-              "  pm.test('competicionNombre presente', () => pm.expect(logs[0].competicionNombre).to.be.a('string'));",
-              "}"
-            ]
-          }}],
-          "request": { "method": "GET", "header": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('Tiene al menos 1 log', () => pm.expect(j.totalElements).to.be.at.least(1));",
+                  "if (j.content.length > 0) {",
+                  "  var logs = j.content;",
+                  "  var acciones = logs.map(function(l) { return l.accion; });",
+                  "  pm.test('Contiene log CREAR', () => pm.expect(acciones).to.include('CREAR'));",
+                  "  pm.test('Contiene log EDITAR', () => pm.expect(acciones).to.include('EDITAR'));",
+                  "  pm.test('Entidad es Competicion', () => pm.expect(logs[0].entidad).to.eql('Competicion'));",
+                  "  pm.test('competicionId coincide', () => pm.expect(logs[0].competicionId).to.eql(parseInt(pm.collectionVariables.get('createdCompeticionId'))));",
+                  "  pm.test('usuarioUsername presente', () => pm.expect(logs[0].usuarioUsername).to.be.a('string'));",
+                  "  pm.test('competicionNombre presente', () => pm.expect(logs[0].competicionNombre).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/logs/competicion/{{createdCompeticionId}}?page=0&size=20",
-              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{createdCompeticionId}}"],
-              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logs",
+                "competicion",
+                "{{createdCompeticionId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
             }
           }
         },
         {
           "name": "GET Logs de usuario",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('Tiene campo content', () => pm.expect(j).to.have.property('content'));",
-              "pm.test('content es array', () => pm.expect(j.content).to.be.an('array'));",
-              "pm.test('Tiene totalElements', () => pm.expect(j).to.have.property('totalElements'));",
-              "if (j.content.length > 0) {",
-              "  var log = j.content[0];",
-              "  pm.test('usuarioId del log coincide', () => pm.expect(log.usuarioId).to.eql(parseInt(pm.collectionVariables.get('testUserId'))));",
-              "  pm.test('Log tiene accion válida', () => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(log.accion));",
-              "}"
-            ]
-          }}],
-          "request": { "method": "GET", "header": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('Tiene campo content', () => pm.expect(j).to.have.property('content'));",
+                  "pm.test('content es array', () => pm.expect(j.content).to.be.an('array'));",
+                  "pm.test('Tiene totalElements', () => pm.expect(j).to.have.property('totalElements'));",
+                  "if (j.content.length > 0) {",
+                  "  var log = j.content[0];",
+                  "  pm.test('usuarioId del log coincide', () => pm.expect(log.usuarioId).to.eql(parseInt(pm.collectionVariables.get('testUserId'))));",
+                  "  pm.test('Log tiene accion válida', () => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(log.accion));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/logs/usuario/{{testUserId}}?page=0&size=20",
-              "host": ["{{baseUrl}}"], "path": ["logs", "usuario", "{{testUserId}}"],
-              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logs",
+                "usuario",
+                "{{testUserId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
             }
           }
         },
         {
           "name": "GET Logs entidad Competicion — historial completo",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('Es array', () => pm.expect(j).to.be.an('array'));",
-              "if (j.length > 0) {",
-              "  pm.test('Todos son de entidad Competicion', () => j.forEach(l => pm.expect(l.entidad).to.eql('Competicion')));",
-              "  pm.test('Acciones válidas', () => j.forEach(l => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(l.accion)));",
-              "}"
-            ]
-          }}],
-          "request": { "method": "GET", "header": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('Es array', () => pm.expect(j).to.be.an('array'));",
+                  "if (j.length > 0) {",
+                  "  pm.test('Todos son de entidad Competicion', () => j.forEach(l => pm.expect(l.entidad).to.eql('Competicion')));",
+                  "  pm.test('Acciones válidas', () => j.forEach(l => pm.expect(['CREAR','EDITAR','ELIMINAR']).to.include(l.accion)));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/logs/entidad/Competicion/{{createdCompeticionId}}",
-              "host": ["{{baseUrl}}"], "path": ["logs", "entidad", "Competicion", "{{createdCompeticionId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logs",
+                "entidad",
+                "Competicion",
+                "{{createdCompeticionId}}"
+              ]
             }
           }
         },
         {
           "name": "GET Logs entidad Competicion — recién creada (campos completos)",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('Es array no vacío', () => pm.expect(j.length).to.be.at.least(1));",
-              "var log = j[j.length - 1];",
-              "pm.test('Último log es CREAR', () => pm.expect(log.accion).to.eql('CREAR'));",
-              "pm.test('Tiene usuarioUsername', () => pm.expect(log.usuarioUsername).to.be.a('string'));",
-              "pm.test('Tiene competicionNombre', () => pm.expect(log.competicionNombre).to.be.a('string'));",
-              "pm.test('Tiene ipAddress', () => pm.expect(log.ipAddress).to.be.a('string'));",
-              "pm.test('datosAnteriores null en CREAR', () => pm.expect(log.datosAnteriores).to.be.null);"
-            ]
-          }}],
-          "request": { "method": "GET", "header": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('Es array no vacío', () => pm.expect(j.length).to.be.at.least(1));",
+                  "var log = j[j.length - 1];",
+                  "pm.test('Último log es CREAR', () => pm.expect(log.accion).to.eql('CREAR'));",
+                  "pm.test('Tiene usuarioUsername', () => pm.expect(log.usuarioUsername).to.be.a('string'));",
+                  "pm.test('Tiene competicionNombre', () => pm.expect(log.competicionNombre).to.be.a('string'));",
+                  "pm.test('Tiene ipAddress', () => pm.expect(log.ipAddress).to.be.a('string'));",
+                  "pm.test('datosAnteriores null en CREAR', () => pm.expect(log.datosAnteriores).to.be.null);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/logs/entidad/Competicion/{{createdCompeticionId}}",
-              "host": ["{{baseUrl}}"], "path": ["logs", "entidad", "Competicion", "{{createdCompeticionId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logs",
+                "entidad",
+                "Competicion",
+                "{{createdCompeticionId}}"
+              ]
             }
           }
         },
         {
           "name": "GET Logs entidad Equipo — recién creado",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('Es array', () => pm.expect(j).to.be.an('array'));",
-              "pm.test('Al menos 1 log (CREAR equipo)', () => pm.expect(j.length).to.be.at.least(1));",
-              "if (j.length > 0) {",
-              "  pm.test('Todos son de entidad Equipo', () => j.forEach(l => pm.expect(l.entidad).to.eql('Equipo')));",
-              "}"
-            ]
-          }}],
-          "request": { "method": "GET", "header": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('Es array', () => pm.expect(j).to.be.an('array'));",
+                  "pm.test('Al menos 1 log (CREAR equipo)', () => pm.expect(j.length).to.be.at.least(1));",
+                  "if (j.length > 0) {",
+                  "  pm.test('Todos son de entidad Equipo', () => j.forEach(l => pm.expect(l.entidad).to.eql('Equipo')));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/logs/entidad/Equipo/{{createdEquipoId}}",
-              "host": ["{{baseUrl}}"], "path": ["logs", "entidad", "Equipo", "{{createdEquipoId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logs",
+                "entidad",
+                "Equipo",
+                "{{createdEquipoId}}"
+              ]
             }
           }
         },
         {
           "name": "GET Logs paginación — size=5",
-          "event": [{ "listen": "test", "script": { "type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "var j = pm.response.json();",
-              "pm.test('pageSize es 5', () => pm.expect(j.pageSize).to.eql(5));",
-              "pm.test('pageNumber es 0', () => pm.expect(j.pageNumber).to.eql(0));",
-              "pm.test('content.length <= 5', () => pm.expect(j.content.length).to.be.at.most(5));",
-              "pm.test('Tiene first y last', () => { pm.expect(j).to.have.property('first'); pm.expect(j).to.have.property('last'); });"
-            ]
-          }}],
-          "request": { "method": "GET", "header": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "var j = pm.response.json();",
+                  "pm.test('pageSize es 5', () => pm.expect(j.pageSize).to.eql(5));",
+                  "pm.test('pageNumber es 0', () => pm.expect(j.pageNumber).to.eql(0));",
+                  "pm.test('content.length <= 5', () => pm.expect(j.content.length).to.be.at.most(5));",
+                  "pm.test('Tiene first y last', () => { pm.expect(j).to.have.property('first'); pm.expect(j).to.have.property('last'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/logs/competicion/{{createdCompeticionId}}?page=0&size=5",
-              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{createdCompeticionId}}"],
-              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "5" }]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logs",
+                "competicion",
+                "{{createdCompeticionId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                }
+              ]
             }
           }
         },
         {
           "name": "GET Logs sin auth → 401/403",
           "event": [
-            { "listen": "prerequest", "script": { "type": "text/javascript",
-              "exec": [
-                "pm.collectionVariables.set('savedToken', pm.collectionVariables.get('accessToken'));",
-                "pm.collectionVariables.set('accessToken', 'INVALID_TOKEN_XYZ');"
-              ]
-            }},
-            { "listen": "test", "script": { "type": "text/javascript",
-              "exec": [
-                "pm.test('401 o 403 sin auth (Spring Security 6 devuelve 403)', () => pm.expect([401, 403]).to.include(pm.response.code));",
-                "pm.collectionVariables.set('accessToken', pm.collectionVariables.get('savedToken'));"
-              ]
-            }}
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('savedToken', pm.collectionVariables.get('accessToken'));",
+                  "pm.collectionVariables.set('accessToken', 'INVALID_TOKEN_XYZ');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 o 403 sin auth (Spring Security 6 devuelve 403)', () => pm.expect([401, 403]).to.include(pm.response.code));",
+                  "pm.collectionVariables.set('accessToken', pm.collectionVariables.get('savedToken'));"
+                ]
+              }
+            }
           ],
-          "request": { "method": "GET", "header": [],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/logs/competicion/{{createdCompeticionId}}",
-              "host": ["{{baseUrl}}"], "path": ["logs", "competicion", "{{createdCompeticionId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logs",
+                "competicion",
+                "{{createdCompeticionId}}"
+              ]
             }
           }
         }
       ]
     }
-
   ]
 }

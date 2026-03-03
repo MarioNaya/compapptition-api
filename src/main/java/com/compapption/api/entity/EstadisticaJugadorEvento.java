@@ -5,6 +5,14 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+/**
+ * Registra el valor de una estadística concreta de un jugador en un evento específico.
+ * Mapeada a la tabla {@code estadistica_jugador_evento}, almacena el valor numérico (BigDecimal)
+ * de un {@link TipoEstadistica} para un {@link Jugador} en un {@link Evento} determinado.
+ * Permite agregar después las estadísticas acumuladas por temporada o competición.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "estadistica_jugador_evento")
 @Getter

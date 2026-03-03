@@ -23,6 +23,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Servicio de gestión de jugadores.
+ *
+ * <p>Ofrece operaciones CRUD sobre la entidad {@code Jugador} (consulta simple y
+ * detalle, búsqueda paginada, creación, actualización y eliminación) además de la
+ * operación de vinculación de un jugador con un {@code Usuario} del sistema.
+ * Todas las mutaciones quedan registradas en el log de auditoría a través de
+ * {@code LogService}.</p>
+ *
+ * @author Mario
+ */
 @Service
 @RequiredArgsConstructor
 public class JugadorService {
@@ -34,8 +45,13 @@ public class JugadorService {
 
     // === CONSULTAS JUGADOR === //
 
-    // Obtener jugador por id con jerarquía de detalle
-
+    /**
+     * Obtiene un jugador en formato simple por su identificador.
+     *
+     * @param id identificador del jugador
+     * @return {@link JugadorSimpleDTO} con los campos básicos del jugador
+     * @throws ResourceNotFoundException si no existe ningún jugador con ese id
+     */
     @Transactional(readOnly = true)
     public JugadorSimpleDTO obtenerPorIdSimple(Long id) {
         Jugador jugador = jugadorRepository.findById(id)
@@ -44,6 +60,13 @@ public class JugadorService {
         return jugadorMapper.toSimpleDTO(jugador);
     }
 
+    /**
+     * Obtiene un jugador en formato detalle por su identificador.
+     *
+     * @param id identificador del jugador
+     * @return {@link JugadorDetalleDTO} con todos los datos del jugador
+     * @throws ResourceNotFoundException si no existe ningún jugador con ese id
+     */
     @Transactional(readOnly = true)
     public JugadorDetalleDTO obtenerPorIdDetalle(Long id) {
         Jugador jugador = jugadorRepository.findById(id)
@@ -52,8 +75,13 @@ public class JugadorService {
         return jugadorMapper.toDetalleDTO(jugador);
     }
 
-    // Búsqueda de jugador por nombre o apellidos con resultado paginado
-
+    /**
+     * Realiza una búsqueda paginada de jugadores por nombre o apellidos.
+     *
+     * @param search   cadena a buscar en nombre o apellidos
+     * @param pageable parámetros de paginación y ordenación
+     * @return {@link PageResponse} con la página de {@link JugadorSimpleDTO} resultante
+     */
     @Transactional(readOnly = true)
     public PageResponse<JugadorSimpleDTO> buscar(String search, Pageable pageable) {
         Page<Jugador> page = jugadorRepository.searchByNombreOrApellidos(search, pageable);
@@ -68,6 +96,11 @@ public class JugadorService {
                 .build();
     }
 
+    /**
+     * Devuelve la lista completa de jugadores registrados en el sistema.
+     *
+     * @return lista de {@link JugadorSimpleDTO} con todos los jugadores
+     */
     @Transactional(readOnly = true)
     public List<JugadorSimpleDTO> obtenerTodos() {
         return jugadorMapper.toSimpleDTOList(jugadorRepository.findAll());
@@ -75,6 +108,17 @@ public class JugadorService {
 
     // === CREAR, ELIMINAR Y ACTUALIZAR JUGADOR === //
 
+    /**
+     * Crea un nuevo jugador y opcionalmente lo vincula a un usuario existente.
+     *
+     * <p>Si se proporciona {@code usuarioId}, verifica que el usuario exista y que no
+     * tenga ya un perfil de jugador asociado antes de vincularlos.</p>
+     *
+     * @param request datos del jugador (nombre, apellidos, dorsal, posición, foto y usuarioId opcional)
+     * @return {@link JugadorDetalleDTO} con el jugador recién creado
+     * @throws ResourceNotFoundException si se indica un usuarioId que no existe
+     * @throws BadRequestException       si el usuario ya tiene un perfil de jugador
+     */
     @Transactional
     public JugadorDetalleDTO crear(JugadorCreateRequest request) {
         Usuario usuario = null;
@@ -103,6 +147,16 @@ public class JugadorService {
         return jugadorMapper.toDetalleDTO(jugador);
     }
 
+    /**
+     * Actualiza los datos de un jugador existente.
+     *
+     * <p>Solo se modifican los campos no nulos del request.</p>
+     *
+     * @param id      identificador del jugador a actualizar
+     * @param request campos a actualizar (nombre, apellidos, dorsal, posición y/o foto)
+     * @return {@link JugadorDetalleDTO} con los datos actualizados
+     * @throws ResourceNotFoundException si no existe ningún jugador con ese id
+     */
     @Transactional
     public JugadorDetalleDTO actualizar(Long id, JugadorUpdateRequest request) {
         Jugador jugador = jugadorRepository.findById(id)
@@ -129,6 +183,13 @@ public class JugadorService {
         return jugadorMapper.toDetalleDTO(jugador);
     }
 
+    /**
+     * Elimina un jugador del sistema tras verificar que no pertenece a ningún equipo.
+     *
+     * @param id identificador del jugador a eliminar
+     * @throws ResourceNotFoundException si no existe ningún jugador con ese id
+     * @throws BadRequestException       si el jugador pertenece a uno o más equipos
+     */
     @Transactional
     public void eliminar(Long id) {
         Jugador jugador = jugadorRepository.findById(id)
@@ -141,6 +202,18 @@ public class JugadorService {
         jugadorRepository.delete(jugador);
     }
 
+    /**
+     * Vincula un jugador existente a un usuario del sistema.
+     *
+     * <p>Verifica que el jugador no tenga ya un usuario vinculado y que el usuario
+     * no tenga ya otro perfil de jugador antes de establecer la relación.</p>
+     *
+     * @param jugadorId identificador del jugador
+     * @param usuarioId identificador del usuario a vincular
+     * @return {@link JugadorUsuarioDTO} con la información del jugador y su usuario vinculado
+     * @throws ResourceNotFoundException si el jugador o el usuario no existen
+     * @throws BadRequestException       si el jugador ya está vinculado a un usuario o el usuario ya tiene perfil de jugador
+     */
     @Transactional
     public JugadorUsuarioDTO vincularUsuario(Long jugadorId, Long usuarioId) {
         Jugador jugador = jugadorRepository.findById(jugadorId)

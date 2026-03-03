@@ -6,6 +6,14 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Representa la asignación de un usuario como manager de un equipo en el contexto de una competición concreta.
+ * Mapeada a la tabla {@code equipo_manager} con restricción de unicidad sobre (equipo_id, competicion_id, usuario_id),
+ * registra la fecha de asignación del rol de gestión.
+ * Se relaciona con {@link Equipo}, {@link Competicion} y {@link Usuario}.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "equipo_manager", uniqueConstraints = @UniqueConstraint(columnNames = {"equipo_id", "competicion_id", "usuario_id"}))
 @Getter

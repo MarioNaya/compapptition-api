@@ -7,6 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de petición de reseteo de contraseña con el token de recuperación y la nueva
+ * contraseña elegida, utilizado en el endpoint POST /auth/reset-password.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

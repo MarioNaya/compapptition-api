@@ -7,6 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO con la vista resumida de un evento/partido, incluyendo jornada, fecha y los equipos
+ * participantes, utilizado en listados de eventos de una competición.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

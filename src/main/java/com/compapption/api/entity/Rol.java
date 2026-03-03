@@ -3,6 +3,14 @@ package com.compapption.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Representa un rol del sistema con comportamiento similar a un enum persistido en base de datos.
+ * Mapeada a la tabla {@code rol}, los valores posibles son: ADMIN_SISTEMA, ADMIN_COMPETICION,
+ * ARBITRO, MANAGER_EQUIPO, JUGADOR e INVITADO.
+ * Es referenciada por {@link UsuarioRolCompeticion} para asignar roles a usuarios en competiciones concretas.
+ *
+ * @author Mario
+ */
 @Entity
 @Table(name = "rol")
 @Getter

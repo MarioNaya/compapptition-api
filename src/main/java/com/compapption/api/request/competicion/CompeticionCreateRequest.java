@@ -11,6 +11,11 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * Petición para crear una competición. Contiene nombre, deporte, configuración de formato y opciones de visibilidad.
+ *
+ * @author Mario
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
