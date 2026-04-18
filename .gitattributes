@@ -1,2 +1,16 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+# GitHub Linguist: excluir HTML autogenerado de la detección de lenguaje
+target/** linguist-vendored
+build/** linguist-vendored
+site/** linguist-vendored
+out/** linguist-vendored
+docs/** linguist-documentation
+**/*.html linguist-documentation
+**/jacoco-report/** linguist-generated
+**/surefire-reports/** linguist-generated
+
+# Marcar explícitamente los lenguajes del proyecto
+*.java linguist-detectable=true
+*.xml linguist-detectable=true

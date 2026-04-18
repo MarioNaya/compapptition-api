@@ -34,3 +34,18 @@ build/
 
 ### Variables de Entorno ###
 .env
+
+### Autogenerados (HTML, reportes, documentación) ###
+site/
+out/
+docs/api/
+coverage/
+jacoco/
+**/jacoco-report/
+surefire-reports/
+**/surefire-reports/
+
+### Logs ###
+*.log
+logs/postman/*.html
+postman/informe.html
