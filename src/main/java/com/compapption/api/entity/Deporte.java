@@ -8,8 +8,8 @@ import java.util.Set;
 
 /**
  * Representa un deporte disponible en el sistema (por ejemplo, fútbol, baloncesto).
- * Mapeada a la tabla {@code deporte}, almacena nombre único, descripción e icono como BLOB,
- * así como un flag de activación.
+ * Mapeada a la tabla {@code deporte}, almacena nombre único, descripción y URL del icono
+ * (hospedado externamente), así como un flag de activación.
  * Se relaciona con {@link TipoEstadistica} para los tipos de estadística propios del deporte
  * y con {@link Competicion} para las competiciones que usan este deporte.
  *
@@ -34,8 +34,8 @@ public class Deporte {
     @Column(length = 255)
     private String descripcion;
 
-    @Column(columnDefinition = "BLOB")
-    private String icono;
+    @Column(name = "icono_url", length = 512)
+    private String iconoUrl;
 
     @Builder.Default
     @Column(nullable = false)

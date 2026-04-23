@@ -40,7 +40,7 @@ public interface EquipoJugadorMapper {
                     "equipoJugador.getDorsalEquipo() : " +
                     "equipoJugador.getJugador().getDorsal())")
     @Mapping(target ="posicion", source = "jugador.posicion")
-    @Mapping(target ="foto", source = "jugador.foto")
+    @Mapping(target ="fotoUrl", source = "jugador.fotoUrl")
     JugadorSimpleDTO toJugadorSimpleDTO(EquipoJugador equipoJugador);
 
     /**

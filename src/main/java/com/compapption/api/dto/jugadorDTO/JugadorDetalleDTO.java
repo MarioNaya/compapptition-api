@@ -24,7 +24,7 @@ public class JugadorDetalleDTO {
     private String apellidos;
     private Integer dorsal;
     private String posicion;
-    private Byte[] foto;
+    private String fotoUrl;
     private Long usuarioId;
     private String usuarioUsername;
     private LocalDateTime fechaCreacion;

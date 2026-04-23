@@ -8,8 +8,8 @@ import java.util.Set;
 
 /**
  * Representa un equipo deportivo dentro del sistema.
- * Mapeada a la tabla {@code equipo}, almacena el nombre, descripción, escudo como BLOB ({@code byte[]})
- * y el tipo de equipo (GESTIONADO o ESTANDAR).
+ * Mapeada a la tabla {@code equipo}, almacena el nombre, descripción, URL del escudo
+ * (hospedado externamente) y el tipo de equipo (GESTIONADO o ESTANDAR).
  * Se relaciona con {@link EquipoJugador}, {@link CompeticionEquipo}, {@link EventoEquipo},
  * {@link EquipoManager} y {@link Clasificacion}.
  *
@@ -34,8 +34,8 @@ public class Equipo {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "escudo_equipo", columnDefinition = "BLOB")
-    private byte[] escudo;
+    @Column(name = "escudo_url", length = 512)
+    private String escudoUrl;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

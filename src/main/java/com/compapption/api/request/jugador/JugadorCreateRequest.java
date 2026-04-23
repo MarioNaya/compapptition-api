@@ -8,7 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Petición para crear un jugador. Contiene nombre, apellidos, dorsal, posición, foto y vinculación opcional a un usuario.
+ * Petición para crear un jugador. Contiene nombre, apellidos, dorsal, posición, URL de la foto
+ * (imagen alojada externamente) y vinculación opcional a un usuario.
  *
  * @author Mario
  */
@@ -30,7 +31,8 @@ public class JugadorCreateRequest {
     @Size(max = 50, message = "La posición no puede exceder 50 caracteres")
     private String posicion;
 
-    private byte[] foto;
+    @Size(max = 512, message = "La URL de la foto no puede exceder 512 caracteres")
+    private String fotoUrl;
 
     private Long usuarioId;
 }

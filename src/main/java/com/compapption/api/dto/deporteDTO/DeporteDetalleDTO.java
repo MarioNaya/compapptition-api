@@ -23,7 +23,7 @@ public class DeporteDetalleDTO {
     private Long id;
     private String nombre;
     private String descripcion;
-    private String icono;
+    private String iconoUrl;
     private Boolean activo;
     private List<TipoEstadisticaDTO> tipoEstadisticas;
 }

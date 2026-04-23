@@ -25,7 +25,7 @@ public class EquipoDetalleDTO {
     private Long id;
     private String nombre;
     private String descripcion;
-    private Byte[] escudo;
+    private String escudoUrl;
     private Equipo.TipoEquipo tipo;
     private LocalDateTime fechaCreacion;
     private Integer numJugadores;

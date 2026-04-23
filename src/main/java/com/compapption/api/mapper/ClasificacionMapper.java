@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * Mapper MapStruct para convertir entre entidades Clasificacion y sus DTOs.
- * Gestiona la transformacion del escudo de {@code byte[]} a Base64 y
- * soporta la actualizacion parcial de la entidad desde un DTO de actualizacion.
+ * Mapea los campos anidados de equipo (nombre, URL del escudo, id) y soporta la
+ * actualizacion parcial de la entidad desde un DTO de actualizacion.
  *
  * @author Mario
  */
@@ -25,13 +25,13 @@ public interface ClasificacionMapper {
 
     /**
      * Convierte una entidad Clasificacion a su DTO de detalle completo.
-     * Mapea los campos anidados de equipo (nombre, escudo, id) y el id de la competicion.
+     * Mapea los campos anidados de equipo (nombre, URL del escudo, id) y el id de la competicion.
      *
      * @param clasificacion entidad de origen
-     * @return DTO con todos los datos de la clasificacion, incluyendo escudo en Base64
+     * @return DTO con todos los datos de la clasificacion, incluyendo la URL del escudo
      */
     @Mapping(target = "equipoNombre", source = "equipo.nombre")
-    @Mapping(target = "equipoEscudo", source = "equipo.escudo")
+    @Mapping(target = "equipoEscudoUrl", source = "equipo.escudoUrl")
     @Mapping(target = "competicionId", source = "competicion.id")
     @Mapping(target = "equipoId", source = "equipo.id")
     ClasificacionDetalleDTO toDetalleDTO(Clasificacion clasificacion);
@@ -78,18 +78,4 @@ public interface ClasificacionMapper {
     @Mapping(target = "competicion", ignore = true)
     @Mapping(target = "equipo", ignore = true)
     void updateEntityFromDTO(ClasificacionUpdateDTO dto, @MappingTarget Clasificacion entity);
-
-    /**
-     * Convierte un array de bytes que representa un escudo a su representacion Base64.
-     * Devuelve {@code null} si el array es nulo o vacio.
-     *
-     * @param escudo imagen del escudo en bytes
-     * @return cadena Base64 del escudo, o null si no hay imagen
-     */
-    default String map(byte[] escudo) {
-        if (escudo == null || escudo.length == 0) {
-            return null;
-        }
-        return java.util.Base64.getEncoder().encodeToString(escudo);
-    }
 }

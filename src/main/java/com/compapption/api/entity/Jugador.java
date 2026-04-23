@@ -11,7 +11,8 @@ import java.util.Set;
 
 /**
  * Representa un jugador deportivo dentro del sistema.
- * Mapeada a la tabla {@code jugador}, almacena nombre, apellidos, dorsal, posición y foto como BLOB ({@code byte[]}).
+ * Mapeada a la tabla {@code jugador}, almacena nombre, apellidos, dorsal, posición y URL
+ * de la foto (hospedada externamente).
  * Puede vincularse opcionalmente a un {@link Usuario} del sistema, y se relaciona con
  * {@link EquipoJugador} para los equipos en los que participa y con {@link EstadisticaJugadorEvento}
  * para las estadísticas por partido.
@@ -43,8 +44,8 @@ public class Jugador {
     @Column(length = 50)
     private String posicion;
 
-    @Column(name = "foto", columnDefinition = "BLOB")
-    private byte[] foto;
+    @Column(name = "foto_url", length = 512)
+    private String fotoUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")

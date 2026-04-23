@@ -5,14 +5,11 @@ import com.compapption.api.dto.clasificacionDTO.ClasificacionUpdateDTO;
 import com.compapption.api.entity.Clasificacion;
 import com.compapption.api.entity.Competicion;
 import com.compapption.api.entity.Equipo;
-import com.compapption.api.mapper.ClasificacionMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,13 +21,13 @@ class ClasificacionMapperTest {
     private ClasificacionMapper mapper;
 
     // =========================================================
-    // toDetalleDTO() — conversión byte[] → Base64 en equipoEscudo
+    // toDetalleDTO() — equipoEscudoUrl se propaga directamente desde Equipo.escudoUrl
     // =========================================================
 
     @Test
-    void toDetalleDTO_conEscudoBytes_convierteABase64() {
-        byte[] escudo = {1, 2, 3, 4};
-        Equipo equipo = Equipo.builder().id(1L).nombre("Test FC").escudo(escudo).build();
+    void toDetalleDTO_conEscudoUrl_propagaLaUrl() {
+        String escudoUrl = "https://cdn.example.com/escudo/test-fc.png";
+        Equipo equipo = Equipo.builder().id(1L).nombre("Test FC").escudoUrl(escudoUrl).build();
         Competicion competicion = Competicion.builder().id(10L).build();
 
         Clasificacion clasificacion = Clasificacion.builder()
@@ -39,13 +36,12 @@ class ClasificacionMapperTest {
 
         ClasificacionDetalleDTO dto = mapper.toDetalleDTO(clasificacion);
 
-        String esperado = Base64.getEncoder().encodeToString(escudo);
-        assertThat(dto.getEquipoEscudo()).isEqualTo(esperado);
+        assertThat(dto.getEquipoEscudoUrl()).isEqualTo(escudoUrl);
     }
 
     @Test
-    void toDetalleDTO_sinEscudo_equipoEscudoEsNull() {
-        Equipo equipo = Equipo.builder().id(1L).nombre("Sin Escudo").escudo(null).build();
+    void toDetalleDTO_sinEscudoUrl_equipoEscudoUrlEsNull() {
+        Equipo equipo = Equipo.builder().id(1L).nombre("Sin Escudo").escudoUrl(null).build();
         Competicion competicion = Competicion.builder().id(10L).build();
 
         Clasificacion clasificacion = Clasificacion.builder()
@@ -54,7 +50,7 @@ class ClasificacionMapperTest {
 
         ClasificacionDetalleDTO dto = mapper.toDetalleDTO(clasificacion);
 
-        assertThat(dto.getEquipoEscudo()).isNull();
+        assertThat(dto.getEquipoEscudoUrl()).isNull();
     }
 
     @Test

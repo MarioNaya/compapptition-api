@@ -12,9 +12,8 @@ import java.util.List;
 
 /**
  * Mapper MapStruct para convertir entre entidades Equipo y sus DTOs.
- * Gestiona la transformacion del escudo de {@code byte[]} a Base64 y
- * el calculo del numero de jugadores activos. Utiliza {@link EquipoJugadorMapper}
- * para mapear la coleccion de jugadores.
+ * Calcula el numero de jugadores activos del equipo y delega en {@link EquipoJugadorMapper}
+ * para mapear la coleccion de jugadores. La URL del escudo se mapea directamente String-a-String.
  *
  * @author Mario
  */
@@ -65,18 +64,4 @@ public interface EquipoMapper {
      * @return lista de DTOs simples
      */
     List<EquipoSimpleDTO> toSimpleDTOList(List<Equipo> equipos);
-
-    /**
-     * Convierte un array de bytes que representa un escudo a su representacion Base64.
-     * Devuelve {@code null} si el array es nulo o vacio.
-     *
-     * @param escudo imagen del escudo en bytes
-     * @return cadena Base64 del escudo, o null si no hay imagen
-     */
-    default String map(byte[] escudo) {
-        if (escudo == null || escudo.length == 0) {
-            return null;
-        }
-        return java.util.Base64.getEncoder().encodeToString(escudo);
-    }
 }

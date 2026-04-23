@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO con los datos básicos de un jugador (nombre, apellidos, dorsal, posición y foto),
+ * DTO con los datos básicos de un jugador (nombre, apellidos, dorsal, posición y URL de la foto),
  * utilizado en listados de jugadores y como referencia embebida en EquipoDetalleDTO.
  *
  * @author Mario
@@ -22,5 +22,5 @@ public class JugadorSimpleDTO {
     private String apellidos;
     private Integer dorsal;
     private String posicion;
-    private Byte[] foto;
+    private String fotoUrl;
 }

@@ -28,7 +28,8 @@ public class JugadorUpdateRequest {
     @Size(max = 50, message = "La posición no puede exceder 50 caracteres")
     private String posicion;
 
-    private byte[] foto;
+    @Size(max = 512, message = "La URL de la foto no puede exceder 512 caracteres")
+    private String fotoUrl;
 
     private Long usuarioId;
 }

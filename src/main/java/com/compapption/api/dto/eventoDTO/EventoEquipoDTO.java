@@ -1,6 +1,5 @@
 package com.compapption.api.dto.eventoDTO;
 
-import com.compapption.api.entity.Equipo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +18,6 @@ import lombok.NoArgsConstructor;
 public class EventoEquipoDTO {
     private Long id;
     private String nombre;
-    private byte[] escudo;
+    private String escudoUrl;
     private Boolean esLocal;
 }

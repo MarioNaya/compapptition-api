@@ -22,7 +22,7 @@ public class ClasificacionDetalleDTO {
     private Long equipoId;
     private Integer temporada;
     private String equipoNombre;
-    private String equipoEscudo;
+    private String equipoEscudoUrl;
     private Integer posicion;
     private Integer puntos;
     private Integer partidosJugados;

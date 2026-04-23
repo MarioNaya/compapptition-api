@@ -8,7 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Petición para crear un equipo. Contiene nombre, descripción y escudo en formato binario.
+ * Petición para crear un equipo. Contiene nombre, descripción y URL del escudo (imagen
+ * alojada externamente, p.ej. Cloudinary).
  *
  * @author Mario
  */
@@ -24,5 +25,6 @@ public class EquipoCreateRequest {
 
     private String descripcion;
 
-    private byte[] escudo;
+    @Size(max = 512, message = "La URL del escudo no puede exceder 512 caracteres")
+    private String escudoUrl;
 }

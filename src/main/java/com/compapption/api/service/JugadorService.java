@@ -138,7 +138,7 @@ public class JugadorService {
                 .apellidos(request.getApellidos())
                 .dorsal(request.getDorsal())
                 .posicion(request.getPosicion())
-                .foto(request.getFoto())
+                .fotoUrl(request.getFotoUrl())
                 .usuario(usuario)
                 .build();
 
@@ -174,8 +174,8 @@ public class JugadorService {
         if (request.getPosicion()!=null){
             jugador.setPosicion(request.getPosicion());
         }
-        if (request.getFoto()!=null){
-            jugador.setFoto(request.getFoto());
+        if (request.getFotoUrl()!=null){
+            jugador.setFotoUrl(request.getFotoUrl());
         }
 
         jugador = jugadorRepository.save(jugador);

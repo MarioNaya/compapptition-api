@@ -27,15 +27,15 @@ public interface EventoMapper {
 
     /**
      * Convierte una entidad EventoEquipo a su DTO de equipo participante en el evento.
-     * Extrae el id, nombre y escudo del equipo, y el flag de local.
+     * Extrae el id, nombre y URL del escudo del equipo, y el flag de local.
      *
      * @param eventoEquipo entidad de relacion evento-equipo de origen
      * @return DTO con los datos del equipo en el contexto del evento
      */
-    @Mapping(target = "id",      source = "equipo.id")
-    @Mapping(target = "nombre",  source = "equipo.nombre")
-    @Mapping(target = "escudo",  source = "equipo.escudo")
-    @Mapping(target = "esLocal", source = "esLocal")
+    @Mapping(target = "id",        source = "equipo.id")
+    @Mapping(target = "nombre",    source = "equipo.nombre")
+    @Mapping(target = "escudoUrl", source = "equipo.escudoUrl")
+    @Mapping(target = "esLocal",   source = "esLocal")
     EventoEquipoDTO toEquipoDTO(EventoEquipo eventoEquipo);
 
     /**

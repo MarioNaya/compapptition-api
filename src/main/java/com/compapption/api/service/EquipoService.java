@@ -166,7 +166,7 @@ public class EquipoService {
         Equipo equipo = Equipo.builder()
                 .nombre(request.getNombre())
                 .descripcion(request.getDescripcion())
-                .escudo(request.getEscudo())
+                .escudoUrl(request.getEscudoUrl())
                 .build();
 
         equipo = equipoRepository.save(equipo);
@@ -215,8 +215,8 @@ public class EquipoService {
         if (request.getDescripcion()!=null){
             equipo.setDescripcion(request.getDescripcion());
         }
-        if (request.getEscudo()!=null){
-            equipo.setEscudo(request.getEscudo());
+        if (request.getEscudoUrl()!=null){
+            equipo.setEscudoUrl(request.getEscudoUrl());
         }
 
         equipo = equipoRepository.save(equipo);
