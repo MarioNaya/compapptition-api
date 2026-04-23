@@ -39,10 +39,12 @@ class EventoServiceTest {
     @Mock private EstadisticaJugadorEventoRepository estadisticaJugadorEventoRepository;
     @Mock private TipoEstadisticaRepository tipoEstadisticaRepository;
     @Mock private JugadorRepository jugadorRepository;
+    @Mock private EquipoManagerRepository equipoManagerRepository;
     @Mock private EventoMapper eventoMapper;
     @Mock private EstadisticaMapper estadisticaMapper;
     @Mock private ClasificacionService clasificacionService;
     @Mock private LogService logService;
+    @Mock private NotificacionService notificacionService;
 
     @InjectMocks private EventoService eventoService;
 

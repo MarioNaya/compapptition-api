@@ -36,6 +36,7 @@ public class AuthResponse {
         private String email;
         private String nombre;
         private String apellidos;
+        private Boolean esAdminSistema;
     }
 
     @Data

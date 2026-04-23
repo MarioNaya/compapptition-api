@@ -38,6 +38,7 @@ class InvitacionServiceTest {
     @Mock private EmailService emailService;
     @Mock private InvitacionMapper invitacionMapper;
     @Mock private LogService logService;
+    @Mock private NotificacionService notificacionService;
 
     @InjectMocks private InvitacionService invitacionService;
 

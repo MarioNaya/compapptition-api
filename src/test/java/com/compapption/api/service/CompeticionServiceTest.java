@@ -29,12 +29,14 @@ class CompeticionServiceTest {
     @Mock private UsuarioRepository usuarioRepository;
     @Mock private CompeticionEquipoRepository competicionEquipoRepository;
     @Mock private EquipoRepository equipoRepository;
+    @Mock private UsuarioRolCompeticionRepository usuarioRolCompeticionRepository;
     @Mock private CompeticionMapper competicionMapper;
     @Mock private EquipoMapper equipoMapper;
     @Mock private ClasificacionService clasificacionService;
     @Mock private ConfiguracionCompeticionService configuracionCompeticionService;
     @Mock private UsuarioRolCompeticionService usuarioRolCompeticionService;
     @Mock private LogService logService;
+    @Mock private NotificacionService notificacionService;
 
     @InjectMocks private CompeticionService competicionService;
 

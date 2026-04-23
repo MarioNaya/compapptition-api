@@ -299,6 +299,7 @@ public class AuthService {
                 .email(usuario.getEmail())
                 .nombre(usuario.getNombre())
                 .apellidos(usuario.getApellidos())
+                .esAdminSistema(Boolean.TRUE.equals(usuario.getEsAdminSistema()))
                 .build();
     }
 

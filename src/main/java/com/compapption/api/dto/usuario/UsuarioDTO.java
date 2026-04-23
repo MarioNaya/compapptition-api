@@ -22,4 +22,5 @@ public class UsuarioDTO {
     private String nombre;
     private String apellidos;
     private Boolean activo;
+    private Boolean esAdminSistema;
 }

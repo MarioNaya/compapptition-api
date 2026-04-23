@@ -23,8 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.compapption.api.service.log.LogService;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Servicio que gestiona el ciclo de vida completo de las competiciones. Implementa la lógica
@@ -45,12 +49,14 @@ public class CompeticionService {
     private final UsuarioRepository usuarioRepository;
     private final CompeticionEquipoRepository competicionEquipoRepository;
     private final EquipoRepository equipoRepository;
+    private final UsuarioRolCompeticionRepository usuarioRolCompeticionRepository;
     private final CompeticionMapper competicionMapper;
     private final EquipoMapper equipoMapper;
     private final ClasificacionService clasificacionService;
     private final ConfiguracionCompeticionService configuracionCompeticionService;
     private final UsuarioRolCompeticionService usuarioRolCompeticionService;
     private final LogService logService;
+    private final NotificacionService notificacionService;
 
     // === CRUD COMPETICIONES === //
 
@@ -236,8 +242,12 @@ public class CompeticionService {
         if (request.getFechaFin() != null){
             competicion.setFechaFin(request.getFechaFin());
         }
+        Competicion.EstadoCompeticion estadoAnterior = competicion.getEstado();
+        boolean activando = false;
         if (request.getEstado() != null){
             validarCambioEstado(competicion, request.getEstado());
+            activando = estadoAnterior != Competicion.EstadoCompeticion.ACTIVA
+                    && request.getEstado() == Competicion.EstadoCompeticion.ACTIVA;
             competicion.setEstado(request.getEstado());
         }
         if (request.getConfiguracion() != null){
@@ -248,6 +258,11 @@ public class CompeticionService {
 
         competicion = competicionRepository.save(competicion);
         logService.registrar("Competicion", competicion.getId(), LogModificacion.AccionLog.EDITAR, null, null, competicion.getId());
+
+        if (activando) {
+            notificarCompeticionActivada(competicion);
+        }
+
         return competicionMapper.toDetalleDTO(competicion);
     }
 
@@ -545,8 +560,39 @@ public class CompeticionService {
         validarPermisoEdicion(competicion, usuarioId);
         validarCambioEstado(competicion, nuevoEstado);
 
+        Competicion.EstadoCompeticion estadoAnterior = competicion.getEstado();
         competicion.setEstado(nuevoEstado);
-        return competicionMapper.toDetalleDTO(competicionRepository.save(competicion));
+        Competicion actualizada = competicionRepository.save(competicion);
+
+        // Notificar a todos los miembros cuando la competición pasa a ACTIVA
+        if (estadoAnterior != Competicion.EstadoCompeticion.ACTIVA
+                && nuevoEstado == Competicion.EstadoCompeticion.ACTIVA) {
+            notificarCompeticionActivada(actualizada);
+        }
+
+        return competicionMapper.toDetalleDTO(actualizada);
+    }
+
+    /**
+     * Notifica a todos los usuarios con algún rol en la competición que esta ha sido activada.
+     * Deduplica por usuarioId para evitar múltiples notificaciones si un usuario tiene varios roles.
+     *
+     * @param competicion competición recién activada
+     */
+    private void notificarCompeticionActivada(Competicion competicion) {
+        Set<Long> destinatarios = new HashSet<>();
+        usuarioRolCompeticionRepository.findByCompeticionId(competicion.getId())
+                .forEach(urc -> {
+                    if (urc.getUsuario() != null) destinatarios.add(urc.getUsuario().getId());
+                });
+
+        for (Long uid : destinatarios) {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("competicionId", competicion.getId());
+            payload.put("competicionNombre", competicion.getNombre());
+            notificacionService.crear(uid,
+                    Notificacion.TipoNotificacion.COMPETICION_ACTIVADA, payload);
+        }
     }
 
     // ==================== GESTIÓN DE USUARIOS ====================

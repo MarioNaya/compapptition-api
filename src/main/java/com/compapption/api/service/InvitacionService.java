@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -44,6 +46,7 @@ public class InvitacionService {
     private final EmailService emailService;
     private final InvitacionMapper invitacionMapper;
     private final LogService logService;
+    private final NotificacionService notificacionService;
 
     public static final List<String> ROLES_VALIDOS = List.of("ADMIN_COMPETICION", "MANAGER_EQUIPO", "JUGADOR");
 
@@ -133,6 +136,15 @@ public class InvitacionService {
                 : (equipo!=null ? equipo.getNombre() : emisor.getUsername());
         emailService.enviarInvitacion(request.getDestinatarioEmail(), nombreContexto, nombreContexto, rol, token);
 
+        // Notificar al destinatario si ya es usuario del sistema
+        if (destinatario != null) {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("invitacionId", invitacion.getId());
+            payload.put("competicionNombre", competicion != null ? competicion.getNombre() : null);
+            notificacionService.crear(destinatario.getId(),
+                    Notificacion.TipoNotificacion.INVITACION_RECIBIDA, payload);
+        }
+
         return invitacionMapper.toDetalleDTO(invitacion);
     }
 
@@ -199,6 +211,17 @@ public class InvitacionService {
         invitacion = invitacionRepository.save(invitacion);
         logService.registrar("Invitacion", invitacion.getId(), LogModificacion.AccionLog.EDITAR, null, null,
                 invitacion.getCompeticion() != null ? invitacion.getCompeticion().getId() : null);
+
+        // Notificar al creador de la competición cuando un equipo es aceptado (MANAGER_EQUIPO)
+        if ("MANAGER_EQUIPO".equals(invitacion.getRolOfrecido())
+                && invitacion.getCompeticion() != null
+                && invitacion.getCompeticion().getCreador() != null) {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("equipoNombre", invitacion.getEquipo() != null ? invitacion.getEquipo().getNombre() : null);
+            payload.put("competicionNombre", invitacion.getCompeticion().getNombre());
+            notificacionService.crear(invitacion.getCompeticion().getCreador().getId(),
+                    Notificacion.TipoNotificacion.EQUIPO_ACEPTADO, payload);
+        }
 
         return invitacionMapper.toDetalleDTO(invitacion);
     }

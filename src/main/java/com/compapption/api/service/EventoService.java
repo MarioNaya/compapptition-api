@@ -22,9 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Servicio que gestiona el ciclo de vida completo de los eventos (partidos) de una
@@ -48,10 +50,12 @@ public class EventoService {
     private final EstadisticaJugadorEventoRepository estadisticaJugadorEventoRepository;
     private final TipoEstadisticaRepository tipoEstadisticaRepository;
     private final JugadorRepository jugadorRepository;
+    private final EquipoManagerRepository equipoManagerRepository;
     private final EventoMapper eventoMapper;
     private final EstadisticaMapper estadisticaMapper;
     private final ClasificacionService clasificacionService;
     private final LogService logService;
+    private final NotificacionService notificacionService;
 
     /// === CONSULTAS EVENTOS === ///
 
@@ -385,7 +389,42 @@ public class EventoService {
         procesarAvancePlayoff(evento);
 
         logService.registrar("Evento", evento.getId(), LogModificacion.AccionLog.EDITAR, null, null, evento.getCompeticion().getId());
+
+        // Notificar a los managers de ambos equipos del resultado registrado
+        notificarResultadoAManagers(evento);
+
         return eventoMapper.toResultadoDTO(evento);
+    }
+
+    /**
+     * Notifica a los managers de los dos equipos participantes del evento que el
+     * resultado ya ha sido registrado. Se deduplica por usuarioId para no duplicar
+     * notificaciones si un manager gestiona ambos equipos.
+     *
+     * @param evento evento finalizado con resultado
+     */
+    private void notificarResultadoAManagers(Evento evento) {
+        if (evento.getCompeticion() == null) return;
+        long competicionId = evento.getCompeticion().getId();
+        String resultado = evento.getResultadoLocal() + "-" + evento.getResultadoVisitante();
+
+        Set<Long> destinatarios = new HashSet<>();
+        for (EventoEquipo ee : evento.getEquipos()) {
+            if (ee.getEquipo() == null) continue;
+            equipoManagerRepository.findByEquipoIdAndCompeticionId(
+                            ee.getEquipo().getId(), competicionId)
+                    .forEach(em -> {
+                        if (em.getUsuario() != null) destinatarios.add(em.getUsuario().getId());
+                    });
+        }
+
+        for (Long uid : destinatarios) {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("eventoId", evento.getId());
+            payload.put("resultado", resultado);
+            notificacionService.crear(uid,
+                    Notificacion.TipoNotificacion.RESULTADO_REGISTRADO, payload);
+        }
     }
 
     /// === LÓGICA DE AVANCE AUTOMÁTICO EN BRACKET PLAYOFF === ///

@@ -113,11 +113,22 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
 
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
-            return Arrays.stream(cookies)
+            String fromCookie = Arrays.stream(cookies)
                     .filter(cookie -> "access_token".equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);
+            if (fromCookie != null) return fromCookie;
+        }
+
+        // Fallback para endpoints SSE (EventSource no permite cabeceras custom):
+        // acepta el token por query param `?token=...` solo en rutas /*/stream.
+        String uri = request.getRequestURI();
+        if (uri != null && uri.endsWith("/stream")) {
+            String queryToken = request.getParameter("token");
+            if (queryToken != null && !queryToken.isBlank()) {
+                return queryToken;
+            }
         }
         return null;
     }
