@@ -1,12 +1,19 @@
 package com.compapption.api.controller;
 
+import com.compapption.api.config.CustomUserDetails;
 import com.compapption.api.dto.estadisticaDTO.EstadisticaAcumuladaDTO;
 import com.compapption.api.dto.estadisticaDTO.EstadisticaJugadorDTO;
+import com.compapption.api.request.estadistica.EstadisticaCreateRequest;
 import com.compapption.api.service.EstadisticaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +33,27 @@ import java.util.List;
 public class EstadisticaController {
 
     private final EstadisticaService estadisticaService;
+
+    /**
+     * POST /estadisticas — registra manualmente la estadística de un jugador en un evento.
+     * <p>
+     * Valida la pertenencia del jugador a alguno de los equipos del evento, la coincidencia del
+     * tipo de estadística con el deporte de la competición, el permiso del usuario autenticado
+     * (ADMIN_SISTEMA, ADMIN_COMPETICION, ARBITRO o MANAGER_EQUIPO del equipo del jugador) y
+     * la coherencia del valor con el {@code TipoValor} de la estadística. Si ya existe un
+     * registro para (evento, jugador, tipo) lo actualiza (upsert).
+     *
+     * @param request     cuerpo con {@code eventoId}, {@code jugadorId}, {@code tipoEstadisticaId} y {@code valor}
+     * @param userDetails principal autenticado extraído del JWT
+     * @return ResponseEntity con el EstadisticaJugadorDTO resultante y estado 201 Created
+     */
+    @PostMapping
+    public ResponseEntity<EstadisticaJugadorDTO> crear(
+            @Valid @RequestBody EstadisticaCreateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        EstadisticaJugadorDTO dto = estadisticaService.registrarEstadistica(request, userDetails.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    }
 
     /**
      * GET /estadisticas/jugador/{jugadorId} — obtiene todas las estadísticas históricas de un jugador.
