@@ -109,6 +109,13 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<!-- Cloudinary (signed upload de imágenes) -->
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http5</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
