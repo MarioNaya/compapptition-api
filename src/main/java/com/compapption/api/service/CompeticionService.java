@@ -175,7 +175,7 @@ public class CompeticionService {
                 .deporte(deporte)
                 .creador(creador)
                 .publica(request.isPublica())
-                .inscripcionAbierta(request.isInscripcionAbierta())
+                .inscripcionAbierta(request.getInscripcionAbierta() == null || request.getInscripcionAbierta())
                 .fechaInicio(request.getFechaInicio())
                 .fechaFin(request.getFechaFin())
                 .estado(Competicion.EstadoCompeticion.BORRADOR)
@@ -346,7 +346,8 @@ public class CompeticionService {
 
         validarPermisoEdicion(competicion, usuarioId);
 
-        if (!competicion.isInscripcionAbierta()) {
+        if (competicion.getEstado() != Competicion.EstadoCompeticion.BORRADOR
+                && !competicion.isInscripcionAbierta()) {
             throw new BadRequestException("Las inscripciones están cerradas");
         }
 

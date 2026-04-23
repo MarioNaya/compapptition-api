@@ -34,7 +34,7 @@ public class CompeticionCreateRequest {
     private Integer temporadaActual;
 
     private boolean publica;
-    private boolean inscripcionAbierta;
+    private Boolean inscripcionAbierta;
     private boolean estadisticasActivas;
 
     private LocalDate fechaInicio;

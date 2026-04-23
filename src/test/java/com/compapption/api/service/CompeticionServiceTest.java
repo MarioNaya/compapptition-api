@@ -118,6 +118,7 @@ class CompeticionServiceTest {
     void altaEquipo_inscripcionCerrada_lanzaBadRequest() {
         Competicion cerrada = Competicion.builder()
                 .id(5L).nombre("Cerrada").creador(creador)
+                .estado(Competicion.EstadoCompeticion.ACTIVA)
                 .inscripcionAbierta(false)
                 .build();
 
