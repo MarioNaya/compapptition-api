@@ -58,6 +58,14 @@ public class ConfiguracionCompeticion {
     @Column(name = "partidos_eliminatoria")
     private Integer partidosEliminatoria = 1;
 
+    /**
+     * Número de grupos en formato GRUPOS_PLAYOFF. Si es {@code null}, el generador
+     * calcula automáticamente un valor basado en el total de equipos inscritos y
+     * el tamaño del playoff. Null para otros formatos.
+     */
+    @Column(name = "num_grupos")
+    private Integer numGrupos;
+
     public enum FormatoCompeticion {
         EVENTO_UNICO,
         LIGA,

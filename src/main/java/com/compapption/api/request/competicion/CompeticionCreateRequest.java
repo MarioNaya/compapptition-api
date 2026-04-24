@@ -54,6 +54,8 @@ public class CompeticionCreateRequest {
         private ConfiguracionCompeticion.FormatoCompeticion formato;
         private Integer numEquiposPlayoff;
         private Integer partidosEliminatoria;
+        /** Solo se usa si formato == GRUPOS_PLAYOFF; null = auto-calcular. */
+        private Integer numGrupos;
     }
 
 }

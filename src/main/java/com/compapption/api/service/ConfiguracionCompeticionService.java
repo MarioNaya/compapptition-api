@@ -50,6 +50,7 @@ public class ConfiguracionCompeticionService {
             if (configRequest.getFormato() != null)        builder.formato(configRequest.getFormato());
             if (configRequest.getNumEquiposPlayoff() != null) builder.numEquiposPlayoff(configRequest.getNumEquiposPlayoff());
             if (configRequest.getPartidosEliminatoria() != null) builder.partidosEliminatoria(configRequest.getPartidosEliminatoria());
+            if (configRequest.getNumGrupos() != null) builder.numGrupos(configRequest.getNumGrupos());
         }
 
         return builder.build();
@@ -78,6 +79,9 @@ public class ConfiguracionCompeticionService {
         }
         if (request.getNumEquiposPlayOff() != null) {
             config.setNumEquiposPlayoff(request.getNumEquiposPlayOff());
+        }
+        if (request.getNumGrupos() != null) {
+            config.setNumGrupos(request.getNumGrupos());
         }
         if (request.getPartidosEliminatoria() != null) {
             config.setPartidosEliminatoria(request.getPartidosEliminatoria());

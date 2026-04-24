@@ -54,7 +54,11 @@ public class GeneradorGruposPlayoff implements GeneradorCalendario {
                                 LocalDateTime fechaInicio,
                                 Integer diasJornada,
                                 ConfiguracionCompeticion config) {
-        int numGrupos = calcularNumGrupos(equipos.size(), config.getNumEquiposPlayoff());
+        // Si el usuario ha fijado el número de grupos en la configuración, se
+        // respeta (validado contra mínimos). Si no, se calcula automáticamente.
+        int numGrupos = (config.getNumGrupos() != null)
+                ? validarNumGrupos(config.getNumGrupos(), equipos.size())
+                : calcularNumGrupos(equipos.size(), config.getNumEquiposPlayoff());
         List<List<Equipo>> grupos = sortearGrupos(equipos, numGrupos);
 
         List<Evento> eventos = new ArrayList<>();
@@ -119,6 +123,27 @@ public class GeneradorGruposPlayoff implements GeneradorCalendario {
         }
         int numGrupos = Math.max(2, numEquiposPlayoff / 2);
         return Math.min(numGrupos, maxGrupos);
+    }
+
+    /**
+     * Valida que el número de grupos solicitado por el usuario sea viable:
+     * al menos 2 grupos y con al menos 3 equipos por grupo para que el
+     * round-robin tenga sentido.
+     *
+     * @throws IllegalStateException si no cumple los límites.
+     */
+    private int validarNumGrupos(int numGrupos, int numEquipos) {
+        if (numGrupos < 2) {
+            throw new IllegalStateException(
+                    "El número de grupos debe ser al menos 2 (solicitados: " + numGrupos + ")");
+        }
+        int maxGrupos = numEquipos / 3;
+        if (numGrupos > maxGrupos) {
+            throw new IllegalStateException(
+                    "Con " + numEquipos + " equipos no se pueden formar " + numGrupos
+                    + " grupos de al menos 3 equipos (máximo permitido: " + maxGrupos + ")");
+        }
+        return numGrupos;
     }
 
 }

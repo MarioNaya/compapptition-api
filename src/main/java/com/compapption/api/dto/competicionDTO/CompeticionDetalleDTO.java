@@ -52,6 +52,8 @@ public class CompeticionDetalleDTO {
         private ConfiguracionCompeticion.FormatoCompeticion formato;
         private Integer numEquiposPlayoff;
         private Integer partidosEliminatoria;
+        /** Solo relevante para formato GRUPOS_PLAYOFF; null = auto-calcular. */
+        private Integer numGrupos;
     }
 
 }
