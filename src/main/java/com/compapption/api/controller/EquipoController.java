@@ -47,7 +47,7 @@ public class EquipoController {
     @GetMapping
     public ResponseEntity<PageResponse<EquipoSimpleDTO>> buscar(
             @RequestParam String search,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(equipoService.buscar(search, pageable));
     }
 

@@ -38,7 +38,7 @@ public class JugadorController {
     @GetMapping("/buscar")
     public ResponseEntity<PageResponse<JugadorSimpleDTO>> buscar(
             @RequestParam String search,
-            @PageableDefault(size = 20)Pageable pageable){
+            @PageableDefault(size = 10)Pageable pageable){
         return ResponseEntity.ok(jugadorService.buscar(search, pageable));
     }
 

@@ -48,7 +48,7 @@ public class CompeticionController {
      */
     @GetMapping("/publicas/simple")
     public ResponseEntity<PageResponse<CompeticionSimpleDTO>> listarPublicasSimple(
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(competicionService.obtenerPublicas(pageable));
     }
 
@@ -62,7 +62,7 @@ public class CompeticionController {
     @GetMapping("/publicas/buscar")
     public ResponseEntity<PageResponse<CompeticionSimpleDTO>> buscarPublicas(
             @RequestParam String search,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(competicionService.buscarPublicas(search, pageable));
     }
 

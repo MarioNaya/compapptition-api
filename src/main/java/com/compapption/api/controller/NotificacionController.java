@@ -41,7 +41,7 @@ public class NotificacionController {
     @GetMapping
     public ResponseEntity<Page<NotificacionDTO>> listar(
             @RequestParam(required = false) Boolean leida,
-            @PageableDefault(size = 20) Pageable pageable,
+            @PageableDefault(size = 10) Pageable pageable,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(notificacionService.listar(userDetails.getId(), pageable, leida));
     }

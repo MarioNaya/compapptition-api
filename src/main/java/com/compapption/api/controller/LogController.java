@@ -41,7 +41,7 @@ public class LogController {
     @PreAuthorize("@rbacService.isAdminCompeticion(#competicionId, authentication)")
     public ResponseEntity<PageResponse<LogDTO>> obtenerPorCompeticion(
             @PathVariable Long competicionId,
-            @PageableDefault(size = 20, sort = "fecha", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "fecha", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(toPageResponse(logService.obtenerPorCompeticion(competicionId, pageable)));
     }
 
@@ -57,7 +57,7 @@ public class LogController {
     @PreAuthorize("hasRole('ADMIN_SISTEMA') or #usuarioId == authentication.principal.id")
     public ResponseEntity<PageResponse<LogDTO>> obtenerPorUsuario(
             @PathVariable Long usuarioId,
-            @PageableDefault(size = 20, sort = "fecha", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "fecha", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(toPageResponse(logService.obtenerPorUsuario(usuarioId, pageable)));
     }
 
