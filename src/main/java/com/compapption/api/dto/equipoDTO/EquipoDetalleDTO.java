@@ -30,5 +30,7 @@ public class EquipoDetalleDTO {
     private LocalDateTime fechaCreacion;
     private Integer numJugadores;
     private List<JugadorSimpleDTO> jugadores;
+    private Long creadorId;
+    private String creadorUsername;
 
 }

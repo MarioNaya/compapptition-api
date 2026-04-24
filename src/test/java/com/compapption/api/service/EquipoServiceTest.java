@@ -1,11 +1,13 @@
 package com.compapption.api.service;
 
+import com.compapption.api.dto.equipoDTO.EquipoSimpleDTO;
 import com.compapption.api.entity.*;
 import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.EquipoMapper;
 import com.compapption.api.mapper.JugadorMapper;
 import com.compapption.api.repository.*;
+import com.compapption.api.request.equipo.EquipoCreateRequest;
 import com.compapption.api.service.log.LogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -164,5 +167,51 @@ class EquipoServiceTest {
         assertThatThrownBy(() -> equipoService.asignarManager(1L, 5L, 20L))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("manager");
+    }
+
+    // =========================================================
+    // crear() — asigna creador
+    // =========================================================
+
+    @Test
+    void crear_asignaCreador() {
+        EquipoCreateRequest request = EquipoCreateRequest.builder()
+                .nombre("Nuevos FC")
+                .descripcion("Equipo recién creado")
+                .escudoUrl("https://cdn.example.com/escudo.png")
+                .build();
+
+        when(usuarioRepository.findById(20L)).thenReturn(Optional.of(usuario));
+        when(equipoRepository.save(any(Equipo.class))).thenAnswer(inv -> {
+            Equipo e = inv.getArgument(0);
+            e.setId(77L);
+            return e;
+        });
+
+        equipoService.crear(request, 20L);
+
+        ArgumentCaptor<Equipo> captor = ArgumentCaptor.forClass(Equipo.class);
+        verify(equipoRepository).save(captor.capture());
+        assertThat(captor.getValue().getCreador()).isEqualTo(usuario);
+        assertThat(captor.getValue().getNombre()).isEqualTo("Nuevos FC");
+    }
+
+    // =========================================================
+    // obtenerPorCreador() — devuelve equipos del usuario
+    // =========================================================
+
+    @Test
+    void obtenerPorCreador_devuelveEquiposDelUsuario() {
+        Equipo eq1 = Equipo.builder().id(1L).nombre("Alpha").creador(usuario).build();
+        Equipo eq2 = Equipo.builder().id(2L).nombre("Beta").creador(usuario).build();
+        when(equipoRepository.findByCreadorId(20L)).thenReturn(List.of(eq1, eq2));
+        when(equipoMapper.toSimpleDTO(eq1)).thenReturn(EquipoSimpleDTO.builder().id(1L).nombre("Alpha").creadorId(20L).build());
+        when(equipoMapper.toSimpleDTO(eq2)).thenReturn(EquipoSimpleDTO.builder().id(2L).nombre("Beta").creadorId(20L).build());
+
+        List<EquipoSimpleDTO> resultado = equipoService.obtenerPorCreador(20L);
+
+        assertThat(resultado).hasSize(2);
+        assertThat(resultado).extracting(EquipoSimpleDTO::getCreadorId).containsOnly(20L);
+        assertThat(resultado).extracting(EquipoSimpleDTO::getNombre).containsExactly("Alpha", "Beta");
     }
 }

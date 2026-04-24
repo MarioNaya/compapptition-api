@@ -21,4 +21,6 @@ public class EquipoSimpleDTO {
     private String nombre;
     private String descripcion;
     private String escudoUrl;
+    private Long creadorId;
+    private String creadorUsername;
 }

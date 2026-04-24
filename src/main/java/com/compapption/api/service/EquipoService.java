@@ -153,20 +153,43 @@ public class EquipoService {
                 .toList();
     }
 
+    /**
+     * Devuelve los equipos creados por un usuario, sin necesidad de que estén
+     * inscritos en ninguna competición. Alimenta la bandeja "Mis equipos" del
+     * dashboard tras la creación de un equipo nuevo.
+     *
+     * @param usuarioId identificador del usuario creador
+     * @return lista de {@link EquipoSimpleDTO} creados por el usuario
+     */
+    @Transactional(readOnly = true)
+    public List<EquipoSimpleDTO> obtenerPorCreador(Long usuarioId){
+        return equipoRepository.findByCreadorId(usuarioId)
+                .stream()
+                .map(equipoMapper::toSimpleDTO)
+                .toList();
+    }
+
     // === CREAR, ELIMINAR Y ACTUALIZAR EQUIPO === //
 
     /**
-     * Crea un nuevo equipo y registra la acción en el log de auditoría.
+     * Crea un nuevo equipo asignando el usuario autenticado como creador y
+     * registra la acción en el log de auditoría.
      *
-     * @param request datos del equipo a crear (nombre, descripción, escudo)
+     * @param request   datos del equipo a crear (nombre, descripción, escudo)
+     * @param creadorId identificador del usuario autenticado que crea el equipo
      * @return {@link EquipoDetalleDTO} con el equipo recién creado
+     * @throws ResourceNotFoundException si el usuario creador no existe
      */
     @Transactional
-    public EquipoDetalleDTO crear(EquipoCreateRequest request) {
+    public EquipoDetalleDTO crear(EquipoCreateRequest request, Long creadorId) {
+        Usuario creador = usuarioRepository.findById(creadorId)
+                .orElseThrow(()-> new ResourceNotFoundException("Usuario", "id", creadorId));
+
         Equipo equipo = Equipo.builder()
                 .nombre(request.getNombre())
                 .descripcion(request.getDescripcion())
                 .escudoUrl(request.getEscudoUrl())
+                .creador(creador)
                 .build();
 
         equipo = equipoRepository.save(equipo);

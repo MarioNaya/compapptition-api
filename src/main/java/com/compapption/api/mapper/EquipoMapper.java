@@ -39,6 +39,8 @@ public interface EquipoMapper {
                     "(int) equipo.getJugadores().stream()" +
                     ".filter(ej -> ej.isActivo()).count() : 0)")
     @Mapping(target = "jugadores", source = "jugadores")
+    @Mapping(target = "creadorId", source = "creador.id")
+    @Mapping(target = "creadorUsername", source = "creador.username")
     EquipoDetalleDTO toDetalleDTO(Equipo equipo);
 
     /**
@@ -47,6 +49,8 @@ public interface EquipoMapper {
      * @param equipo entidad de origen
      * @return DTO con los datos minimos del equipo
      */
+    @Mapping(target = "creadorId", source = "creador.id")
+    @Mapping(target = "creadorUsername", source = "creador.username")
     EquipoSimpleDTO toSimpleDTO(Equipo equipo);
 
     /**

@@ -37,6 +37,10 @@ public class Equipo {
     @Column(name = "escudo_url", length = 512)
     private String escudoUrl;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creador_id")
+    private Usuario creador;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 20)

@@ -1,5 +1,6 @@
 package com.compapption.api.controller;
 
+import com.compapption.api.config.CustomUserDetails;
 import com.compapption.api.dto.equipoDTO.EquipoDetalleDTO;
 import com.compapption.api.dto.equipoDTO.EquipoSimpleDTO;
 import com.compapption.api.dto.jugadorDTO.JugadorDetalleDTO;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -72,6 +74,19 @@ public class EquipoController {
     }
 
     /**
+     * GET /equipos/mis-equipos/creados — obtiene todos los equipos creados por el usuario,
+     * independientemente de si están inscritos o no en una competición. Alimenta la
+     * bandeja "Mis equipos" del dashboard tras crear un equipo nuevo.
+     *
+     * @param id identificador del usuario creador
+     * @return ResponseEntity con la lista de EquipoSimpleDTO creados por el usuario
+     */
+    @GetMapping("mis-equipos/creados")
+    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposCreados(@RequestParam long id) {
+        return ResponseEntity.ok(equipoService.obtenerPorCreador(id));
+    }
+
+    /**
      * GET /equipos/{id}/simple — obtiene la vista resumida de un equipo por su identificador.
      *
      * @param id identificador único del equipo
@@ -94,14 +109,19 @@ public class EquipoController {
     }
 
     /**
-     * POST /equipos — crea un nuevo equipo.
+     * POST /equipos — crea un nuevo equipo. Asigna automáticamente el usuario autenticado
+     * como creador del equipo.
      *
-     * @param request cuerpo con los datos del nuevo equipo (nombre, deporte, tipo, escudo, etc.)
+     * @param request cuerpo con los datos del nuevo equipo (nombre, descripción, escudo)
+     * @param userDetails principal autenticado; su {@code id} se usa como creador del equipo
      * @return ResponseEntity con el EquipoDetalleDTO del equipo creado y estado 201 Created
      */
     @PostMapping
-    public ResponseEntity<EquipoDetalleDTO> crear(@Valid @RequestBody EquipoCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(equipoService.crear(request));
+    public ResponseEntity<EquipoDetalleDTO> crear(
+            @Valid @RequestBody EquipoCreateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(equipoService.crear(request, userDetails.getId()));
     }
 
     /**

@@ -99,4 +99,18 @@ public interface EquipoRepository extends JpaRepository<Equipo, Long> {
      * @return {@code true} si el nombre ya está en uso
      */
     boolean existsByNombre(String nombre);
+
+    /**
+     * Obtiene todos los equipos creados por un usuario concreto, sin necesidad de
+     * inscripción previa en una competición. Se utiliza para poblar la bandeja
+     * "Mis equipos" del dashboard.
+     *
+     * @param usuarioId identificador del usuario creador
+     * @return lista de equipos cuyo {@code creador.id} coincide con el usuario
+     */
+    @Query("SELECT e FROM Equipo e " +
+            "WHERE e.creador.id = :usuarioId")
+    List<Equipo> findByCreadorId(
+            @Param("usuarioId") Long usuarioId
+    );
 }
