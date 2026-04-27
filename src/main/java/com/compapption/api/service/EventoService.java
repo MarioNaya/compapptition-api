@@ -280,6 +280,13 @@ public class EventoService {
             throw new BadRequestException("El equipo local y visitante no pueden ser el mismo");
         }
 
+        // Defensa: si la competición no tiene temporada (datos legacy), inicializarla
+        // a 1 ahora para que el evento y la clasificación queden coherentes.
+        if (competicion.getTemporadaActual() == null) {
+            competicion.setTemporadaActual(1);
+            competicion = competicionRepository.save(competicion);
+        }
+
         Evento evento = Evento.builder()
                 .competicion(competicion)
                 .jornada(request.getJornada())

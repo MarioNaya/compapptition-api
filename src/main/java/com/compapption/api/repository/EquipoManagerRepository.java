@@ -80,6 +80,55 @@ public interface EquipoManagerRepository extends JpaRepository<EquipoManager, Lo
     );
 
     /**
+     * Comprueba si un usuario es manager de un equipo en alguna de sus competiciones.
+     * Se usa en autorización cuando interesa cualquier competición donde el equipo esté inscrito.
+     *
+     * @param equipoId  identificador del equipo
+     * @param usuarioId identificador del usuario candidato a manager
+     * @return {@code true} si el usuario es manager del equipo en alguna competición
+     */
+    boolean existsByEquipoIdAndUsuarioId(long equipoId, long usuarioId);
+
+    /**
+     * Comprueba si un usuario ya es manager de algún equipo distinto del indicado
+     * dentro de una competición concreta. Se usa para impedir que un mismo usuario
+     * gestione varios equipos en la misma competición.
+     *
+     * @param usuarioId         identificador del usuario candidato a manager
+     * @param competicionId     identificador de la competición a vigilar
+     * @param excludingEquipoId equipo a excluir de la búsqueda (el destino de la asignación)
+     * @return {@code true} si el usuario ya gestiona otro equipo en la competición
+     */
+    @Query("SELECT COUNT(em) > 0 FROM EquipoManager em " +
+            "WHERE em.usuario.id = :usuarioId " +
+            "AND em.competicion.id = :competicionId " +
+            "AND em.equipo.id <> :excludingEquipoId")
+    boolean existeManagerEnOtroEquipoDeCompeticion(
+            @Param("usuarioId") long usuarioId,
+            @Param("competicionId") long competicionId,
+            @Param("excludingEquipoId") long excludingEquipoId);
+
+    /**
+     * Devuelve los nombres de las competiciones donde el usuario ya gestiona otro
+     * equipo y donde el equipo destino también está inscrito. Permite aplicar la
+     * regla "un manager por equipo en cada competición" cuando la invitación
+     * MANAGER_EQUIPO no especifica competición.
+     */
+    @Query("SELECT DISTINCT cDestino.nombre FROM CompeticionEquipo ceDestino " +
+            "JOIN ceDestino.competicion cDestino " +
+            "WHERE ceDestino.equipo.id = :equipoDestinoId " +
+            "AND ceDestino.activo = true " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM EquipoManager em " +
+            "  WHERE em.usuario.id = :usuarioId " +
+            "  AND em.equipo.id <> :equipoDestinoId " +
+            "  AND em.competicion.id = cDestino.id" +
+            ")")
+    List<String> competicionesConConflictoManager(
+            @Param("usuarioId") long usuarioId,
+            @Param("equipoDestinoId") long equipoDestinoId);
+
+    /**
      * Elimina todas las asignaciones de managers de un equipo en una competición.
      *
      * @param equipoId      identificador del equipo

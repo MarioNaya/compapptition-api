@@ -77,6 +77,30 @@ public interface JugadorRepository extends JpaRepository<Jugador, Long> {
     );
 
     /**
+     * Busca jugadores inscritos en una competición concreta cuyo nombre o apellidos
+     * coincidan con el texto indicado. El scope evita exponer el censo global de
+     * jugadores: solo devuelve los que están en algún equipo activo de la competición.
+     *
+     * @param competicionId identificador de la competición
+     * @param search        texto a buscar en nombre o apellidos (puede ser cadena vacía)
+     * @param pageable      parámetros de paginación y ordenación
+     * @return página de jugadores activos en la competición que coinciden con la búsqueda
+     */
+    @Query("SELECT DISTINCT j FROM Jugador j " +
+            "JOIN j.equipos ej " +
+            "JOIN ej.equipo.competiciones ce " +
+            "WHERE ce.competicion.id = :competicionId " +
+            "AND ej.activo = true " +
+            "AND ce.activo = true " +
+            "AND (LOWER(j.nombre) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "  OR LOWER(j.apellidos) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Jugador> searchByCompeticionId(
+            @Param("competicionId") Long competicionId,
+            @Param("search") String search,
+            Pageable pageable
+    );
+
+    /**
      * Busca un jugador por su identificador cargando en la misma consulta
      * sus estadísticas y el tipo de cada estadística (evita N+1).
      *

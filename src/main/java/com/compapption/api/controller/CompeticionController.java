@@ -6,11 +6,13 @@ import com.compapption.api.dto.competicionDTO.CompeticionInfoDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionSimpleDTO;
 import com.compapption.api.dto.equipoDTO.EquipoDetalleDTO;
 import com.compapption.api.dto.equipoDTO.EquipoSimpleDTO;
+import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
 import com.compapption.api.entity.Competicion;
 import com.compapption.api.request.competicion.CompeticionCreateRequest;
 import com.compapption.api.request.competicion.CompeticionUpdateRequest;
 import com.compapption.api.request.page.PageResponse;
 import com.compapption.api.service.CompeticionService;
+import com.compapption.api.service.JugadorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,7 @@ import java.util.Map;
 public class CompeticionController {
 
     private final CompeticionService competicionService;
+    private final JugadorService jugadorService;
 
     // ==================== CONSULTAS PÚBLICAS ====================
 
@@ -282,6 +285,31 @@ public class CompeticionController {
             @RequestParam Long usuarioId) {
         competicionService.bajaEquipo(id, equipoId, usuarioId);
         return ResponseEntity.noContent().build();
+    }
+
+    // ==================== JUGADORES (BÚSQUEDA CON SCOPE) ====================
+
+    /**
+     * GET /competiciones/{competicionId}/jugadores/buscar — busca jugadores cuyo
+     * nombre o apellidos coincidan con la cadena indicada, restringiendo el censo
+     * al de la competición. Sustituye al uso del endpoint global
+     * {@code /jugadores/buscar} desde el frontend al añadir un jugador a un equipo,
+     * para no exponer datos de jugadores ajenos a la competición.
+     *
+     * <p>Acceso reservado a miembros de la competición (admin, manager o jugador).</p>
+     *
+     * @param competicionId identificador de la competición
+     * @param search cadena a buscar (puede ser vacía)
+     * @param pageable paginación (por defecto 10 por página)
+     * @return ResponseEntity con la página de JugadorSimpleDTO acotada a la competición
+     */
+    @GetMapping("/{competicionId}/jugadores/buscar")
+    @PreAuthorize("@rbacService.isMiembroCompeticion(#competicionId, authentication)")
+    public ResponseEntity<PageResponse<JugadorSimpleDTO>> buscarJugadores(
+            @PathVariable Long competicionId,
+            @RequestParam(required = false, defaultValue = "") String search,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(jugadorService.buscarPorCompeticion(competicionId, search, pageable));
     }
 
     // ==================== GESTIÓN DE USUARIOS ====================

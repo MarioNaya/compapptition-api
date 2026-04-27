@@ -47,6 +47,7 @@ public interface InvitacionMapper {
      */
     @Mapping(target = "emisorUsername", source = "emisor.username")
     @Mapping(target = "competicionNombre", source = "competicion.nombre")
+    @Mapping(target = "equipoNombre", source = "equipo.nombre")
     InvitacionSimpleDTO toSimpleDTO(Invitacion invitacion);
 
     /**

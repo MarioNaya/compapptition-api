@@ -23,7 +23,14 @@ public class InvitacionSimpleDTO {
     private String emisorUsername;
     private String destinatarioUsername;
     private String competicionNombre;
+    private String equipoNombre;
     private String rolOfrecido;
+    /**
+     * Token de un solo uso que el destinatario usa para aceptar o rechazar la
+     * invitación desde la UI. Solo se expone al destinatario porque las consultas
+     * de pendientes filtran por su email.
+     */
+    private String token;
     private Invitacion.EstadoInvitacion estado;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaExpiracion;

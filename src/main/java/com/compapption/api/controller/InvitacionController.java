@@ -1,5 +1,6 @@
 package com.compapption.api.controller;
 
+import com.compapption.api.config.CustomUserDetails;
 import com.compapption.api.dto.invitacionDTO.InvitacionDetalleDTO;
 import com.compapption.api.dto.invitacionDTO.InvitacionSimpleDTO;
 import com.compapption.api.request.invitacion.InvitacionCreateRequest;
@@ -8,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,19 +30,25 @@ public class InvitacionController {
     private final InvitacionService invitacionService;
 
     /**
-     * POST /invitaciones — crea una nueva invitación para que un usuario se una a una competición.
-     * Genera un token UUID con validez de 7 días y lo asocia al destinatario.
+     * POST /invitaciones — crea una nueva invitación para que un usuario se una a una
+     * competición o un equipo con el rol indicado. Genera un token UUID con validez de
+     * 7 días, notifica al destinatario por email y, si ya está registrado, también vía SSE.
+     * El emisor se toma del JWT, no del query string. La autorización se valida vía RBAC:
+     * para invitar como ADMIN_COMPETICION o MANAGER_EQUIPO se exige ser admin de la
+     * competición; para invitar como JUGADOR, poder gestionar la plantilla del equipo.
      *
-     * @param request cuerpo con los datos de la invitación (competición, destinatario, rol)
-     * @param usuarioId identificador del usuario que envía la invitación
-     * @return ResponseEntity con el InvitacionDetalleDTO de la invitación creada y estado 201 Created
+     * @param request cuerpo con los datos de la invitación (destinatario por email o
+     *                username, competición o equipo, rol)
+     * @param userDetails principal autenticado; su {@code id} se usa como emisor
+     * @return ResponseEntity con el InvitacionDetalleDTO creado y estado 201 Created
      */
     @PostMapping
+    @PreAuthorize("@rbacService.puedeInvitar(#request, authentication)")
     public ResponseEntity<InvitacionDetalleDTO> crear(
             @Valid @RequestBody InvitacionCreateRequest request,
-            @RequestParam Long usuarioId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(invitacionService.crearInvitacion(usuarioId, request));
+                .body(invitacionService.crearInvitacion(userDetails.getId(), request));
     }
 
     /**

@@ -7,6 +7,7 @@ import com.compapption.api.dto.jugadorDTO.JugadorDetalleDTO;
 import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
 import com.compapption.api.request.equipo.EquipoCreateRequest;
 import com.compapption.api.request.equipo.EquipoUpdateRequest;
+import com.compapption.api.request.jugador.JugadorCreateRequest;
 import com.compapption.api.request.page.PageResponse;
 import com.compapption.api.service.EquipoService;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -175,7 +177,32 @@ public class EquipoController {
     }
 
     /**
-     * POST /equipos/{id}/jugadores/{jugadorId} — inscribe un jugador en la plantilla de un equipo.
+     * POST /equipos/{equipoId}/jugadores — crea un jugador "fantasma" (sin cuenta) y lo
+     * inscribe en la plantilla del equipo en un solo paso. Solo permitido para equipos
+     * de tipo {@code ESTANDAR}; en los {@code GESTIONADO} se debe usar el flujo de
+     * invitación. Requiere ser creador del equipo, manager del equipo en alguna de
+     * sus competiciones o admin de alguna competición donde el equipo participa.
+     *
+     * @param equipoId identificador único del equipo
+     * @param request datos del jugador (nombre, apellidos, dorsal, posición, foto). El
+     *                campo {@code usuarioId} se ignora — usa el flujo de vinculación.
+     * @param dorsal dorsal opcional vía query (prevalece sobre el del request)
+     * @return ResponseEntity con el JugadorDetalleDTO creado y estado 201 Created
+     */
+    @PostMapping("/{equipoId}/jugadores")
+    @PreAuthorize("@rbacService.puedeCrearJugadorEnEquipo(#equipoId, authentication)")
+    public ResponseEntity<JugadorDetalleDTO> crearJugadorFantasma(
+            @PathVariable Long equipoId,
+            @Valid @RequestBody JugadorCreateRequest request,
+            @RequestParam(required = false) Integer dorsal) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(equipoService.crearJugadorFantasma(equipoId, request, dorsal));
+    }
+
+    /**
+     * POST /equipos/{id}/jugadores/{jugadorId} — inscribe un jugador existente en la
+     * plantilla. Requiere ser creador del equipo, manager del equipo en alguna de sus
+     * competiciones o admin de una competición donde el equipo participa.
      *
      * @param id identificador único del equipo
      * @param jugadorId identificador del jugador a inscribir
@@ -183,6 +210,7 @@ public class EquipoController {
      * @return ResponseEntity con mensaje de confirmación de inscripción
      */
     @PostMapping("/{id}/jugadores/{jugadorId}")
+    @PreAuthorize("@rbacService.puedeGestionarPlantilla(#id, authentication)")
     public ResponseEntity<Map<String,String>> agregarJugador(
             @PathVariable Long id,
             @PathVariable Long jugadorId,
@@ -192,13 +220,15 @@ public class EquipoController {
     }
 
     /**
-     * DELETE /equipos/{id}/jugadores/{jugadorId} — elimina un jugador de la plantilla de un equipo.
+     * DELETE /equipos/{id}/jugadores/{jugadorId} — da de baja a un jugador de la plantilla.
+     * Mismas reglas de autorización que la inscripción.
      *
      * @param id identificador único del equipo
      * @param jugadorId identificador del jugador a dar de baja
      * @return ResponseEntity vacío con estado 204 No Content
      */
     @DeleteMapping("{id}/jugadores/{jugadorId}")
+    @PreAuthorize("@rbacService.puedeGestionarPlantilla(#id, authentication)")
     public ResponseEntity<Void> quitarJugador(
             @PathVariable Long id,
             @PathVariable Long jugadorId) {

@@ -1,7 +1,12 @@
 package com.compapption.api.service;
 
 import com.compapption.api.config.CustomUserDetails;
+import com.compapption.api.entity.Equipo;
 import com.compapption.api.entity.Rol;
+import com.compapption.api.repository.EquipoManagerRepository;
+import com.compapption.api.repository.EquipoRepository;
+import com.compapption.api.repository.UsuarioRolCompeticionRepository;
+import com.compapption.api.request.invitacion.InvitacionCreateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,9 @@ import java.util.List;
 public class RbacService {
 
     private final UsuarioRolCompeticionService urcService;
+    private final EquipoRepository equipoRepository;
+    private final EquipoManagerRepository equipoManagerRepository;
+    private final UsuarioRolCompeticionRepository urcRepository;
 
     /**
      * Comprueba si el usuario autenticado tiene el rol global {@code ROLE_ADMIN_SISTEMA}.
@@ -94,6 +102,85 @@ public class RbacService {
         Long userId = extractUserId(auth);
         if (userId == null) return false;
         return urcService.esMiembro(userId, competicionId);
+    }
+
+    /**
+     * Comprueba si el usuario puede gestionar la plantilla de un equipo (añadir/quitar
+     * jugadores, asignar dorsales, etc.). Aceptan:
+     * <ul>
+     *   <li>administradores del sistema,</li>
+     *   <li>el creador del equipo,</li>
+     *   <li>cualquier manager del equipo en alguna de sus competiciones,</li>
+     *   <li>cualquier admin de una competición donde el equipo esté inscrito activamente.</li>
+     * </ul>
+     *
+     * @param equipoId identificador del equipo
+     * @param auth     objeto de autenticación de Spring Security
+     * @return {@code true} si el usuario tiene legitimidad para tocar la plantilla
+     */
+    public boolean puedeGestionarPlantilla(Long equipoId, Authentication auth) {
+        if (isAdminSistema(auth)) return true;
+        Long userId = extractUserId(auth);
+        if (userId == null || equipoId == null) return false;
+        return puedeGestionarPlantillaParaUsuario(equipoId, userId);
+    }
+
+    /**
+     * Variante de {@link #puedeGestionarPlantilla(Long, Authentication)} que opera
+     * directamente sobre un identificador de usuario, sin pasar por {@link Authentication}.
+     * Se usa en flujos internos donde el contexto de seguridad no es accesible o donde
+     * interesa preguntar por un usuario distinto del que invoca (p.ej. notificaciones).
+     */
+    public boolean puedeGestionarPlantillaParaUsuario(Long equipoId, Long usuarioId) {
+        if (equipoId == null || usuarioId == null) return false;
+        if (equipoRepository.existsByIdAndCreadorId(equipoId, usuarioId)) return true;
+        if (equipoManagerRepository.existsByEquipoIdAndUsuarioId(equipoId, usuarioId)) return true;
+        return urcRepository.existsAdminCompeticionForEquipo(usuarioId, equipoId);
+    }
+
+    /**
+     * Comprueba si el usuario puede crear un jugador "fantasma" (sin cuenta) en un
+     * equipo. Requiere los mismos permisos que {@link #puedeGestionarPlantilla} y,
+     * además, que el equipo sea de tipo {@link Equipo.TipoEquipo#ESTANDAR}: en los
+     * equipos {@code GESTIONADO} solo se acepta vincular jugadores vía invitación.
+     *
+     * @param equipoId identificador del equipo
+     * @param auth     objeto de autenticación de Spring Security
+     * @return {@code true} si el equipo es ESTANDAR y el usuario puede gestionar plantilla
+     */
+    public boolean puedeCrearJugadorEnEquipo(Long equipoId, Authentication auth) {
+        if (!puedeGestionarPlantilla(equipoId, auth)) return false;
+        return equipoRepository.findById(equipoId)
+                .map(e -> e.getTipo() == Equipo.TipoEquipo.ESTANDAR)
+                .orElse(false);
+    }
+
+    /**
+     * Comprueba si el usuario autenticado puede emitir la invitación descrita en
+     * el request, en función del rol ofrecido y del ámbito (competición/equipo):
+     * <ul>
+     *   <li>{@code ADMIN_COMPETICION} y {@code MANAGER_EQUIPO}: el emisor debe ser
+     *       admin de la competición destino.</li>
+     *   <li>{@code JUGADOR}: el emisor debe poder gestionar la plantilla del equipo
+     *       destino (creador del equipo, manager o admin de alguna de sus
+     *       competiciones).</li>
+     * </ul>
+     * Los administradores del sistema superan la comprobación.
+     *
+     * @param request datos de la invitación a crear
+     * @param auth    objeto de autenticación de Spring Security
+     * @return {@code true} si el usuario está legitimado para emitir la invitación
+     */
+    public boolean puedeInvitar(InvitacionCreateRequest request, Authentication auth) {
+        if (request == null || request.getRolOfrecido() == null) return false;
+        if (isAdminSistema(auth)) return true;
+        return switch (request.getRolOfrecido()) {
+            case "ADMIN_COMPETICION", "MANAGER_EQUIPO" ->
+                    isAdminCompeticion(request.getCompeticionId(), auth);
+            case "JUGADOR" ->
+                    puedeGestionarPlantilla(request.getEquipoId(), auth);
+            default -> false;
+        };
     }
 
     private Long extractUserId(Authentication auth) {

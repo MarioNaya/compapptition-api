@@ -65,6 +65,59 @@ public interface EquipoJugadorRepository extends JpaRepository<EquipoJugador, Lo
     boolean existsByEquipoIdAndJugadorIdAndActivoTrue(long equipoId, long jugadorId);
 
     /**
+     * Comprueba si un usuario ya está inscrito como jugador en algún equipo distinto
+     * del indicado dentro de una competición concreta. Se usa para impedir que un
+     * mismo usuario juegue en varios equipos de la misma competición.
+     *
+     * @param usuarioId        identificador del usuario candidato
+     * @param competicionId    identificador de la competición a vigilar
+     * @param excludingEquipoId equipo a excluir de la búsqueda (el destino de la inscripción)
+     * @return {@code true} si el usuario ya está activo como jugador en otro equipo de la competición
+     */
+    @Query("SELECT COUNT(ej) > 0 FROM EquipoJugador ej " +
+            "JOIN ej.equipo e " +
+            "JOIN e.competiciones ce " +
+            "WHERE ej.jugador.usuario.id = :usuarioId " +
+            "AND ce.competicion.id = :competicionId " +
+            "AND ce.activo = true " +
+            "AND ej.activo = true " +
+            "AND ej.equipo.id <> :excludingEquipoId")
+    boolean existeJugadorEnOtroEquipoDeCompeticion(
+            @Param("usuarioId") long usuarioId,
+            @Param("competicionId") long competicionId,
+            @Param("excludingEquipoId") long excludingEquipoId);
+
+    /**
+     * Devuelve los nombres de las competiciones donde el usuario ya juega en otro equipo
+     * y donde el equipo destino indicado también está inscrito. Permite detectar el
+     * conflicto sin necesidad de conocer una competición concreta de antemano: cuando
+     * la invitación al equipo no especifica competición, esta query aplica la regla
+     * "un usuario por equipo en cada competición" sobre todo el conjunto de
+     * competiciones del equipo.
+     *
+     * @param usuarioId        identificador del usuario candidato
+     * @param equipoDestinoId  equipo al que se quiere inscribir
+     * @return lista de nombres de competiciones donde existe conflicto, vacía si no hay
+     */
+    @Query("SELECT DISTINCT cDestino.nombre FROM CompeticionEquipo ceDestino " +
+            "JOIN ceDestino.competicion cDestino " +
+            "WHERE ceDestino.equipo.id = :equipoDestinoId " +
+            "AND ceDestino.activo = true " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM EquipoJugador ej " +
+            "  JOIN ej.equipo eOtro " +
+            "  JOIN eOtro.competiciones ceOtro " +
+            "  WHERE ej.jugador.usuario.id = :usuarioId " +
+            "  AND ej.activo = true " +
+            "  AND eOtro.id <> :equipoDestinoId " +
+            "  AND ceOtro.activo = true " +
+            "  AND ceOtro.competicion.id = cDestino.id" +
+            ")")
+    List<String> competicionesConConflictoJugador(
+            @Param("usuarioId") long usuarioId,
+            @Param("equipoDestinoId") long equipoDestinoId);
+
+    /**
      * Cuenta el número de jugadores activos en un equipo.
      *
      * @param equipoId identificador del equipo

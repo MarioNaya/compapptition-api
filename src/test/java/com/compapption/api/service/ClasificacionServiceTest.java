@@ -27,6 +27,7 @@ class ClasificacionServiceTest {
     @Mock private CompeticionRepository competicionRepository;
     @Mock private EventoRepository eventoRepository;
     @Mock private EventoEquipoRepository eventoEquipoRepository;
+    @Mock private EquipoRepository equipoRepository;
     @Mock private ClasificacionMapper clasificacionMapper;
 
     @InjectMocks private ClasificacionService clasificacionService;
@@ -292,6 +293,10 @@ class ClasificacionServiceTest {
         when(clasificacionRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
         when(eventoRepository.findFinalizadosByCompeticionIdAndTemporada(1L, 1))
                 .thenReturn(eventos);
+        // Los equipos inscritos coinciden con los que ya tienen clasificación; el
+        // recálculo no debería crear ninguna fila adicional.
+        List<Equipo> equipos = clasificaciones.stream().map(Clasificacion::getEquipo).toList();
+        when(equipoRepository.findByCompeticionId(1L)).thenReturn(equipos);
     }
 
     private Clasificacion clasificacionParaEquipo(Equipo equipo) {

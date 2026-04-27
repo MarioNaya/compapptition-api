@@ -101,6 +101,15 @@ public interface EquipoRepository extends JpaRepository<Equipo, Long> {
     boolean existsByNombre(String nombre);
 
     /**
+     * Comprueba si un usuario es el creador de un equipo concreto.
+     *
+     * @param id        identificador del equipo
+     * @param creadorId identificador del usuario candidato a creador
+     * @return {@code true} si el equipo existe y su creador es ese usuario
+     */
+    boolean existsByIdAndCreadorId(Long id, Long creadorId);
+
+    /**
      * Obtiene todos los equipos creados por un usuario concreto, sin necesidad de
      * inscripción previa en una competición. Se utiliza para poblar la bandeja
      * "Mis equipos" del dashboard.

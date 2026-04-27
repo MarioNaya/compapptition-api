@@ -84,6 +84,21 @@ public class InvitacionService {
             throw new BadRequestException("Se requiere id del equipo para invitar como " + rol);
         }
 
+        // El destinatario puede venir por email o por username. Si llega username y
+        // no email, se resuelve aquí al email registrado del usuario.
+        String destinatarioEmail = request.getDestinatarioEmail();
+        if ((destinatarioEmail == null || destinatarioEmail.isBlank())
+                && request.getDestinatarioUsername() != null
+                && !request.getDestinatarioUsername().isBlank()) {
+            Usuario u = usuarioRepository.findByUsername(request.getDestinatarioUsername())
+                    .orElseThrow(()-> new ResourceNotFoundException("Usuario", "username", request.getDestinatarioUsername()));
+            destinatarioEmail = u.getEmail();
+        }
+        if (destinatarioEmail == null || destinatarioEmail.isBlank()) {
+            throw new BadRequestException("Debes indicar el email o el username del destinatario");
+        }
+        request.setDestinatarioEmail(destinatarioEmail);
+
         Usuario emisor = usuarioRepository.findById(emisorId)
                 .orElseThrow(()-> new ResourceNotFoundException("Usuario", "id", emisorId));
 
@@ -193,12 +208,26 @@ public class InvitacionService {
                 if (invitacion.getCompeticion()==null || invitacion.getEquipo()==null) {
                     throw new BadRequestException("La invitación requiere competición y equipo");
                 }
+                List<String> conflictosManager = equipoManagerRepository
+                        .competicionesConConflictoManager(usuario.getId(), invitacion.getEquipo().getId());
+                if (!conflictosManager.isEmpty()) {
+                    throw new BadRequestException(
+                            "Ya gestionas otro equipo en " + String.join(", ", conflictosManager) +
+                                    "; no puedes ser manager de dos equipos en la misma competición");
+                }
                 asignarRolEncompeticion(usuario, invitacion.getCompeticion(), Rol.RolNombre.MANAGER_EQUIPO);
                 asignarManagerEquipo(usuario, invitacion.getEquipo(), invitacion.getCompeticion());
             }
             case "JUGADOR"-> {
                 if (invitacion.getEquipo()==null) {
                     throw new BadRequestException("La invitación no tiene equipo asociado");
+                }
+                List<String> conflictosJugador = equipoJugadorRepository
+                        .competicionesConConflictoJugador(usuario.getId(), invitacion.getEquipo().getId());
+                if (!conflictosJugador.isEmpty()) {
+                    throw new BadRequestException(
+                            "Ya juegas en otro equipo de " + String.join(", ", conflictosJugador) +
+                                    "; no puedes inscribirte en dos equipos de la misma competición");
                 }
                 Jugador jugador = obtenerOCrearJugador(usuario);
                 agregarJugadorAEquipo(jugador, invitacion.getEquipo());

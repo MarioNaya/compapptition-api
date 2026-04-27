@@ -97,6 +97,31 @@ public class JugadorService {
     }
 
     /**
+     * Búsqueda paginada de jugadores acotada al censo de una competición. Solo
+     * devuelve jugadores que están en algún equipo activo de la competición, lo
+     * que evita exponer el listado global del sistema.
+     *
+     * @param competicionId identificador de la competición
+     * @param search        cadena a buscar (puede ser vacía para devolver todos)
+     * @param pageable      parámetros de paginación y ordenación
+     * @return {@link PageResponse} con la página de {@link JugadorSimpleDTO}
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<JugadorSimpleDTO> buscarPorCompeticion(Long competicionId, String search, Pageable pageable) {
+        String s = search == null ? "" : search;
+        Page<Jugador> page = jugadorRepository.searchByCompeticionId(competicionId, s, pageable);
+        return PageResponse.<JugadorSimpleDTO>builder()
+                .content(jugadorMapper.toSimpleDTOList(page.getContent()))
+                .pageNumber(page.getNumber())
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .first(page.isFirst())
+                .last(page.isLast())
+                .build();
+    }
+
+    /**
      * Devuelve la lista completa de jugadores registrados en el sistema.
      *
      * @return lista de {@link JugadorSimpleDTO} con todos los jugadores

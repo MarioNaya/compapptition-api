@@ -8,7 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Petición para crear una invitación. Contiene el email del destinatario, la competición o equipo al que se invita y el rol ofrecido.
+ * Petición para crear una invitación. Permite identificar al destinatario por
+ * email o por username; debe proporcionarse al menos uno de los dos. También
+ * incluye el ámbito (competición o equipo) y el rol ofrecido.
  *
  * @author Mario
  */
@@ -17,9 +19,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class InvitacionCreateRequest {
-    @NotBlank(message = "El email del destinatario es obligatorio")
+    /**
+     * Email del destinatario. Opcional si se proporciona {@link #destinatarioUsername}.
+     */
     @Email(message = "El email no tiene un formato válido")
     private String destinatarioEmail;
+
+    /**
+     * Username del destinatario. Opcional si se proporciona {@link #destinatarioEmail}.
+     * El servicio resuelve el username al email registrado del usuario.
+     */
+    private String destinatarioUsername;
 
     private Long competicionId;
 

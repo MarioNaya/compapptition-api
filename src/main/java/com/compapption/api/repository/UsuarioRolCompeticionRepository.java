@@ -60,4 +60,25 @@ public interface UsuarioRolCompeticionRepository extends JpaRepository<UsuarioRo
             long competicionId,
             Rol.RolNombre nombre
     );
+
+    /**
+     * Comprueba si un usuario es admin de alguna competición en la que un equipo esté
+     * inscrito activamente. Pregunta de autorización utilizada al gestionar la
+     * plantilla del equipo: cualquier admin de una de sus competiciones puede actuar.
+     *
+     * @param usuarioId identificador del usuario candidato a admin
+     * @param equipoId  identificador del equipo
+     * @return {@code true} si existe al menos una competición activa donde el equipo
+     *         está inscrito y el usuario tiene rol {@code ADMIN_COMPETICION}
+     */
+    @Query("SELECT COUNT(urc) > 0 FROM UsuarioRolCompeticion urc " +
+            "WHERE urc.usuario.id = :usuarioId " +
+            "AND urc.rol.nombre = com.compapption.api.entity.Rol.RolNombre.ADMIN_COMPETICION " +
+            "AND urc.competicion.id IN (" +
+            "  SELECT ce.competicion.id FROM CompeticionEquipo ce " +
+            "  WHERE ce.equipo.id = :equipoId AND ce.activo = true)")
+    boolean existsAdminCompeticionForEquipo(
+            @Param("usuarioId") Long usuarioId,
+            @Param("equipoId") Long equipoId
+    );
 }

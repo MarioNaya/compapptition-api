@@ -189,6 +189,9 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     /**
      * Obtiene los eventos finalizados de una competición en una temporada concreta.
+     * Cuando la temporada solicitada es la primera (valor 1), se incluyen también los
+     * eventos cuya {@code temporada} sea nula, para tolerar registros legacy creados
+     * antes de que el campo fuera obligatorio en el flujo de creación.
      *
      * @param competicionId identificador de la competición
      * @param temporada     número de temporada
@@ -197,7 +200,7 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     @Query("SELECT e FROM Evento e " +
             "WHERE e.competicion.id = :competicionId " +
             "AND e.estado = 'FINALIZADO' " +
-            "AND e.temporada = :temporada")
+            "AND (e.temporada = :temporada OR (:temporada = 1 AND e.temporada IS NULL))")
     List<Evento> findFinalizadosByCompeticionIdAndTemporada(
             @Param("competicionId") Long competicionId,
             @Param("temporada") Integer temporada);

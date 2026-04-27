@@ -8,10 +8,12 @@ import com.compapption.api.mapper.ClasificacionMapper;
 import com.compapption.api.repository.*;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
  *
  * @author Mario
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClasificacionService {
@@ -34,6 +37,7 @@ public class ClasificacionService {
     private final CompeticionRepository competicionRepository;
     private final EventoRepository eventoRepository;
     private final EventoEquipoRepository eventoEquipoRepository;
+    private final EquipoRepository equipoRepository;
     private final ClasificacionMapper clasificacionMapper;
 
     /**
@@ -231,17 +235,62 @@ public class ClasificacionService {
         int puntosEmpate = config.getPuntosEmpate();
         int puntosDerrota = config.getPuntosDerrota();
 
-        // Resetear la clasificación
-        Map<Long, Clasificacion> clasificacionMap = resetearClasificacion(competicionId, competicion.getTemporadaActual());
+        // Defensa: si la temporada actual está a null por datos legacy, normalizar a 1.
+        Integer temporada = competicion.getTemporadaActual();
+        if (temporada == null) {
+            temporada = 1;
+            competicion.setTemporadaActual(temporada);
+            competicionRepository.save(competicion);
+            log.warn("Competición {} sin temporada_actual: normalizada a 1", competicionId);
+        }
 
-        // Calcular los resultados de cada evento finalizado
+        // Resetear las clasificaciones existentes y, además, asegurar que existe una fila
+        // por cada equipo inscrito activo. De este modo, aunque algún equipo se haya
+        // registrado por un flujo que no llamó a inicializarClasificacionEquipo, igual
+        // entra en el cálculo y termina con sus contadores actualizados.
+        Map<Long, Clasificacion> clasificacionMap = resetearClasificacion(competicionId, temporada);
+        int creadas = 0;
+        for (Equipo equipo : equipoRepository.findByCompeticionId(competicionId)) {
+            if (!clasificacionMap.containsKey(equipo.getId())) {
+                Clasificacion nueva = Clasificacion.builder()
+                        .competicion(competicion)
+                        .equipo(equipo)
+                        .temporada(temporada)
+                        .posicion(0)
+                        .puntos(0)
+                        .partidosJugados(0)
+                        .victorias(0)
+                        .empates(0)
+                        .derrotas(0)
+                        .golesFavor(0)
+                        .golesContra(0)
+                        .diferenciaGoles(0)
+                        .build();
+                nueva = clasificacionRepository.save(nueva);
+                clasificacionMap.put(equipo.getId(), nueva);
+                creadas++;
+            }
+        }
+        if (creadas > 0) {
+            log.info("Recalculo competición {}: creadas {} clasificaciones que faltaban", competicionId, creadas);
+        }
+
+        // Calcular los resultados de cada evento finalizado.
+        // Defensa: incluimos eventos cuya temporada coincide y también los que tengan
+        // temporada nula (datos legacy), evitando que un null en BD descarte el partido.
         List<Evento> eventosFinalizados = eventoRepository
-                .findFinalizadosByCompeticionIdAndTemporada(
-                        competicionId,
-                        competicion.getTemporadaActual());
+                .findFinalizadosByCompeticionIdAndTemporada(competicionId, temporada);
 
+        log.debug("Recalculo competición {}: temporada={}, equipos en clasificación={}, eventos finalizados={}",
+                competicionId, temporada, clasificacionMap.size(), eventosFinalizados.size());
+
+        int procesados = 0;
+        int saltados = 0;
         for (Evento evento : eventosFinalizados) {
-            if (evento.getResultadoLocal()==null || evento.getResultadoVisitante()==null) continue;
+            if (evento.getResultadoLocal()==null || evento.getResultadoVisitante()==null) {
+                saltados++;
+                continue;
+            }
 
             List<EventoEquipo> equiposEvento = eventoEquipoRepository.findByEventoId(evento.getId());
             EventoEquipo local = equiposEvento.stream()
@@ -253,12 +302,21 @@ public class ClasificacionService {
                     .findFirst()
                     .orElse(null);
 
-            if (local==null || visitante==null) continue;
+            if (local==null || visitante==null) {
+                log.warn("Evento {} sin equipos local/visitante completos; saltado", evento.getId());
+                saltados++;
+                continue;
+            }
 
             Clasificacion clasificacionLocal = clasificacionMap.get(local.getEquipo().getId());
             Clasificacion clasificacionVisitante = clasificacionMap.get(visitante.getEquipo().getId());
 
-            if (clasificacionLocal==null || clasificacionVisitante==null) continue;
+            if (clasificacionLocal==null || clasificacionVisitante==null) {
+                log.warn("Evento {}: falta clasificación para equipo local {} o visitante {}; saltado",
+                        evento.getId(), local.getEquipo().getId(), visitante.getEquipo().getId());
+                saltados++;
+                continue;
+            }
 
             int golesLocal = evento.getResultadoLocal();
             int golesVisitante = evento.getResultadoVisitante();
@@ -293,7 +351,11 @@ public class ClasificacionService {
                 clasificacionVisitante.setEmpates(clasificacionVisitante.getEmpates() + 1);
                 clasificacionVisitante.setPuntos(clasificacionVisitante.getPuntos() + puntosEmpate);
             }
+            procesados++;
         }
+
+        log.info("Recalculo competición {}: temporada={}, eventos procesados={}, saltados={}",
+                competicionId, temporada, procesados, saltados);
 
         // Extraer lista del map
         List<Clasificacion> clasificaciones = new ArrayList<>(clasificacionMap.values());

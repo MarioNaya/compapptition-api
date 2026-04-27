@@ -12,6 +12,7 @@ import com.compapption.api.mapper.JugadorMapper;
 import com.compapption.api.repository.*;
 import com.compapption.api.request.equipo.EquipoCreateRequest;
 import com.compapption.api.request.equipo.EquipoUpdateRequest;
+import com.compapption.api.request.jugador.JugadorCreateRequest;
 import com.compapption.api.request.page.PageResponse;
 import com.compapption.api.entity.LogModificacion;
 import com.compapption.api.service.log.LogService;
@@ -285,6 +286,62 @@ public class EquipoService {
 
         equipoJugadorRepository.save(equipoJugador);
         logService.registrar("EquipoJugador", jugadorId, LogModificacion.AccionLog.CREAR, null, null, null);
+    }
+
+    /**
+     * Crea un jugador "fantasma" (sin {@link Usuario} asociado) y lo inscribe directamente
+     * en la plantilla del equipo. Solo se permite cuando el equipo es de tipo
+     * {@link Equipo.TipoEquipo#ESTANDAR}: en los equipos {@code GESTIONADO} la
+     * incorporación de jugadores debe pasar por una invitación.
+     *
+     * <p>Cualquier {@code usuarioId} presente en el request se ignora: este endpoint
+     * crea siempre un perfil sin cuenta. Para vincular un usuario al jugador se usa
+     * el flujo de solicitud de vinculación con doble validación.</p>
+     *
+     * @param equipoId identificador del equipo destino
+     * @param request  datos del jugador a crear (nombre, apellidos, dorsal, posición, foto)
+     * @param dorsal   dorsal opcional. Si es {@code null} se usa el {@code dorsal}
+     *                 del request; si ambos están definidos prevalece este parámetro
+     * @return {@link JugadorDetalleDTO} con el jugador creado
+     * @throws ResourceNotFoundException si el equipo no existe
+     * @throws BadRequestException       si el equipo no es ESTANDAR o el dorsal está ocupado
+     */
+    @Transactional
+    public JugadorDetalleDTO crearJugadorFantasma(Long equipoId, JugadorCreateRequest request, Integer dorsal) {
+        Equipo equipo = equipoRepository.findById(equipoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipo", "id", equipoId));
+
+        if (equipo.getTipo() != Equipo.TipoEquipo.ESTANDAR) {
+            throw new BadRequestException("Solo se pueden crear jugadores sin cuenta en equipos ESTANDAR. " +
+                    "Para equipos GESTIONADO usa el flujo de invitación.");
+        }
+
+        Integer dorsalFinal = dorsal != null ? dorsal : request.getDorsal();
+        if (dorsalFinal != null
+                && equipoJugadorRepository.findByEquipoIdAndDorsalEquipo(equipoId, dorsalFinal).isPresent()) {
+            throw new BadRequestException("El dorsal " + dorsalFinal + " ya está asignado");
+        }
+
+        Jugador jugador = Jugador.builder()
+                .nombre(request.getNombre())
+                .apellidos(request.getApellidos())
+                .dorsal(request.getDorsal())
+                .posicion(request.getPosicion())
+                .fotoUrl(request.getFotoUrl())
+                .usuario(null)
+                .build();
+        jugador = jugadorRepository.save(jugador);
+        logService.registrar("Jugador", jugador.getId(), LogModificacion.AccionLog.CREAR, null, null, null);
+
+        EquipoJugador equipoJugador = EquipoJugador.builder()
+                .equipo(equipo)
+                .jugador(jugador)
+                .dorsalEquipo(dorsalFinal)
+                .build();
+        equipoJugadorRepository.save(equipoJugador);
+        logService.registrar("EquipoJugador", jugador.getId(), LogModificacion.AccionLog.CREAR, null, null, null);
+
+        return jugadorMapper.toDetalleDTO(jugador);
     }
 
     /**

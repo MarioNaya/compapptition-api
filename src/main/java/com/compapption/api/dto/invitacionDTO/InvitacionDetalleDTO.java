@@ -29,6 +29,10 @@ public class InvitacionDetalleDTO {
     private Long equipoId;
     private String equipoNombre;
     private String rolOfrecido;
+    /**
+     * Token de un solo uso para aceptar o rechazar la invitación desde la UI.
+     */
+    private String token;
     private Invitacion.EstadoInvitacion estado;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaExpiracion;

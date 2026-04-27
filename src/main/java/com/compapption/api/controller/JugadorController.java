@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -29,13 +30,17 @@ public class JugadorController {
     private final JugadorService jugadorService;
 
     /**
-     * GET /jugadores/buscar — busca jugadores por nombre o criterio con paginación.
+     * GET /jugadores/buscar — búsqueda global de jugadores. Restringida a administradores
+     * del sistema porque expone el censo completo. La búsqueda con scope (la que usa
+     * el frontend al añadir un jugador a un equipo) vive en
+     * {@code GET /competiciones/{competicionId}/jugadores/buscar}.
      *
-     * @param search término de búsqueda para filtrar jugadores
-     * @param pageable parámetros de paginación y ordenación (por defecto 20 por página)
-     * @return ResponseEntity con una página de JugadorSimpleDTO que coinciden con la búsqueda
+     * @param search término de búsqueda
+     * @param pageable parámetros de paginación
+     * @return ResponseEntity con una página de JugadorSimpleDTO
      */
     @GetMapping("/buscar")
+    @PreAuthorize("hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<PageResponse<JugadorSimpleDTO>> buscar(
             @RequestParam String search,
             @PageableDefault(size = 10)Pageable pageable){
@@ -65,12 +70,16 @@ public class JugadorController {
     }
 
     /**
-     * POST /jugadores — crea un nuevo jugador en el sistema.
+     * POST /jugadores — crea un jugador "libre" sin equipo asignado. Restringido a
+     * administradores del sistema. El flujo normal del frontend usa
+     * {@code POST /equipos/{equipoId}/jugadores} (jugador fantasma + alta en plantilla)
+     * o el flujo de invitación.
      *
-     * @param request cuerpo con los datos del nuevo jugador (nombre, posición, datos físicos, etc.)
+     * @param request cuerpo con los datos del nuevo jugador
      * @return ResponseEntity con el JugadorDetalleDTO del jugador creado y estado 201 Created
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<JugadorDetalleDTO> crear(
             @Valid @RequestBody JugadorCreateRequest request){
         return ResponseEntity.status(HttpStatus.CREATED).body(jugadorService.crear(request));
@@ -103,14 +112,16 @@ public class JugadorController {
     }
 
     /**
-     * POST /jugadores/{id}/vincular/{usuarioId} — vincula un jugador con una cuenta de usuario existente.
-     * Permite que el usuario controle su propio perfil de jugador.
+     * POST /jugadores/{id}/vincular/{usuarioId} — vinculación directa de un jugador a un
+     * usuario. Restringido a administradores del sistema; el flujo de usuario debe
+     * pasar por el sistema de solicitudes de vinculación con doble validación.
      *
      * @param id identificador único del jugador
      * @param usuarioId identificador del usuario a vincular con el jugador
-     * @return ResponseEntity con el JugadorUsuarioDTO que refleja la vinculación realizada
+     * @return ResponseEntity con el JugadorUsuarioDTO que refleja la vinculación
      */
     @PostMapping("/{id}/vincular/{usuarioId}")
+    @PreAuthorize("hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<JugadorUsuarioDTO> vincularUsuario(
             @PathVariable Long id,
             @PathVariable Long usuarioId){
