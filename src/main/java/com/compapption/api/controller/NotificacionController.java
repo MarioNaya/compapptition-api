@@ -88,4 +88,34 @@ public class NotificacionController {
     public SseEmitter stream(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return notificacionService.subscribe(userDetails.getId());
     }
+
+    /**
+     * DELETE /notificaciones/{id} — elimina una notificación propia. Útil para
+     * limpiar el dropdown de la campana sin tener que esperar a que prescriba.
+     *
+     * @param id          identificador de la notificación
+     * @param userDetails datos del usuario autenticado
+     * @return respuesta vacía 204 No Content
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        notificacionService.eliminar(id, userDetails.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * DELETE /notificaciones/leidas — elimina todas las notificaciones ya leídas
+     * del usuario logado. Atajo de mantenimiento del histórico.
+     *
+     * @param userDetails datos del usuario autenticado
+     * @return mapa con el número de notificaciones eliminadas
+     */
+    @DeleteMapping("/leidas")
+    public ResponseEntity<Map<String, Integer>> eliminarLeidas(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        int eliminadas = notificacionService.eliminarLeidas(userDetails.getId());
+        return ResponseEntity.ok(Map.of("eliminadas", eliminadas));
+    }
 }

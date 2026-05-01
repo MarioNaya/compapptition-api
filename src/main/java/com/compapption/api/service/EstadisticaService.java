@@ -225,6 +225,13 @@ public class EstadisticaService {
         Evento evento = eventoRepository.findById(request.getEventoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Evento", "id", request.getEventoId()));
 
+        // 1.b Bloqueo de playoff: no se puede registrar estadística mientras la fase
+        // anterior (liga, grupos o ronda previa del bracket) no esté cerrada.
+        if (eventoBloqueado(evento)) {
+            throw new BadRequestException(
+                    "Este partido de playoff no se puede modificar hasta que termine la fase anterior");
+        }
+
         Long competicionId = evento.getCompeticion().getId();
         Long deporteId = evento.getCompeticion().getDeporte().getId();
 
@@ -409,5 +416,22 @@ public class EstadisticaService {
                 .tipoEstadisticaNombre(primera.getTipoEstadistica().getNombre())
                 .total(total)
                 .build();
+    }
+
+    /**
+     * Réplica simplificada de la lógica de bloqueo de playoff que vive en
+     * {@link EventoService#estaBloqueado}. Se mantiene aquí para evitar la
+     * dependencia circular EventoService↔EstadisticaService.
+     */
+    private boolean eventoBloqueado(Evento e) {
+        if (e.getNumeroPartido() == null) return false;
+        Evento ant1 = e.getPartidoAnteriorLocal();
+        Evento ant2 = e.getPartidoAnteriorVisitante();
+        if (ant1 != null && ant1.getEstado() != Evento.EstadoEvento.FINALIZADO) return true;
+        if (ant2 != null && ant2.getEstado() != Evento.EstadoEvento.FINALIZADO) return true;
+        if (ant1 == null && ant2 == null) {
+            return eventoRepository.existsFaseRegularNoFinalizada(e.getCompeticion().getId());
+        }
+        return false;
     }
 }

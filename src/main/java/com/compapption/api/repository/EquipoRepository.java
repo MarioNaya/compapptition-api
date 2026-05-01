@@ -93,6 +93,32 @@ public interface EquipoRepository extends JpaRepository<Equipo, Long> {
     );
 
     /**
+     * Busca equipos públicos por nombre. Alimenta el selector de equipos al
+     * inscribir en una competición: los privados quedan fuera y solo se llega
+     * a ellos por código de invitación.
+     */
+    @Query("SELECT e FROM Equipo e " +
+            "WHERE e.publico = true " +
+            "AND LOWER(e.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))")
+    Page<Equipo> searchPublicosByNombre(
+            @Param("nombre") String nombre,
+            Pageable pageable
+    );
+
+    /**
+     * Localiza un equipo privado por su código de invitación. El admin de
+     * competición lo introduce manualmente cuando el creador del equipo se lo
+     * facilita.
+     */
+    Optional<Equipo> findByCodigoInvitacion(String codigoInvitacion);
+
+    /**
+     * Comprueba si existe ya un equipo con el código indicado. Se usa en la
+     * generación de nuevos códigos para evitar colisiones.
+     */
+    boolean existsByCodigoInvitacion(String codigoInvitacion);
+
+    /**
      * Comprueba si ya existe un equipo con el nombre indicado.
      *
      * @param nombre nombre del equipo a verificar

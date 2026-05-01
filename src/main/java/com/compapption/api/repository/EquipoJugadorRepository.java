@@ -145,4 +145,25 @@ public interface EquipoJugadorRepository extends JpaRepository<EquipoJugador, Lo
             @Param("equipoId") long equipoId,
             @Param("dorsal") int dorsal
     );
+
+    /**
+     * Devuelve los identificadores de usuario de los jugadores activos
+     * inscritos en cualquier equipo activo de la competición. Se usa para
+     * notificar a los jugadores cuando hay novedades de la competición
+     * (registro de resultado, cambio de estado, etc.).
+     *
+     * @param competicionId identificador de la competición
+     * @return lista de {@code usuario.id} (sin duplicados); excluye los
+     *         jugadores fantasma (sin cuenta)
+     */
+    @Query("SELECT DISTINCT ej.jugador.usuario.id FROM EquipoJugador ej " +
+            "JOIN ej.equipo e " +
+            "JOIN e.competiciones ce " +
+            "WHERE ce.competicion.id = :competicionId " +
+            "AND ce.activo = true " +
+            "AND ej.activo = true " +
+            "AND ej.jugador.usuario IS NOT NULL")
+    List<Long> findUsuarioIdsJugadoresActivosByCompeticion(
+            @Param("competicionId") long competicionId
+    );
 }

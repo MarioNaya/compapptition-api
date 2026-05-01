@@ -120,11 +120,11 @@ class MensajeriaServiceTest {
     }
 
     // =========================================================
-    // enviarMensaje — actualiza fechaUltimoMensaje y dispara notificación
+    // enviarMensaje — actualiza fechaUltimoMensaje sin notificación bell
     // =========================================================
 
     @Test
-    void enviarMensaje_flujoFeliz_actualizaFechaYNotificaAlOtro() {
+    void enviarMensaje_flujoFeliz_actualizaFechaSinNotificacion() {
         Conversacion conv = Conversacion.builder().id(1L).usuarioA(alice).usuarioB(bob).build();
         MensajeCreateRequest req = new MensajeCreateRequest("Hola Bob!");
 
@@ -143,11 +143,9 @@ class MensajeriaServiceTest {
         assertThat(conv.getFechaUltimoMensaje()).isNotNull();
         verify(conversacionRepository).save(conv);
 
-        // Se dispara notificación al OTRO usuario (bob, id=2)
-        verify(notificacionService).crear(
-                eq(2L),
-                eq(Notificacion.TipoNotificacion.MENSAJE_RECIBIDO),
-                any(Map.class));
+        // Ya no se dispara notificación tipo MENSAJE_RECIBIDO: la bandeja de
+        // mensajería tiene su propio contador y duplicar el aviso confunde.
+        verify(notificacionService, never()).crear(anyLong(), any(), any());
     }
 
     @Test

@@ -6,8 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO con los datos básicos de un equipo (nombre, descripción y URL del escudo), utilizado
- * en listados de equipos y como referencia ligera en otras entidades.
+ * DTO con los datos básicos de un equipo (nombre, descripción, URL del escudo
+ * y visibilidad público/privado). Utilizado en listados de equipos y como
+ * referencia ligera en otras entidades.
  *
  * @author Mario
  */
@@ -21,6 +22,7 @@ public class EquipoSimpleDTO {
     private String nombre;
     private String descripcion;
     private String escudoUrl;
+    private boolean publico;
     private Long creadorId;
     private String creadorUsername;
 }

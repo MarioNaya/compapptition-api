@@ -58,4 +58,13 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Long
     @Query("UPDATE Notificacion n SET n.leida = true " +
             "WHERE n.destinatario.id = :destinatarioId AND n.leida = false")
     int marcarTodasLeidas(@Param("destinatarioId") Long destinatarioId);
+
+    /**
+     * Elimina todas las notificaciones leídas del destinatario indicado.
+     * Usado por el botón "limpiar leídas" del histórico.
+     */
+    @Modifying
+    @Query("DELETE FROM Notificacion n " +
+            "WHERE n.destinatario.id = :destinatarioId AND n.leida = true")
+    int deleteLeidas(@Param("destinatarioId") Long destinatarioId);
 }

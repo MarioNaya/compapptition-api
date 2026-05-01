@@ -106,6 +106,7 @@ public class JugadorController {
      * @return ResponseEntity vacío con estado 204 No Content
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("@rbacService.puedeEliminarJugador(#id, authentication)")
     public ResponseEntity<Void> eliminar(@PathVariable Long id){
         jugadorService.eliminar(id);
         return ResponseEntity.noContent().build();

@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,6 +49,14 @@ public class EquipoService {
     private final EquipoMapper equipoMapper;
     private final JugadorMapper jugadorMapper;
     private final LogService logService;
+
+    /**
+     * Alfabeto del código de invitación: 32 caracteres legibles
+     * (sin 0/O/1/I/L para evitar confusiones al transcribir).
+     */
+    private static final String CODIGO_ALFABETO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    private static final int CODIGO_LONGITUD = 8;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     // === CONSULTAS EQUIPO === //
 
@@ -108,13 +117,17 @@ public class EquipoService {
     /**
      * Realiza una búsqueda paginada de equipos por nombre.
      *
-     * @param nombre   cadena a buscar (puede ser parcial o nula para devolver todos)
-     * @param pageable parámetros de paginación y ordenación
+     * @param nombre      cadena a buscar (puede ser parcial o nula para devolver todos)
+     * @param soloPublicos si {@code true} excluye los equipos privados; ideal para
+     *                     selectores donde el usuario no debe descubrir equipos ocultos
+     * @param pageable    parámetros de paginación y ordenación
      * @return {@link PageResponse} con la página de {@link EquipoSimpleDTO} resultante
      */
     @Transactional(readOnly = true)
-    public PageResponse<EquipoSimpleDTO> buscar(String nombre, Pageable pageable){
-        Page<Equipo> page = equipoRepository.searchByNombre(nombre, pageable);
+    public PageResponse<EquipoSimpleDTO> buscar(String nombre, boolean soloPublicos, Pageable pageable){
+        Page<Equipo> page = soloPublicos
+                ? equipoRepository.searchPublicosByNombre(nombre, pageable)
+                : equipoRepository.searchByNombre(nombre, pageable);
         return PageResponse.<EquipoSimpleDTO>builder()
                 .content(page.getContent().stream().map(equipoMapper::toSimpleDTO).toList())
                 .pageNumber(page.getNumber())
@@ -124,6 +137,21 @@ public class EquipoService {
                 .first(page.isFirst())
                 .last(page.isLast())
                 .build();
+    }
+
+    /**
+     * Localiza un equipo privado por su código de invitación. Devuelve
+     * {@link EquipoSimpleDTO} para que el admin que va a invitar al equipo
+     * pueda confirmar la elección antes de mandar la invitación.
+     *
+     * @throws ResourceNotFoundException si el código no existe o el equipo es público
+     */
+    @Transactional(readOnly = true)
+    public EquipoSimpleDTO buscarPorCodigo(String codigo){
+        Equipo equipo = equipoRepository.findByCodigoInvitacion(codigo)
+                .filter(e -> !e.isPublico())
+                .orElseThrow(() -> new ResourceNotFoundException("Equipo", "codigoInvitacion", codigo));
+        return equipoMapper.toSimpleDTO(equipo);
     }
 
     /**
@@ -186,11 +214,15 @@ public class EquipoService {
         Usuario creador = usuarioRepository.findById(creadorId)
                 .orElseThrow(()-> new ResourceNotFoundException("Usuario", "id", creadorId));
 
+        boolean publico = request.getPublico() == null || request.getPublico();
+
         Equipo equipo = Equipo.builder()
                 .nombre(request.getNombre())
                 .descripcion(request.getDescripcion())
                 .escudoUrl(request.getEscudoUrl())
                 .creador(creador)
+                .publico(publico)
+                .codigoInvitacion(publico ? null : generarCodigoUnico())
                 .build();
 
         equipo = equipoRepository.save(equipo);
@@ -242,10 +274,55 @@ public class EquipoService {
         if (request.getEscudoUrl()!=null){
             equipo.setEscudoUrl(request.getEscudoUrl());
         }
+        if (request.getPublico() != null && request.getPublico() != equipo.isPublico()) {
+            // público → privado: emitimos un código nuevo; privado → público:
+            // limpiamos el código (deja de ser válido).
+            equipo.setPublico(request.getPublico());
+            equipo.setCodigoInvitacion(request.getPublico() ? null : generarCodigoUnico());
+        }
 
         equipo = equipoRepository.save(equipo);
         logService.registrar("Equipo", equipo.getId(), LogModificacion.AccionLog.EDITAR, null, null, null);
         return equipoMapper.toSimpleDTO(equipo);
+    }
+
+    /**
+     * Regenera el código de invitación de un equipo privado. Útil si el código
+     * actual se ha filtrado y se quiere invalidar.
+     *
+     * @throws BadRequestException       si el equipo es público
+     * @throws ResourceNotFoundException si el equipo no existe
+     */
+    @Transactional
+    public EquipoDetalleDTO regenerarCodigoInvitacion(Long equipoId) {
+        Equipo equipo = equipoRepository.findByIdWithJugadores(equipoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipo", "id", equipoId));
+        if (equipo.isPublico()) {
+            throw new BadRequestException("El equipo es público; no tiene código de invitación");
+        }
+        equipo.setCodigoInvitacion(generarCodigoUnico());
+        equipo = equipoRepository.save(equipo);
+        logService.registrar("Equipo", equipo.getId(), LogModificacion.AccionLog.EDITAR, null, null, null);
+        return equipoMapper.toDetalleDTO(equipo);
+    }
+
+    /**
+     * Genera un código de invitación único de 8 caracteres usando
+     * {@link #CODIGO_ALFABETO}. Reintenta hasta 10 veces si hubiera colisión
+     * con un equipo existente.
+     */
+    private String generarCodigoUnico() {
+        for (int intento = 0; intento < 10; intento++) {
+            StringBuilder sb = new StringBuilder(CODIGO_LONGITUD);
+            for (int i = 0; i < CODIGO_LONGITUD; i++) {
+                sb.append(CODIGO_ALFABETO.charAt(RANDOM.nextInt(CODIGO_ALFABETO.length())));
+            }
+            String candidato = sb.toString();
+            if (!equipoRepository.existsByCodigoInvitacion(candidato)) {
+                return candidato;
+            }
+        }
+        throw new IllegalStateException("No se pudo generar un código de invitación único");
     }
 
     // === GESTIÓN DE USUARIOS === //
@@ -289,14 +366,43 @@ public class EquipoService {
     }
 
     /**
-     * Crea un jugador "fantasma" (sin {@link Usuario} asociado) y lo inscribe directamente
-     * en la plantilla del equipo. Solo se permite cuando el equipo es de tipo
-     * {@link Equipo.TipoEquipo#ESTANDAR}: en los equipos {@code GESTIONADO} la
-     * incorporación de jugadores debe pasar por una invitación.
+     * Actualiza el dorsal de un jugador en un equipo. Permite a managers/admins
+     * cambiarlo sin tener que dar de baja al jugador y volver a inscribirlo.
+     * El dorsal {@code null} libera el slot. Valida que no se choque con el
+     * dorsal de otro jugador activo del equipo.
      *
-     * <p>Cualquier {@code usuarioId} presente en el request se ignora: este endpoint
-     * crea siempre un perfil sin cuenta. Para vincular un usuario al jugador se usa
-     * el flujo de solicitud de vinculación con doble validación.</p>
+     * @param equipoId  identificador del equipo
+     * @param jugadorId identificador del jugador
+     * @param dorsal    nuevo dorsal (puede ser {@code null} para limpiarlo)
+     * @throws ResourceNotFoundException si la relación no existe
+     * @throws BadRequestException       si el dorsal está ocupado por otro jugador
+     */
+    @Transactional
+    public void actualizarDorsal(Long equipoId, Long jugadorId, Integer dorsal) {
+        EquipoJugador relacion = equipoJugadorRepository
+                .findByEquipoIdAndJugadorId(equipoId, jugadorId)
+                .orElseThrow(() -> new ResourceNotFoundException("El jugador no pertenece a este equipo"));
+
+        if (dorsal != null) {
+            equipoJugadorRepository.findByEquipoIdAndDorsalEquipo(equipoId, dorsal)
+                    .ifPresent(otro -> {
+                        if (!otro.getId().equals(relacion.getId())) {
+                            throw new BadRequestException("El dorsal " + dorsal + " ya está asignado");
+                        }
+                    });
+        }
+
+        relacion.setDorsalEquipo(dorsal);
+        equipoJugadorRepository.save(relacion);
+        logService.registrar("EquipoJugador", jugadorId, LogModificacion.AccionLog.EDITAR, null, null, null);
+    }
+
+    /**
+     * Crea un jugador "fantasma" (sin {@link Usuario} asociado) y lo inscribe
+     * directamente en la plantilla del equipo. Cualquier {@code usuarioId}
+     * presente en el request se ignora: este endpoint crea siempre un perfil
+     * sin cuenta. Para vincular un usuario al jugador se usa el flujo de
+     * solicitud de vinculación con doble validación.
      *
      * @param equipoId identificador del equipo destino
      * @param request  datos del jugador a crear (nombre, apellidos, dorsal, posición, foto)
@@ -304,17 +410,12 @@ public class EquipoService {
      *                 del request; si ambos están definidos prevalece este parámetro
      * @return {@link JugadorDetalleDTO} con el jugador creado
      * @throws ResourceNotFoundException si el equipo no existe
-     * @throws BadRequestException       si el equipo no es ESTANDAR o el dorsal está ocupado
+     * @throws BadRequestException       si el dorsal está ocupado en el equipo
      */
     @Transactional
     public JugadorDetalleDTO crearJugadorFantasma(Long equipoId, JugadorCreateRequest request, Integer dorsal) {
         Equipo equipo = equipoRepository.findById(equipoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Equipo", "id", equipoId));
-
-        if (equipo.getTipo() != Equipo.TipoEquipo.ESTANDAR) {
-            throw new BadRequestException("Solo se pueden crear jugadores sin cuenta en equipos ESTANDAR. " +
-                    "Para equipos GESTIONADO usa el flujo de invitación.");
-        }
 
         Integer dorsalFinal = dorsal != null ? dorsal : request.getDorsal();
         if (dorsalFinal != null

@@ -39,4 +39,12 @@ public class EventoDetalleDTO {
     private Long partidoAnteriorLocalId;
     private Long partidoAnteriorVisitanteId;
     private Integer numeroPartido;
+
+    /**
+     * Indica si el partido es de playoff y depende de una fase aún no terminada
+     * (liga, grupos o ronda anterior del bracket). Cuando es {@code true} el
+     * frontend debe deshabilitar la edición y el backend rechaza mutaciones
+     * sobre el evento.
+     */
+    private boolean bloqueado;
 }

@@ -40,17 +40,35 @@ public class EquipoController {
     /// === END POINTS CRUD === ///
 
     /**
-     * GET /equipos — busca equipos por nombre o criterio de búsqueda con paginación.
+     * GET /equipos — busca equipos por nombre con paginación. Por defecto solo
+     * devuelve equipos públicos para alimentar el selector de inscripción en
+     * competiciones; con {@code soloPublicos=false} incluye también los privados
+     * (uso administrativo).
      *
-     * @param search término de búsqueda para filtrar equipos por nombre
-     * @param pageable parámetros de paginación y ordenación (por defecto 20 por página)
+     * @param search        término de búsqueda para filtrar equipos por nombre
+     * @param soloPublicos  si {@code true} (por defecto) omite los privados
+     * @param pageable      parámetros de paginación y ordenación
      * @return ResponseEntity con una página de EquipoSimpleDTO que coinciden con la búsqueda
      */
     @GetMapping
     public ResponseEntity<PageResponse<EquipoSimpleDTO>> buscar(
             @RequestParam String search,
+            @RequestParam(defaultValue = "true") boolean soloPublicos,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(equipoService.buscar(search, pageable));
+        return ResponseEntity.ok(equipoService.buscar(search, soloPublicos, pageable));
+    }
+
+    /**
+     * GET /equipos/codigo/{codigo} — localiza un equipo privado por su código
+     * de invitación. Devuelve los datos básicos para que el admin que va a
+     * invitar pueda confirmar la elección antes de mandar la invitación.
+     *
+     * @param codigo código compartido por el creador del equipo
+     * @return ResponseEntity con el EquipoSimpleDTO del equipo
+     */
+    @GetMapping("/codigo/{codigo}")
+    public ResponseEntity<EquipoSimpleDTO> buscarPorCodigo(@PathVariable String codigo) {
+        return ResponseEntity.ok(equipoService.buscarPorCodigo(codigo));
     }
 
     /**
@@ -178,10 +196,9 @@ public class EquipoController {
 
     /**
      * POST /equipos/{equipoId}/jugadores — crea un jugador "fantasma" (sin cuenta) y lo
-     * inscribe en la plantilla del equipo en un solo paso. Solo permitido para equipos
-     * de tipo {@code ESTANDAR}; en los {@code GESTIONADO} se debe usar el flujo de
-     * invitación. Requiere ser creador del equipo, manager del equipo en alguna de
-     * sus competiciones o admin de alguna competición donde el equipo participa.
+     * inscribe en la plantilla del equipo en un solo paso. Requiere ser creador del
+     * equipo, manager del equipo en alguna de sus competiciones o admin de alguna
+     * competición donde el equipo participa.
      *
      * @param equipoId identificador único del equipo
      * @param request datos del jugador (nombre, apellidos, dorsal, posición, foto). El
@@ -234,6 +251,43 @@ public class EquipoController {
             @PathVariable Long jugadorId) {
         equipoService.quitarJugador(id, jugadorId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * PATCH /equipos/{id}/jugadores/{jugadorId}/dorsal — actualiza el dorsal
+     * de un jugador del equipo. Mismas reglas de autorización que la inscripción.
+     * Si {@code dorsal} no se pasa, se limpia el valor.
+     *
+     * @param id        identificador del equipo
+     * @param jugadorId identificador del jugador
+     * @param dorsal    nuevo dorsal (opcional; si se omite se borra)
+     * @return ResponseEntity con un mensaje de confirmación
+     */
+    @PatchMapping("/{id}/jugadores/{jugadorId}/dorsal")
+    @PreAuthorize("@rbacService.puedeGestionarPlantilla(#id, authentication)")
+    public ResponseEntity<Map<String, String>> actualizarDorsal(
+            @PathVariable Long id,
+            @PathVariable Long jugadorId,
+            @RequestParam(required = false) Integer dorsal) {
+        equipoService.actualizarDorsal(id, jugadorId, dorsal);
+        return ResponseEntity.ok(Map.of("message", "Dorsal actualizado"));
+    }
+
+    /// === CÓDIGO DE INVITACIÓN === ///
+
+    /**
+     * POST /equipos/{id}/codigo-invitacion/regenerar — emite un código de
+     * invitación nuevo para un equipo privado. El antiguo deja de ser válido.
+     * Requiere los mismos permisos que la gestión de plantilla (creador,
+     * manager o admin de comp donde participa).
+     *
+     * @param id identificador del equipo privado
+     * @return EquipoDetalleDTO con el nuevo código generado
+     */
+    @PostMapping("/{id}/codigo-invitacion/regenerar")
+    @PreAuthorize("@rbacService.puedeGestionarPlantilla(#id, authentication)")
+    public ResponseEntity<EquipoDetalleDTO> regenerarCodigoInvitacion(@PathVariable Long id) {
+        return ResponseEntity.ok(equipoService.regenerarCodigoInvitacion(id));
     }
 
     /// === AÑADIR MANAGER === ///

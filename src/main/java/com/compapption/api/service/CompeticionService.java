@@ -4,6 +4,7 @@ import com.compapption.api.dto.UsuarioRolCompeticion.UsuarioRolCompeticionDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionDetalleDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionInfoDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionSimpleDTO;
+import com.compapption.api.dto.competicionDTO.MisCompeticionesPorRolDTO;
 import com.compapption.api.dto.equipoDTO.EquipoDetalleDTO;
 import com.compapption.api.dto.equipoDTO.EquipoSimpleDTO;
 import com.compapption.api.entity.*;
@@ -153,6 +154,31 @@ public class CompeticionService {
     public List<CompeticionSimpleDTO> obtenerPorCreador(Long usuarioId){
         List<Competicion> competiciones = competicionRepository.findByCreadorId(usuarioId);
         return competicionMapper.toSimpleDTOList(competiciones);
+    }
+
+    /**
+     * Devuelve las competiciones del usuario agrupadas por el rol con el que
+     * participa: admin, manager de equipo, árbitro y jugador. Para los tres
+     * primeros roles consulta {@link UsuarioRolCompeticion}; para jugador usa
+     * la relación equipo-jugador, ya que el flujo de invitación JUGADOR no
+     * crea una entrada de rol-competición.
+     *
+     * @param usuarioId identificador del usuario
+     * @return DTO con cuatro listas (puede haber solapamiento si el usuario
+     *         tiene varios roles en la misma competición)
+     */
+    @Transactional(readOnly = true)
+    public MisCompeticionesPorRolDTO obtenerMisCompeticionesPorRol(Long usuarioId){
+        return MisCompeticionesPorRolDTO.builder()
+                .admin(competicionMapper.toSimpleDTOList(
+                        competicionRepository.findByUsuarioYRol(usuarioId, Rol.RolNombre.ADMIN_COMPETICION)))
+                .manager(competicionMapper.toSimpleDTOList(
+                        competicionRepository.findByUsuarioYRol(usuarioId, Rol.RolNombre.MANAGER_EQUIPO)))
+                .arbitro(competicionMapper.toSimpleDTOList(
+                        competicionRepository.findByUsuarioYRol(usuarioId, Rol.RolNombre.ARBITRO)))
+                .jugador(competicionMapper.toSimpleDTOList(
+                        competicionRepository.findByJugadorUsuarioId(usuarioId)))
+                .build();
     }
 
     // Creación //

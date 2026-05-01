@@ -256,4 +256,19 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             @Param("competicionId") Long competicionId,
             @Param("equipo1Id") Long equipo1Id,
             @Param("equipo2Id") Long equipo2Id);
+
+    /**
+     * Indica si la fase regular (eventos con {@code numeroPartido IS NULL}) de una
+     * competición sigue teniendo partidos no finalizados. Permite bloquear la
+     * edición de los partidos de playoff hasta que termine la liga o la fase de
+     * grupos.
+     *
+     * @param competicionId identificador de la competición
+     * @return {@code true} si queda al menos un evento de fase regular no finalizado
+     */
+    @Query("SELECT COUNT(e) > 0 FROM Evento e " +
+            "WHERE e.competicion.id = :competicionId " +
+            "AND e.numeroPartido IS NULL " +
+            "AND e.estado <> com.compapption.api.entity.Evento.EstadoEvento.FINALIZADO")
+    boolean existsFaseRegularNoFinalizada(@Param("competicionId") Long competicionId);
 }

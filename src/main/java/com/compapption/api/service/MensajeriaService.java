@@ -160,12 +160,10 @@ public class MensajeriaService {
         conversacion.setFechaUltimoMensaje(LocalDateTime.now());
         conversacionRepository.save(conversacion);
 
-        // Notificar al otro participante
-        Long otroUsuarioId = obtenerOtroUsuarioId(conversacion, autorId);
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("conversacionId", conversacion.getId());
-        payload.put("autorUsername", autor.getUsername());
-        notificacionService.crear(otroUsuarioId, Notificacion.TipoNotificacion.MENSAJE_RECIBIDO, payload);
+        // No emitimos notificación tipo MENSAJE_RECIBIDO: la bandeja de
+        // mensajería ya muestra el contador y duplicar el aviso en la campana
+        // resulta confuso. Si en el futuro se quisiera reactivar, basta con
+        // llamar a notificacionService.crear con TipoNotificacion.MENSAJE_RECIBIDO.
 
         return mensajeMapper.toDTO(mensaje);
     }

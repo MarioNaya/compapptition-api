@@ -4,6 +4,7 @@ import com.compapption.api.dto.UsuarioRolCompeticion.UsuarioRolCompeticionDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionDetalleDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionInfoDTO;
 import com.compapption.api.dto.competicionDTO.CompeticionSimpleDTO;
+import com.compapption.api.dto.competicionDTO.MisCompeticionesPorRolDTO;
 import com.compapption.api.dto.equipoDTO.EquipoDetalleDTO;
 import com.compapption.api.dto.equipoDTO.EquipoSimpleDTO;
 import com.compapption.api.dto.jugadorDTO.JugadorSimpleDTO;
@@ -128,6 +129,22 @@ public class CompeticionController {
     public ResponseEntity<List<CompeticionSimpleDTO>> obtenerPorParticipante(
             @RequestParam Long usuarioId) {
         return ResponseEntity.ok(competicionService.obtenerPorParticipante(usuarioId));
+    }
+
+    /**
+     * GET /competiciones/mis-competiciones/por-rol — devuelve las competiciones
+     * del usuario agrupadas por rol (admin, manager, arbitro, jugador).
+     * Permite que el dashboard muestre cuatro secciones separadas e incluye
+     * las competiciones del usuario como jugador (no cubierto por
+     * UsuarioRolCompeticion en el flujo de invitación actual).
+     *
+     * @param usuarioId identificador del usuario
+     * @return DTO con las cuatro listas de competiciones
+     */
+    @GetMapping("/mis-competiciones/por-rol")
+    public ResponseEntity<MisCompeticionesPorRolDTO> obtenerMisCompeticionesPorRol(
+            @RequestParam Long usuarioId) {
+        return ResponseEntity.ok(competicionService.obtenerMisCompeticionesPorRol(usuarioId));
     }
 
     // ==================== CRUD ====================

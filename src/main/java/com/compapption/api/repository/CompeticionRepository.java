@@ -1,6 +1,7 @@
 package com.compapption.api.repository;
 
 import com.compapption.api.entity.Competicion;
+import com.compapption.api.entity.Rol;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -53,6 +54,43 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
             "JOIN c.usuariosRol ur " +
             "WHERE ur.usuario.id = :usuarioId")
     List<Competicion> findByUsuarioParticipante(
+            @Param("usuarioId") long usuarioId
+    );
+
+    /**
+     * Obtiene las competiciones en las que un usuario tiene un rol concreto
+     * (ADMIN_COMPETICION, MANAGER_EQUIPO, ARBITRO).
+     *
+     * @param usuarioId identificador del usuario
+     * @param rolNombre nombre del rol a filtrar
+     * @return lista de competiciones donde el usuario tiene ese rol
+     */
+    @Query("SELECT DISTINCT c FROM Competicion c " +
+            "JOIN c.usuariosRol ur " +
+            "WHERE ur.usuario.id = :usuarioId " +
+            "AND ur.rol.nombre = :rolNombre")
+    List<Competicion> findByUsuarioYRol(
+            @Param("usuarioId") long usuarioId,
+            @Param("rolNombre") Rol.RolNombre rolNombre
+    );
+
+    /**
+     * Obtiene las competiciones donde el usuario figura como jugador activo en
+     * alguno de los equipos inscritos (camino Usuario→Jugador→EquipoJugador→
+     * Equipo→CompeticionEquipo→Competicion). Permite que el dashboard liste
+     * competiciones de un jugador aunque no exista UsuarioRolCompeticion.
+     *
+     * @param usuarioId identificador del usuario vinculado al jugador
+     * @return lista de competiciones donde el usuario juega
+     */
+    @Query("SELECT DISTINCT c FROM Competicion c " +
+            "JOIN c.equipos ce " +
+            "JOIN ce.equipo e " +
+            "JOIN e.jugadores ej " +
+            "WHERE ce.activo = true " +
+            "AND ej.activo = true " +
+            "AND ej.jugador.usuario.id = :usuarioId")
+    List<Competicion> findByJugadorUsuarioId(
             @Param("usuarioId") long usuarioId
     );
 

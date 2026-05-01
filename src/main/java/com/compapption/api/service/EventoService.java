@@ -51,6 +51,8 @@ public class EventoService {
     private final TipoEstadisticaRepository tipoEstadisticaRepository;
     private final JugadorRepository jugadorRepository;
     private final EquipoManagerRepository equipoManagerRepository;
+    private final EquipoJugadorRepository equipoJugadorRepository;
+    private final UsuarioRolCompeticionRepository usuarioRolCompeticionRepository;
     private final EventoMapper eventoMapper;
     private final EstadisticaMapper estadisticaMapper;
     private final ClasificacionService clasificacionService;
@@ -86,7 +88,42 @@ public class EventoService {
     public EventoDetalleDTO obtenerPorIdDetalle(Long id){
         Evento evento = eventoRepository.findByIdWithEquipos(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", id));
-        return eventoMapper.toDetalleDTO(evento);
+        EventoDetalleDTO dto = eventoMapper.toDetalleDTO(evento);
+        dto.setBloqueado(estaBloqueado(evento));
+        return dto;
+    }
+
+    /**
+     * Determina si un evento de playoff tiene su edición bloqueada porque la
+     * fase de la que depende aún no ha terminado.
+     * <ul>
+     *   <li>Eventos de fase regular (numeroPartido == null) nunca están bloqueados.</li>
+     *   <li>Si depende de partidos anteriores del bracket, esos deben estar
+     *       FINALIZADOS para que el actual sea editable.</li>
+     *   <li>Si es un partido de primera ronda de playoff (sin partidos previos
+     *       del bracket), se bloquea hasta que cierre la fase regular de la
+     *       competición (liga o grupos).</li>
+     * </ul>
+     */
+    private boolean estaBloqueado(Evento e) {
+        if (e.getNumeroPartido() == null) return false;
+        Evento ant1 = e.getPartidoAnteriorLocal();
+        Evento ant2 = e.getPartidoAnteriorVisitante();
+        if (ant1 != null && ant1.getEstado() != Evento.EstadoEvento.FINALIZADO) return true;
+        if (ant2 != null && ant2.getEstado() != Evento.EstadoEvento.FINALIZADO) return true;
+        // Primera ronda de playoff: bloqueada hasta que termine la fase regular.
+        if (ant1 == null && ant2 == null) {
+            return eventoRepository.existsFaseRegularNoFinalizada(e.getCompeticion().getId());
+        }
+        return false;
+    }
+
+    /** Lanza excepción si el evento está bloqueado por dependencia de una fase anterior. */
+    private void asegurarNoBloqueado(Evento e) {
+        if (estaBloqueado(e)) {
+            throw new BadRequestException(
+                    "Este partido de playoff no se puede modificar hasta que termine la fase anterior");
+        }
     }
 
     // Por competición
@@ -120,7 +157,35 @@ public class EventoService {
         if (!competicionRepository.existsById(competicionId)){
             throw new ResourceNotFoundException("Competición", "id", competicionId);
         }
-        return eventoMapper.toDetalleDTOList(eventoRepository.findByCompeticionIdOrdered(competicionId));
+        return mapDetalleConBloqueo(eventoRepository.findByCompeticionIdOrdered(competicionId));
+    }
+
+    /**
+     * Convierte una lista de eventos a su DTO detalle calculando además el flag
+     * {@code bloqueado} (dependencia con fase anterior). Optimiza la consulta de
+     * fase regular cacheándola por competición dentro del mismo listado.
+     */
+    private List<EventoDetalleDTO> mapDetalleConBloqueo(List<Evento> eventos) {
+        java.util.Map<Long, Boolean> faseRegularPendienteCache = new java.util.HashMap<>();
+        return eventos.stream().map(e -> {
+            EventoDetalleDTO dto = eventoMapper.toDetalleDTO(e);
+            dto.setBloqueado(estaBloqueadoCacheado(e, faseRegularPendienteCache));
+            return dto;
+        }).toList();
+    }
+
+    private boolean estaBloqueadoCacheado(Evento e, java.util.Map<Long, Boolean> cache) {
+        if (e.getNumeroPartido() == null) return false;
+        Evento ant1 = e.getPartidoAnteriorLocal();
+        Evento ant2 = e.getPartidoAnteriorVisitante();
+        if (ant1 != null && ant1.getEstado() != Evento.EstadoEvento.FINALIZADO) return true;
+        if (ant2 != null && ant2.getEstado() != Evento.EstadoEvento.FINALIZADO) return true;
+        if (ant1 == null && ant2 == null) {
+            return cache.computeIfAbsent(
+                    e.getCompeticion().getId(),
+                    eventoRepository::existsFaseRegularNoFinalizada);
+        }
+        return false;
     }
 
     // Por jornada
@@ -147,7 +212,7 @@ public class EventoService {
      */
     @Transactional(readOnly = true)
     public List<EventoDetalleDTO> obtenerPorJornadaDetalle(Long competicionId, Integer jornada){
-        return eventoMapper.toDetalleDTOList(
+        return mapDetalleConBloqueo(
                 eventoRepository.findByCompeticionIdAndJornada(competicionId, jornada));
     }
 
@@ -338,6 +403,8 @@ public class EventoService {
         Evento evento = eventoRepository.findByIdWithEquipos(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", id));
 
+        asegurarNoBloqueado(evento);
+
         if (request.getJornada() != null) {
             evento.setJornada(request.getJornada());
         }
@@ -356,7 +423,63 @@ public class EventoService {
 
         evento = eventoRepository.save(evento);
         logService.registrar("Evento", evento.getId(), LogModificacion.AccionLog.EDITAR, null, null, evento.getCompeticion().getId());
-        return eventoMapper.toDetalleDTO(evento);
+        EventoDetalleDTO dto = eventoMapper.toDetalleDTO(evento);
+        dto.setBloqueado(estaBloqueado(evento));
+        return dto;
+    }
+
+    /**
+     * Cambia el estado de un evento de forma manual. Permite, por ejemplo, que un
+     * admin de competición pase un partido FINALIZADO a PROGRAMADO para corregir
+     * un resultado mal introducido. Cuando se reabre un partido finalizado se
+     * limpian los marcadores para forzar un nuevo registro de resultado.
+     *
+     * @param id          identificador del evento
+     * @param nuevoEstado nuevo estado destino
+     * @return DTO con el detalle actualizado
+     * @throws BadRequestException si el evento está bloqueado por dependencia
+     *                             de fase anterior o si la transición no es válida
+     */
+    @Transactional
+    public EventoDetalleDTO cambiarEstado(Long id, Evento.EstadoEvento nuevoEstado) {
+        Evento evento = eventoRepository.findByIdWithEquipos(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento", "id", id));
+
+        asegurarNoBloqueado(evento);
+
+        if (nuevoEstado == null) {
+            throw new BadRequestException("El estado destino es obligatorio");
+        }
+        if (evento.getEstado() == nuevoEstado) {
+            // No-op: dejamos el estado tal cual.
+            EventoDetalleDTO dto = eventoMapper.toDetalleDTO(evento);
+            dto.setBloqueado(estaBloqueado(evento));
+            return dto;
+        }
+
+        boolean reabrir = evento.getEstado() == Evento.EstadoEvento.FINALIZADO
+                && nuevoEstado != Evento.EstadoEvento.FINALIZADO;
+
+        evento.setEstado(nuevoEstado);
+        if (reabrir) {
+            // Al reabrir, se limpian los marcadores para que el admin/árbitro
+            // tenga que volver a registrar el resultado de forma explícita.
+            evento.setResultadoLocal(null);
+            evento.setResultadoVisitante(null);
+        }
+        evento = eventoRepository.save(evento);
+
+        if (reabrir) {
+            // Recalcular clasificación tras invalidar el resultado.
+            clasificacionService.calcularClasificacion(evento.getCompeticion().getId());
+        }
+
+        logService.registrar("Evento", evento.getId(), LogModificacion.AccionLog.EDITAR,
+                null, null, evento.getCompeticion().getId());
+
+        EventoDetalleDTO dto = eventoMapper.toDetalleDTO(evento);
+        dto.setBloqueado(estaBloqueado(evento));
+        return dto;
     }
 
     /**
@@ -379,8 +502,10 @@ public class EventoService {
         Evento evento = eventoRepository.findByIdWithEquipos(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", id));
 
+        asegurarNoBloqueado(evento);
+
         if (evento.getEstado() == Evento.EstadoEvento.FINALIZADO){
-            throw new BadRequestException("El evento ya está finalizado");
+            throw new BadRequestException("El evento ya está finalizado. Cambia su estado primero para poder editar el resultado.");
         }
 
         evento.setResultadoLocal(request.getResultadoLocal());
@@ -398,24 +523,53 @@ public class EventoService {
         logService.registrar("Evento", evento.getId(), LogModificacion.AccionLog.EDITAR, null, null, evento.getCompeticion().getId());
 
         // Notificar a los managers de ambos equipos del resultado registrado
-        notificarResultadoAManagers(evento);
+        notificarResultadoAParticipantes(evento);
 
         return eventoMapper.toResultadoDTO(evento);
     }
 
     /**
-     * Notifica a los managers de los dos equipos participantes del evento que el
-     * resultado ya ha sido registrado. Se deduplica por usuarioId para no duplicar
-     * notificaciones si un manager gestiona ambos equipos.
+     * Notifica el registro de un resultado a TODOS los miembros de la
+     * competición:
+     * <ul>
+     *   <li>Roles asignados ({@code ADMIN_COMPETICION}, {@code MANAGER_EQUIPO},
+     *       {@code ARBITRO}, {@code JUGADOR}) que vivan en
+     *       {@link UsuarioRolCompeticion}.</li>
+     *   <li>Managers de los dos equipos del partido vía
+     *       {@link EquipoManager} (cubre el caso de manager sin entrada de
+     *       rol-competición).</li>
+     *   <li>Usuarios vinculados a jugadores activos en cualquier equipo de
+     *       la competición.</li>
+     * </ul>
+     * Se deduplica por usuarioId para no duplicar avisos.
      *
      * @param evento evento finalizado con resultado
      */
-    private void notificarResultadoAManagers(Evento evento) {
+    private void notificarResultadoAParticipantes(Evento evento) {
         if (evento.getCompeticion() == null) return;
         long competicionId = evento.getCompeticion().getId();
         String resultado = evento.getResultadoLocal() + "-" + evento.getResultadoVisitante();
 
+        // Nombres de los equipos para que el detalle se lea como
+        // "Equipo Local vs Equipo Visitante · 2-1" en lugar de solo el marcador.
+        String localNombre = null;
+        String visitanteNombre = null;
+        for (EventoEquipo ee : evento.getEquipos()) {
+            if (ee.getEquipo() == null) continue;
+            if (ee.isEsLocal()) localNombre = ee.getEquipo().getNombre();
+            else visitanteNombre = ee.getEquipo().getNombre();
+        }
+
         Set<Long> destinatarios = new HashSet<>();
+
+        // 1) Todos los roles asignados a la competición.
+        usuarioRolCompeticionRepository.findByCompeticionId(competicionId)
+                .forEach(urc -> {
+                    if (urc.getUsuario() != null) destinatarios.add(urc.getUsuario().getId());
+                });
+
+        // 2) Managers de los equipos del partido (defensivo: cubre managers
+        //    asignados sólo en EquipoManager, sin entrada en UsuarioRolCompeticion).
         for (EventoEquipo ee : evento.getEquipos()) {
             if (ee.getEquipo() == null) continue;
             equipoManagerRepository.findByEquipoIdAndCompeticionId(
@@ -425,10 +579,17 @@ public class EventoService {
                     });
         }
 
+        // 3) Jugadores con cuenta vinculada en cualquier equipo de la competición.
+        destinatarios.addAll(
+                equipoJugadorRepository.findUsuarioIdsJugadoresActivosByCompeticion(competicionId));
+
         for (Long uid : destinatarios) {
             Map<String, Object> payload = new HashMap<>();
             payload.put("eventoId", evento.getId());
+            payload.put("competicionId", competicionId);
             payload.put("resultado", resultado);
+            if (localNombre != null) payload.put("localNombre", localNombre);
+            if (visitanteNombre != null) payload.put("visitanteNombre", visitanteNombre);
             notificacionService.crear(uid,
                     Notificacion.TipoNotificacion.RESULTADO_REGISTRADO, payload);
         }
@@ -703,6 +864,8 @@ public class EventoService {
         Evento evento = eventoRepository.findById(eventoId)
                 .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", eventoId));
 
+        asegurarNoBloqueado(evento);
+
         Jugador jugador = jugadorRepository.findById(request.getJugadorId())
                 .orElseThrow(()-> new ResourceNotFoundException("Jugador", "id", request.getJugadorId()));
 
@@ -743,6 +906,7 @@ public class EventoService {
         if (!estadistica.getEvento().getId().equals(eventoId)) {
             throw new BadRequestException("La estadistica no pertenece a este evento");
         }
+        asegurarNoBloqueado(estadistica.getEvento());
         estadisticaJugadorEventoRepository.delete(estadistica);
     }
 }

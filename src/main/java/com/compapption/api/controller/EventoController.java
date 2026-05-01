@@ -8,12 +8,14 @@ import com.compapption.api.request.estadistica.EstadisticaRequest;
 import com.compapption.api.request.evento.EventoCreateRequest;
 import com.compapption.api.request.evento.EventoUpdateRequest;
 import com.compapption.api.request.evento.ResultadoRequest;
+import com.compapption.api.entity.Evento;
 import com.compapption.api.service.EventoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -158,6 +160,7 @@ public class EventoController {
      * @return ResponseEntity con el EventoDetalleDTO del evento creado y estado 201 Created
      */
     @PostMapping
+    @PreAuthorize("@rbacService.isAdminCompeticion(#competicionId, authentication)")
     public ResponseEntity<EventoDetalleDTO> crear(
             @PathVariable Long competicionId,
             @Valid @RequestBody EventoCreateRequest request){
@@ -174,7 +177,9 @@ public class EventoController {
      * @return ResponseEntity con el EventoResultadoDTO que refleja el resultado registrado
      */
     @PostMapping("/{id}/resultado")
+    @PreAuthorize("@rbacService.isAdminOrArbitroCompeticion(#competicionId, authentication)")
     public ResponseEntity<EventoResultadoDTO> registrarResultado(
+            @PathVariable Long competicionId,
             @PathVariable Long id,
             @Valid @RequestBody ResultadoRequest request) {
         return ResponseEntity.ok(eventoService.registrarResultado(id,request));
@@ -188,10 +193,32 @@ public class EventoController {
      * @return ResponseEntity con el EventoDetalleDTO actualizado
      */
     @PutMapping("/{id}")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#competicionId, authentication)")
     public ResponseEntity<EventoDetalleDTO> actualizar(
+            @PathVariable Long competicionId,
             @PathVariable Long id,
             @Valid @RequestBody EventoUpdateRequest request) {
         return ResponseEntity.ok(eventoService.actualizar(id, request));
+    }
+
+    /**
+     * PATCH /competiciones/{competicionId}/eventos/{id}/estado — cambia el estado
+     * de un partido. Permite al admin de competición reabrir un partido FINALIZADO
+     * para corregir un resultado erróneo: al reabrirlo se limpian los marcadores y
+     * se recalcula la clasificación.
+     *
+     * @param competicionId identificador de la competición (para autorización)
+     * @param id            identificador del evento
+     * @param estado        nuevo estado (PROGRAMADO, EN_CURSO, FINALIZADO, SUSPENDIDO, APLAZADO)
+     * @return EventoDetalleDTO actualizado
+     */
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#competicionId, authentication)")
+    public ResponseEntity<EventoDetalleDTO> cambiarEstado(
+            @PathVariable Long competicionId,
+            @PathVariable Long id,
+            @RequestParam Evento.EstadoEvento estado) {
+        return ResponseEntity.ok(eventoService.cambiarEstado(id, estado));
     }
 
     /// === BORRAR EVENTO === ///
@@ -203,7 +230,9 @@ public class EventoController {
      * @return ResponseEntity vacío con estado 204 No Content
      */
     @DeleteMapping("{id}")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#competicionId, authentication)")
     public ResponseEntity<Void> eliminar(
+            @PathVariable Long competicionId,
             @PathVariable Long id){
         eventoService.eliminar(id);
         return ResponseEntity.noContent().build();
@@ -231,7 +260,9 @@ public class EventoController {
      * @return ResponseEntity con el EstadisticaJugadorDTO registrado y estado 201 Created
      */
     @PostMapping("{id}/estadisticas")
+    @PreAuthorize("@rbacService.isAdminOrArbitroCompeticion(#competicionId, authentication)")
     public ResponseEntity<EstadisticaJugadorDTO> registrarEstadistica(
+            @PathVariable Long competicionId,
             @PathVariable Long id,
             @Valid @RequestBody EstadisticaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -246,7 +277,9 @@ public class EventoController {
      * @return ResponseEntity vacío con estado 204 No Content
      */
     @DeleteMapping("/{id}/estadisticas/{estadisticaId}")
+    @PreAuthorize("@rbacService.isAdminOrArbitroCompeticion(#competicionId, authentication)")
     public ResponseEntity<Void> eliminarEstadistica(
+            @PathVariable Long competicionId,
             @PathVariable Long id,
             @PathVariable Long estadisticaId) {
         eventoService.eliminarEstadistica(id, estadisticaId);

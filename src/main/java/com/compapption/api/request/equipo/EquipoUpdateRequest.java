@@ -24,4 +24,11 @@ public class EquipoUpdateRequest {
 
     @Size(max = 512, message = "La URL del escudo no puede exceder 512 caracteres")
     private String escudoUrl;
+
+    /**
+     * Cambio de visibilidad. Si pasa de público a privado el backend genera un
+     * código de invitación nuevo; si pasa de privado a público el código se
+     * limpia (deja de ser válido).
+     */
+    private Boolean publico;
 }

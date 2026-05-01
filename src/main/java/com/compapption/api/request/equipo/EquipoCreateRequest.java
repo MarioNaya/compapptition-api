@@ -27,4 +27,12 @@ public class EquipoCreateRequest {
 
     @Size(max = 512, message = "La URL del escudo no puede exceder 512 caracteres")
     private String escudoUrl;
+
+    /**
+     * Visibilidad del equipo. {@code true} (por defecto) lo hace visible en el
+     * buscador al inscribir equipos en una competición. {@code false} lo oculta;
+     * el backend genera un código de invitación que el creador puede compartir
+     * para que admins de competición puedan invitarlo.
+     */
+    private Boolean publico;
 }

@@ -9,7 +9,10 @@ import java.util.Set;
 /**
  * Representa un equipo deportivo dentro del sistema.
  * Mapeada a la tabla {@code equipo}, almacena el nombre, descripción, URL del escudo
- * (hospedado externamente) y el tipo de equipo (GESTIONADO o ESTANDAR).
+ * (hospedado externamente) y la visibilidad (público/privado). Los equipos privados
+ * disponen de un {@code codigoInvitacion} único que su creador comparte con el admin
+ * de la competición para poder ser invitados; los públicos aparecen directamente en
+ * el buscador de equipos al inscribir en una competición.
  * Se relaciona con {@link EquipoJugador}, {@link CompeticionEquipo}, {@link EventoEquipo},
  * {@link EquipoManager} y {@link Clasificacion}.
  *
@@ -42,9 +45,16 @@ public class Equipo {
     private Usuario creador;
 
     @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private TipoEquipo tipo = TipoEquipo.ESTANDAR;
+    @Column(nullable = false)
+    private boolean publico = true;
+
+    /**
+     * Código único de invitación para equipos privados. Solo se rellena cuando
+     * {@code publico = false}. El admin de competición lo introduce manualmente
+     * para poder enviar una invitación a un equipo que no aparece en el buscador.
+     */
+    @Column(name = "codigo_invitacion", length = 20, unique = true)
+    private String codigoInvitacion;
 
     @Builder.Default
     @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -65,9 +75,4 @@ public class Equipo {
     @Builder.Default
     @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Clasificacion> clasificaciones = new HashSet<>();
-
-    public enum TipoEquipo {
-        GESTIONADO,
-        ESTANDAR
-    }
 }

@@ -48,7 +48,7 @@ public class InvitacionService {
     private final LogService logService;
     private final NotificacionService notificacionService;
 
-    public static final List<String> ROLES_VALIDOS = List.of("ADMIN_COMPETICION", "MANAGER_EQUIPO", "JUGADOR");
+    public static final List<String> ROLES_VALIDOS = List.of("ADMIN_COMPETICION", "MANAGER_EQUIPO", "ARBITRO", "JUGADOR");
 
     /// === CREACIÓN DE INVITACIÓN === ///
 
@@ -231,6 +231,12 @@ public class InvitacionService {
                 }
                 Jugador jugador = obtenerOCrearJugador(usuario);
                 agregarJugadorAEquipo(jugador, invitacion.getEquipo());
+            }
+            case "ARBITRO" -> {
+                if (invitacion.getCompeticion() == null) {
+                    throw new BadRequestException("La invitación no tiene competición asociada");
+                }
+                asignarRolEncompeticion(usuario, invitacion.getCompeticion(), Rol.RolNombre.ARBITRO);
             }
             default -> throw new BadRequestException("Rol ogrecido desconocido: " + invitacion.getRolOfrecido());
         }

@@ -221,4 +221,34 @@ public class NotificacionService {
     public int marcarTodasLeidas(Long usuarioId) {
         return notificacionRepository.marcarTodasLeidas(usuarioId);
     }
+
+    /**
+     * Elimina una notificación concreta. Solo el destinatario puede borrarla.
+     *
+     * @param id        identificador de la notificación
+     * @param usuarioId identificador del usuario que solicita la operación
+     * @throws ResourceNotFoundException si la notificación no existe
+     * @throws UnauthorizedException     si la notificación no pertenece al usuario
+     */
+    @Transactional
+    public void eliminar(Long id, Long usuarioId) {
+        Notificacion notificacion = notificacionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Notificación", "id", id));
+
+        if (!notificacion.getDestinatario().getId().equals(usuarioId)) {
+            throw new UnauthorizedException("No puedes eliminar notificaciones ajenas");
+        }
+        notificacionRepository.delete(notificacion);
+    }
+
+    /**
+     * Elimina de golpe todas las notificaciones leídas del usuario.
+     *
+     * @param usuarioId identificador del usuario destinatario
+     * @return número de notificaciones eliminadas
+     */
+    @Transactional
+    public int eliminarLeidas(Long usuarioId) {
+        return notificacionRepository.deleteLeidas(usuarioId);
+    }
 }
