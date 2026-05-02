@@ -30,6 +30,4 @@ public class JugadorUpdateRequest {
 
     @Size(max = 512, message = "La URL de la foto no puede exceder 512 caracteres")
     private String fotoUrl;
-
-    private Long usuarioId;
 }
