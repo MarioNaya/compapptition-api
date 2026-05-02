@@ -117,6 +117,10 @@ public class AuthService {
         List<UsuarioRolCompeticion> rolesCompeticion =
                 usuarioRolCompeticionRepository.findByUsuarioIdWithRolesAndCompeticiones(usuario.getId());
 
+        // 4. Revocar refresh tokens activos previos: cada login emite una sesión
+        // limpia y deshabilita las anteriores en otros dispositivos (cierra S-26).
+        refreshTokenRepository.revocarTodosPorUsuario(usuario);
+
         log.info("Usuario autenticado: {} — {} competiciones", usuario.getUsername(), rolesCompeticion.size());
         return buildAuthResponse(usuario, rolesCompeticion);
     }

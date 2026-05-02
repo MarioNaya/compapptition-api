@@ -57,8 +57,15 @@ public class SecurityConfig {
     private final JwtAuthenticatorFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
-    @Value("${app.frontend-url}")
-    private String frontendUrl;
+    /**
+     * Lista CSV de origins CORS permitidos. En dev/default incluye localhost
+     * y la URL del frontend; en prod debe sobreescribirse desde
+     * application-prod.properties con solo el dominio de producción
+     * (cierra S-22). Convención: separados por coma; los wildcards de puerto
+     * usan la sintaxis {@code http://localhost:*}.
+     */
+    @Value("${app.cors.allowed-origins:http://localhost:4200}")
+    private String allowedOriginsCsv;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -89,7 +96,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:*", frontendUrl));
+        List<String> origins = Arrays.stream(allowedOriginsCsv.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+        configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization"));

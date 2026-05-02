@@ -3,14 +3,16 @@ package com.compapption.api.controller;
 import com.compapption.api.dto.auth.*;
 import com.compapption.api.exception.UnauthorizedException;
 import com.compapption.api.service.AuthService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -30,6 +32,14 @@ public class AuthController {
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
+    /** Path al que se restringe la cookie del refresh token. Cubre los dos
+     * endpoints que la consumen ({@code /auth/refresh} y {@code /auth/logout})
+     * sin filtrarse al resto de la API ({@code /usuarios}, {@code /equipos},
+     * etc.). Si se restringe a {@code /auth/refresh} el navegador deja de
+     * enviarla en logout y la sesión queda viva 7 días en BD (cierra S-33). */
+    private static final String REFRESH_COOKIE_PATH = "/auth";
+    private static final String REFRESH_COOKIE_NAME = "refresh_token";
+
     /**
      * POST /auth/registro — registra un nuevo usuario en el sistema.
      * Crea la cuenta, genera los tokens JWT y establece la cookie HTTP-only del refresh token.
@@ -44,7 +54,7 @@ public class AuthController {
             HttpServletResponse response) {
         AuthResponse authResponse = authService.registro(request);
         addRefreshTokenCookie(response, authResponse.getRefreshToken());
-        return ResponseEntity.ok(authResponse);
+        return ResponseEntity.ok(redactRefreshToken(authResponse));
     }
 
     /**
@@ -61,31 +71,33 @@ public class AuthController {
             HttpServletResponse response) {
         AuthResponse authResponse = authService.login(request);
         addRefreshTokenCookie(response, authResponse.getRefreshToken());
-        return ResponseEntity.ok(authResponse);
+        return ResponseEntity.ok(redactRefreshToken(authResponse));
     }
 
     /**
      * POST /auth/refresh — renueva el access token usando el refresh token.
-     * Acepta el refresh token desde el cuerpo de la petición o desde la cookie HTTP-only.
-     * Aplica rotación de refresh token: invalida el antiguo y emite uno nuevo.
+     * El refresh token se lee EXCLUSIVAMENTE de la cookie HttpOnly {@code refresh_token}
+     * (cierra SF-4 y S-17). El cuerpo de la petición se ignora; el cliente debe
+     * disparar la petición con {@code withCredentials: true}. Se aplica rotación:
+     * el token antiguo se invalida y se emite uno nuevo.
      *
-     * @param request cuerpo opcional con el refresh token
-     * @param cookieRefreshToken refresh token leído de la cookie HTTP-only (alternativa al cuerpo)
+     * @param cookieRefreshToken refresh token leído de la cookie HTTP-only
      * @param response respuesta HTTP para actualizar la cookie con el nuevo refresh token
      * @return ResponseEntity con el AuthResponse que contiene el nuevo access token
      */
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(
-            @RequestBody(required = false) RefreshTokenRequest request,
-            @CookieValue(name = "refresh_token", required = false) String cookieRefreshToken,
+            @CookieValue(name = REFRESH_COOKIE_NAME, required = false) String cookieRefreshToken,
             HttpServletResponse response) {
 
-        String refreshToken = resolverRefreshToken(request, cookieRefreshToken);
-        AuthResponse authResponse = authService.refreshToken(refreshToken);
+        if (cookieRefreshToken == null || cookieRefreshToken.isBlank()) {
+            throw new UnauthorizedException("Refresh token no proporcionado");
+        }
+        AuthResponse authResponse = authService.refreshToken(cookieRefreshToken);
 
         // Actualizar cookie con el nuevo refresh token rotado
         addRefreshTokenCookie(response, authResponse.getRefreshToken());
-        return ResponseEntity.ok(authResponse);
+        return ResponseEntity.ok(redactRefreshToken(authResponse));
     }
 
     /**
@@ -98,7 +110,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(
-            @CookieValue(name = "refresh_token", required = false) String cookieRefreshToken,
+            @CookieValue(name = REFRESH_COOKIE_NAME, required = false) String cookieRefreshToken,
             HttpServletResponse response) {
 
         if (cookieRefreshToken != null) {
@@ -144,31 +156,43 @@ public class AuthController {
     // Métodos privados
     // -------------------------------------------------------------------------
 
-    private String resolverRefreshToken(RefreshTokenRequest request, String cookieToken) {
-        if (request != null && request.getRefreshToken() != null) {
-            return request.getRefreshToken();
-        }
-        if (cookieToken != null) {
-            return cookieToken;
-        }
-        throw new UnauthorizedException("Refresh token no proporcionado");
+    /**
+     * Emite la cookie del refresh token con todos los atributos endurecidos:
+     * {@code HttpOnly} (no accesible desde JS), {@code Secure} (solo HTTPS),
+     * {@code SameSite=Strict} (no se envía en navegaciones cross-site, mitiga CSRF),
+     * y {@code Path=/auth/refresh} (restringe el envío al endpoint que la consume,
+     * no se filtra al resto de la API). Cierra S-20.
+     */
+    private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE_NAME, refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path(REFRESH_COOKIE_PATH)
+                .maxAge(Duration.ofMillis(refreshTokenExpiration))
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        Cookie cookie = new Cookie("refresh_token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (refreshTokenExpiration / 1000));
-        response.addCookie(cookie);
+    /**
+     * Redacta el {@code refreshToken} del DTO de respuesta antes de serializarlo
+     * al cliente. La cookie HttpOnly ya fue emitida con su valor real; quitarlo
+     * del JSON evita que una extensión maliciosa con permiso {@code webRequest}
+     * pueda exfiltrarlo desde {@code XMLHttpRequest.responseText} (cierra SF-21).
+     */
+    private AuthResponse redactRefreshToken(AuthResponse authResponse) {
+        authResponse.setRefreshToken(null);
+        return authResponse;
     }
 
     private void clearRefreshTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refresh_token", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path(REFRESH_COOKIE_PATH)
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
