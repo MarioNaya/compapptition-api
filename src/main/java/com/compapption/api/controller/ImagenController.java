@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +41,9 @@ public class ImagenController {
             "misc"
     );
 
+    /** Tamaño máximo de archivo (5 MB). Coincide con el límite multipart de Spring. */
+    private static final long MAX_FILE_SIZE_BYTES = 5L * 1024 * 1024;
+
     private final CloudinaryService cloudinaryService;
 
     /**
@@ -62,8 +66,67 @@ public class ImagenController {
             throw new BadRequestException(
                     "Carpeta no permitida. Permitidas: escudos, fotos, iconos, misc");
         }
+        validarArchivo(file);
 
         String url = cloudinaryService.upload(file, folder);
         return ResponseEntity.ok(Map.of("url", url));
+    }
+
+    /**
+     * Valida tamaño máximo (5 MB) y formato real del archivo subido inspeccionando
+     * los primeros bytes (magic bytes), no la extensión ni el {@code Content-Type}
+     * declarado por el cliente. Acepta PNG, JPEG, WebP, GIF; rechaza explícitamente
+     * SVG (puede contener {@code <script>} con XSS) y cualquier otro formato.
+     * Cierra S-14.
+     */
+    private void validarArchivo(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("El archivo es obligatorio");
+        }
+        if (file.getSize() > MAX_FILE_SIZE_BYTES) {
+            throw new BadRequestException("El archivo excede el tamaño máximo permitido (5 MB)");
+        }
+
+        byte[] header = new byte[12];
+        try {
+            int read = file.getInputStream().read(header);
+            if (read < 4) {
+                throw new BadRequestException("Archivo demasiado pequeño o ilegible");
+            }
+        } catch (IOException e) {
+            throw new BadRequestException("No se pudo leer el archivo");
+        }
+
+        if (!esFormatoImagenPermitido(header)) {
+            throw new BadRequestException(
+                    "Formato no permitido. Acepta PNG, JPEG, WebP o GIF (no SVG ni otros).");
+        }
+    }
+
+    private boolean esFormatoImagenPermitido(byte[] h) {
+        // PNG: 89 50 4E 47 0D 0A 1A 0A
+        if (h.length >= 8
+                && (h[0] & 0xFF) == 0x89 && h[1] == 0x50 && h[2] == 0x4E && h[3] == 0x47
+                && h[4] == 0x0D && h[5] == 0x0A && (h[6] & 0xFF) == 0x1A && h[7] == 0x0A) {
+            return true;
+        }
+        // JPEG: FF D8 FF
+        if (h.length >= 3
+                && (h[0] & 0xFF) == 0xFF && (h[1] & 0xFF) == 0xD8 && (h[2] & 0xFF) == 0xFF) {
+            return true;
+        }
+        // GIF: "GIF87a" o "GIF89a"
+        if (h.length >= 6
+                && h[0] == 'G' && h[1] == 'I' && h[2] == 'F' && h[3] == '8'
+                && (h[4] == '7' || h[4] == '9') && h[5] == 'a') {
+            return true;
+        }
+        // WebP: "RIFF" .... "WEBP"
+        if (h.length >= 12
+                && h[0] == 'R' && h[1] == 'I' && h[2] == 'F' && h[3] == 'F'
+                && h[8] == 'W' && h[9] == 'E' && h[10] == 'B' && h[11] == 'P') {
+            return true;
+        }
+        return false;
     }
 }

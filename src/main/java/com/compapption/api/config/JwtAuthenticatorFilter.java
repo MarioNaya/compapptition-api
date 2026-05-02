@@ -1,5 +1,9 @@
 package com.compapption.api.config;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -98,8 +102,20 @@ public class JwtAuthenticatorFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-        } catch (Exception e) {
-            logger.error("Cannot set user authentication: " + e.getMessage());
+        } catch (ExpiredJwtException e) {
+            // Esperable cuando un access token caduca: el cliente debe llamar
+            // a /auth/refresh. No es un error del servidor — solo DEBUG.
+            logger.debug("JWT expirado: " + e.getMessage());
+        } catch (SignatureException | MalformedJwtException e) {
+            // Indicio fuerte de manipulación o de un cliente roto. WARN
+            // visible pero sin saturar logs si llega tráfico ruidoso.
+            logger.warn("JWT inválido: " + e.getMessage());
+        } catch (JwtException e) {
+            // Resto de problemas JWT (UnsupportedJwtException, etc.).
+            logger.warn("JWT no procesable: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            // Token nulo/blanco que pasa por el extract pero rompe en parse.
+            logger.debug("JWT vacío o malformado: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

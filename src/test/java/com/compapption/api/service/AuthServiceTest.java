@@ -85,7 +85,9 @@ class AuthServiceTest {
     // =========================================================
 
     @Test
-    void login_cuentaDesactivada_lanzaUnauthorized() {
+    void login_cuentaDesactivada_lanzaUnauthorizedConMensajeGenerico() {
+        // T4.4 (S-19): cuenta desactivada y credenciales incorrectas devuelven
+        // EL MISMO mensaje genérico para no filtrar la existencia del usuario.
         Usuario inactivo = Usuario.builder().id(2L).username("inactivo").activo(false).build();
         when(usuarioRepository.findByUsernameOrEmail("inactivo", "inactivo"))
                 .thenReturn(Optional.of(inactivo));
@@ -96,7 +98,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.login(req))
                 .isInstanceOf(UnauthorizedException.class)
-                .hasMessageContaining("desactivada");
+                .hasMessageContaining("Credenciales inválidas");
     }
 
     // =========================================================

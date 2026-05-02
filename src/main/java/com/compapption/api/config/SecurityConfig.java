@@ -14,8 +14,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.XContentTypeOptionsHeaderWriter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -72,6 +75,32 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // Headers de seguridad estándar (cierra S-25, S-28).
+                // CSP base permisiva (compatible con Cloudinary y fonts) — el
+                // frontend Angular añade además su propio meta http-equiv.
+                .headers(headers -> headers
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000))
+                        .addHeaderWriter(new XContentTypeOptionsHeaderWriter())
+                        .referrerPolicy(rp -> rp.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                "img-src 'self' data: https://res.cloudinary.com; " +
+                                "font-src 'self' https://fonts.gstatic.com data:; " +
+                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                                "script-src 'self'; " +
+                                // connect-src incluye los dominios del API y de dev local
+                                // por coherencia con la CSP del frontend (cierra SF-24).
+                                // Solo afecta a responses HTTP del backend, pero conviene
+                                // mantener la política consistente entre lados.
+                                "connect-src 'self' https://api.compapption.com http://localhost:8080; " +
+                                "frame-ancestors 'none'; " +
+                                "base-uri 'self'; " +
+                                "form-action 'self'"
+                        ))
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Preflight CORS — OPTIONS siempre permitido

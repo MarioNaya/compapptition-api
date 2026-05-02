@@ -97,21 +97,50 @@ public class AuthService {
      * @return {@link AuthResponse} con access token, refresh token, datos del usuario y sus roles
      * @throws UnauthorizedException si las credenciales son inválidas o la cuenta está desactivada
      */
+    /** Número máximo de intentos fallidos consecutivos antes de bloquear (S-24). */
+    private static final int MAX_INTENTOS_FALLIDOS = 5;
+
+    /** Duración del bloqueo temporal de cuenta tras superar el umbral (S-24). */
+    private static final Duration LOCKOUT_DURATION = Duration.ofMinutes(15);
+
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        // 1. Localizar usuario (query simple, solo para comprobar activo y obtener username)
+        // 1. Localizar usuario (query simple, solo para comprobar activo y obtener username).
+        // Mensaje deliberadamente idéntico al de credenciales inválidas para no
+        // filtrar si el username/email existe en el sistema (cierra S-19).
         Usuario usuario = usuarioRepository.findByUsernameOrEmail(
                         request.getUsernameOrEmail(), request.getUsernameOrEmail())
                 .orElseThrow(() -> new UnauthorizedException("Credenciales inválidas"));
 
         if (!usuario.isActivo()) {
-            throw new UnauthorizedException("La cuenta está desactivada");
+            // Mismo mensaje genérico: una cuenta desactivada no debe distinguirse
+            // externamente de credenciales inválidas (S-19).
+            throw new UnauthorizedException("Credenciales inválidas");
+        }
+
+        // Account lockout (S-24): si la cuenta está bloqueada y aún no ha
+        // expirado el bloqueo, rechazar sin intentar autenticar.
+        if (usuario.getBloqueadoHasta() != null
+                && usuario.getBloqueadoHasta().isAfter(LocalDateTime.now())) {
+            throw new UnauthorizedException("Credenciales inválidas");
         }
 
         // 2. Validar credenciales (Spring Security — llama a loadUserByUsername internamente)
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(usuario.getUsername(), request.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(usuario.getUsername(), request.getPassword())
+            );
+        } catch (org.springframework.security.core.AuthenticationException ex) {
+            registrarIntentoFallido(usuario);
+            throw new UnauthorizedException("Credenciales inválidas");
+        }
+
+        // Login OK: limpiar contador de intentos fallidos y posible lockout.
+        if (usuario.getIntentosFallidos() > 0 || usuario.getBloqueadoHasta() != null) {
+            usuario.setIntentosFallidos(0);
+            usuario.setBloqueadoHasta(null);
+            usuarioRepository.save(usuario);
+        }
 
         // 3. Cargar contexto de competiciones en query separada
         List<UsuarioRolCompeticion> rolesCompeticion =
@@ -123,6 +152,20 @@ public class AuthService {
 
         log.info("Usuario autenticado: {} — {} competiciones", usuario.getUsername(), rolesCompeticion.size());
         return buildAuthResponse(usuario, rolesCompeticion);
+    }
+
+    /**
+     * Incrementa el contador de intentos fallidos del usuario y, si supera
+     * el umbral, marca {@code bloqueadoHasta} con la fecha actual + lockout
+     * window. Persiste en la misma transacción del login (cierra S-24).
+     */
+    private void registrarIntentoFallido(Usuario usuario) {
+        usuario.setIntentosFallidos(usuario.getIntentosFallidos() + 1);
+        if (usuario.getIntentosFallidos() >= MAX_INTENTOS_FALLIDOS) {
+            usuario.setBloqueadoHasta(LocalDateTime.now().plus(LOCKOUT_DURATION));
+            log.warn("Cuenta bloqueada por exceso de intentos fallidos: {}", usuario.getUsername());
+        }
+        usuarioRepository.save(usuario);
     }
 
     /**

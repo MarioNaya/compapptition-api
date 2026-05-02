@@ -56,6 +56,22 @@ public class Usuario {
     @Column(name = "es_admin_sistema", nullable = false)
     private Boolean esAdminSistema = false;
 
+    /**
+     * Contador de intentos de login fallidos consecutivos. Se resetea a 0
+     * tras un login OK o cuando se cumple {@link #bloqueadoHasta}. Cierra S-24
+     * (account lockout vía {@code AuthService}).
+     */
+    @Builder.Default
+    @Column(name = "intentos_fallidos", nullable = false)
+    private int intentosFallidos = 0;
+
+    /**
+     * Marca temporal hasta la que la cuenta está bloqueada. {@code null}
+     * cuando no hay lockout activo. Cierra S-24.
+     */
+    @Column(name = "bloqueado_hasta")
+    private LocalDateTime bloqueadoHasta;
+
     @CreationTimestamp
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
