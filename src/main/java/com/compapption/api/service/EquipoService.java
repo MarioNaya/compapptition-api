@@ -46,6 +46,7 @@ public class EquipoService {
     private final EquipoJugadorRepository equipoJugadorRepository;
     private final EquipoManagerRepository equipoManagerRepository;
     private final UsuarioRepository usuarioRepository;
+    private final CompeticionEquipoRepository competicionEquipoRepository;
     private final EquipoMapper equipoMapper;
     private final JugadorMapper jugadorMapper;
     private final LogService logService;
@@ -60,32 +61,6 @@ public class EquipoService {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     // === CONSULTAS EQUIPO === //
-
-    /**
-     * Devuelve todos los equipos en formato detalle (incluye jugadores y relaciones).
-     *
-     * @return lista de {@link EquipoDetalleDTO} con todos los equipos
-     */
-    @Transactional(readOnly = true)
-    public List<EquipoDetalleDTO> obtenerTodosDetalle() {
-        return equipoRepository.findAll()
-                .stream()
-                .map(equipoMapper::toDetalleDTO)
-                .toList();
-    }
-
-    /**
-     * Devuelve todos los equipos en formato simple (campos mínimos, sin relaciones pesadas).
-     *
-     * @return lista de {@link EquipoSimpleDTO} con todos los equipos
-     */
-    @Transactional(readOnly = true)
-    public List<EquipoSimpleDTO> obtenerTodosSimple() {
-        return equipoRepository.findAll()
-                .stream()
-                .map(equipoMapper::toSimpleDTO)
-                .toList();
-    }
 
     /**
      * Obtiene un equipo en formato detalle (con jugadores) por su identificador.
@@ -273,7 +248,8 @@ public class EquipoService {
         Equipo equipo = equipoRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Equipo", "id", id));
 
-        if (!equipo.getCompeticiones().isEmpty()) {
+        // exists* en lugar de cargar la colección lazy completa (cierra A-11).
+        if (competicionEquipoRepository.existsByEquipoIdAndActivoTrue(id)) {
             throw new BadRequestException("No se puede eliminar un equipo inscrito en competiciones");
         }
 

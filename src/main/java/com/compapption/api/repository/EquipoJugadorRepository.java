@@ -130,6 +130,16 @@ public interface EquipoJugadorRepository extends JpaRepository<EquipoJugador, Lo
     );
 
     /**
+     * Comprueba si un jugador pertenece de forma activa a algún equipo.
+     * Sustituye al patrón {@code jugador.getEquipos().isEmpty()} antes de
+     * eliminar (que cargaba toda la colección lazy). Cierra A-11.
+     *
+     * @param jugadorId identificador del jugador
+     * @return {@code true} si el jugador tiene al menos una relación activa
+     */
+    boolean existsByJugadorIdAndActivoTrue(long jugadorId);
+
+    /**
      * Busca la relación activa de un equipo para un dorsal concreto.
      * Útil para verificar si un dorsal ya está ocupado antes de asignarlo.
      *

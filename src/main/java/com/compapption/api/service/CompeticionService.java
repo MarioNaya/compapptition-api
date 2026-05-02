@@ -440,7 +440,7 @@ public class CompeticionService {
      * @return lista de equipos inscritos en formato simple
      * @throws ResourceNotFoundException si la competición no existe
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public List<EquipoSimpleDTO> obtenerInscritosSimple(long competicionId){
         if (!competicionRepository.existsById(competicionId)){
             throw new ResourceNotFoundException("Competición", "id", competicionId);
@@ -462,7 +462,7 @@ public class CompeticionService {
      * @return lista de equipos inscritos en formato detalle
      * @throws ResourceNotFoundException si la competición no existe
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public List<EquipoDetalleDTO> obtenerInscritosDetalle(long competicionId){
         if (!competicionRepository.existsById(competicionId)){
             throw new ResourceNotFoundException("Competición", "id", competicionId);

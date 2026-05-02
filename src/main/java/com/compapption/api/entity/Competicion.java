@@ -3,6 +3,7 @@ package com.compapption.api.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
@@ -98,6 +99,16 @@ public class Competicion {
     @Builder.Default
     @OneToMany(mappedBy = "competicion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UsuarioRolCompeticion> usuariosRol = new HashSet<>();
+
+    /**
+     * Número de equipos activos inscritos en la competición. Calculado por
+     * Hibernate vía subquery en el SELECT de la entidad — evita inicializar
+     * la colección lazy {@code equipos} solo para contar (cierra A-10).
+     * Read-only: no se puede setear, lo gestiona la BD.
+     */
+    @Formula("(SELECT COUNT(*) FROM competicion_equipo ce " +
+             "WHERE ce.competicion_id = id AND ce.activo = true)")
+    private Integer numEquiposActivos;
 
     public enum EstadoCompeticion{
         BORRADOR,

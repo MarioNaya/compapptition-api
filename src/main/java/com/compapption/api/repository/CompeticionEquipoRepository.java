@@ -76,4 +76,14 @@ public interface CompeticionEquipoRepository extends JpaRepository<CompeticionEq
     long countActivosByCompeticionId(
             @Param("competicionId") long competicionId
     );
+
+    /**
+     * Comprueba si un equipo está inscrito de forma activa en alguna competición.
+     * Sustituye al patrón {@code equipo.getCompeticiones().isEmpty()} antes de
+     * eliminar (que cargaba toda la colección lazy). Cierra A-11.
+     *
+     * @param equipoId identificador del equipo
+     * @return {@code true} si el equipo tiene al menos una inscripción activa
+     */
+    boolean existsByEquipoIdAndActivoTrue(long equipoId);
 }

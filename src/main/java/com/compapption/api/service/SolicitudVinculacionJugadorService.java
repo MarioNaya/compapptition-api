@@ -184,17 +184,10 @@ public class SolicitudVinculacionJugadorService {
         List<SolicitudVinculacionJugador> resultado = new java.util.ArrayList<>(
                 repo.findPendientesPorUsuario(usuarioId));
 
-        // Equipos donde el usuario tiene legitimidad admin/manager: creador, manager
-        // o admin de alguna de sus competiciones. Para cada solicitud PENDIENTE_ADMIN
-        // se evalúa por equipo.
-        // Optimización: en lugar de cargar todas las solicitudes globales filtramos
-        // por los equipos del usuario gestionables — pero el coste de esa lista
-        // tampoco es trivial; en este punto del proyecto basta con un filtro post-fetch.
-        List<SolicitudVinculacionJugador> pendientesAdmin = repo.findAll().stream()
-                .filter(s -> s.getEstado() == Estado.PENDIENTE_ADMIN)
-                .filter(s -> rbacService.puedeGestionarPlantillaParaUsuario(s.getEquipo().getId(), usuarioId))
-                .toList();
-        resultado.addAll(pendientesAdmin);
+        // Solicitudes PENDIENTE_ADMIN sobre equipos donde el usuario es creador,
+        // manager o admin de competición. Resuelto en SQL con dos EXISTS,
+        // sustituyendo el findAll().stream() previo (cierra A-3).
+        resultado.addAll(repo.findPendientesAdminParaUsuario(usuarioId));
         return resultado.stream().map(this::toDTO).toList();
     }
 

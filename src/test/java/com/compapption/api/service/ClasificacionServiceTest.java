@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,11 +67,11 @@ class ClasificacionServiceTest {
         Clasificacion clasB = clasificacionParaEquipo(equipoB);
 
         Evento evento = eventoFinalizado(1L, 2, 1); // A gana 2-1
-        EventoEquipo eeA = eventoEquipo(evento, equipoA, true);
-        EventoEquipo eeB = eventoEquipo(evento, equipoB, false);
+        evento.setEquipos(new HashSet<>(List.of(
+                eventoEquipo(evento, equipoA, true),
+                eventoEquipo(evento, equipoB, false))));
 
         prepararMocks(List.of(clasA, clasB), List.of(evento));
-        when(eventoEquipoRepository.findByEventoId(1L)).thenReturn(List.of(eeA, eeB));
 
         clasificacionService.calcularClasificacion(1L);
 
@@ -93,11 +94,11 @@ class ClasificacionServiceTest {
         Clasificacion clasB = clasificacionParaEquipo(equipoB);
 
         Evento evento = eventoFinalizado(1L, 0, 3); // B gana 3-0
-        EventoEquipo eeA = eventoEquipo(evento, equipoA, true);
-        EventoEquipo eeB = eventoEquipo(evento, equipoB, false);
+        evento.setEquipos(new HashSet<>(List.of(
+                eventoEquipo(evento, equipoA, true),
+                eventoEquipo(evento, equipoB, false))));
 
         prepararMocks(List.of(clasA, clasB), List.of(evento));
-        when(eventoEquipoRepository.findByEventoId(1L)).thenReturn(List.of(eeA, eeB));
 
         clasificacionService.calcularClasificacion(1L);
 
@@ -113,11 +114,11 @@ class ClasificacionServiceTest {
         Clasificacion clasB = clasificacionParaEquipo(equipoB);
 
         Evento evento = eventoFinalizado(1L, 1, 1);
-        EventoEquipo eeA = eventoEquipo(evento, equipoA, true);
-        EventoEquipo eeB = eventoEquipo(evento, equipoB, false);
+        evento.setEquipos(new HashSet<>(List.of(
+                eventoEquipo(evento, equipoA, true),
+                eventoEquipo(evento, equipoB, false))));
 
         prepararMocks(List.of(clasA, clasB), List.of(evento));
-        when(eventoEquipoRepository.findByEventoId(1L)).thenReturn(List.of(eeA, eeB));
 
         clasificacionService.calcularClasificacion(1L);
 
@@ -140,17 +141,17 @@ class ClasificacionServiceTest {
 
         // A gana a C (3pts A, 0pts C)
         Evento e1 = eventoFinalizado(1L, 2, 0);
-        EventoEquipo e1A = eventoEquipo(e1, equipoA, true);
-        EventoEquipo e1C = eventoEquipo(e1, equipoC, false);
+        e1.setEquipos(new HashSet<>(List.of(
+                eventoEquipo(e1, equipoA, true),
+                eventoEquipo(e1, equipoC, false))));
 
         // B empata con C (1pt B, 1pt C)
         Evento e2 = eventoFinalizado(2L, 1, 1);
-        EventoEquipo e2B = eventoEquipo(e2, equipoB, true);
-        EventoEquipo e2C2 = eventoEquipo(e2, equipoC, false);
+        e2.setEquipos(new HashSet<>(List.of(
+                eventoEquipo(e2, equipoB, true),
+                eventoEquipo(e2, equipoC, false))));
 
         prepararMocks(List.of(clasA, clasB, clasC), List.of(e1, e2));
-        when(eventoEquipoRepository.findByEventoId(1L)).thenReturn(List.of(e1A, e1C));
-        when(eventoEquipoRepository.findByEventoId(2L)).thenReturn(List.of(e2B, e2C2));
 
         clasificacionService.calcularClasificacion(1L);
 
@@ -169,9 +170,10 @@ class ClasificacionServiceTest {
         Clasificacion clasB = clasificacionParaEquipo(equipoB);
 
         Evento evento = eventoFinalizado(1L, 3, 1); // A gana 3-1
+        evento.setEquipos(new HashSet<>(List.of(
+                eventoEquipo(evento, equipoA, true),
+                eventoEquipo(evento, equipoB, false))));
         prepararMocks(List.of(clasA, clasB), List.of(evento));
-        when(eventoEquipoRepository.findByEventoId(1L))
-                .thenReturn(List.of(eventoEquipo(evento, equipoA, true), eventoEquipo(evento, equipoB, false)));
 
         clasificacionService.calcularClasificacion(1L);
 
@@ -185,9 +187,10 @@ class ClasificacionServiceTest {
         Clasificacion clasB = clasificacionParaEquipo(equipoB);
 
         Evento evento = eventoFinalizado(1L, 1, 0); // A gana
+        evento.setEquipos(new HashSet<>(List.of(
+                eventoEquipo(evento, equipoA, true),
+                eventoEquipo(evento, equipoB, false))));
         prepararMocks(List.of(clasA, clasB), List.of(evento));
-        when(eventoEquipoRepository.findByEventoId(1L))
-                .thenReturn(List.of(eventoEquipo(evento, equipoA, true), eventoEquipo(evento, equipoB, false)));
 
         clasificacionService.calcularClasificacion(1L);
 
@@ -291,7 +294,10 @@ class ClasificacionServiceTest {
         when(clasificacionRepository.findByCompeticionIdAndTemporada(1L, 1))
                 .thenReturn(clasificaciones);
         when(clasificacionRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
-        when(eventoRepository.findFinalizadosByCompeticionIdAndTemporada(1L, 1))
+        // Tras A-9, ClasificacionService consume la variante WithEquipos que ya
+        // viene con el grafo {@code evento.equipos} hidratado por JOIN FETCH;
+        // los tests setean los EventoEquipo directamente en cada Evento.
+        when(eventoRepository.findFinalizadosByCompeticionIdAndTemporadaWithEquipos(1L, 1))
                 .thenReturn(eventos);
         // Los equipos inscritos coinciden con los que ya tienen clasificación; el
         // recálculo no debería crear ninguna fila adicional.

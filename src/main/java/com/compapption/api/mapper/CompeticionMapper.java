@@ -38,10 +38,7 @@ public interface CompeticionMapper {
     @Mapping(target = "creadorId", source = "creador.id")
     @Mapping(target = "creadorUsername", source = "creador.username")
     @Mapping(target = "configuracion", source = "configuracion", qualifiedByName = "toConfiguracionDTO")
-    @Mapping(target = "numEquipos",
-            expression = "java(competicion.getEquipos() != null ? " +
-            "(int) competicion.getEquipos().stream()" +
-            ".filter(e -> e.isActivo()).count() : 0)")
+    @Mapping(target = "numEquipos", source = "numEquiposActivos", defaultValue = "0")
     CompeticionDetalleDTO toDetalleDTO(Competicion competicion);
 
     /**
@@ -54,10 +51,7 @@ public interface CompeticionMapper {
      */
     @Mapping(target = "deporteNombre", source = "deporte.nombre")
     @Mapping(target = "creadorUsername", source = "creador.username")
-    @Mapping(target = "numEquipos",
-            expression = "java(competicion.getEquipos() != null ? " +
-                    "(int) competicion.getEquipos().stream()" +
-                    ".filter(e -> e.isActivo()).count() : 0)")
+    @Mapping(target = "numEquipos", source = "numEquiposActivos", defaultValue = "0")
     CompeticionInfoDTO toInfoDTO(Competicion competicion);
 
     /**

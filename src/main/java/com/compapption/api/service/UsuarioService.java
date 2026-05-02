@@ -13,8 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
  * Servicio de gestión de usuarios del sistema.
  *
@@ -65,17 +63,6 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(()-> new ResourceNotFoundException("Usuario", "username", username));
         return mapWithAdminFlag(usuario, incluirAdminFlag);
-    }
-
-    /**
-     * Devuelve la lista completa de usuarios registrados en el sistema. Reservado
-     * a uso administrativo: el flag {@code esAdminSistema} se incluye siempre.
-     *
-     * @return lista de {@link UsuarioDTO} con todos los usuarios
-     */
-    @Transactional(readOnly = true)
-    public List<UsuarioDTO> obtenerTodos(){
-        return usuarioMapper.toDTOList(usuarioRepository.findAll());
     }
 
     /**

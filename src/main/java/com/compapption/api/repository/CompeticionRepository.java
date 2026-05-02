@@ -28,17 +28,23 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
      * @param pageable parámetros de paginación y ordenación
      * @return página de competiciones públicas activas
      */
-    @Query("SELECT c FROM Competicion c " +
+    @Query(value = "SELECT c FROM Competicion c " +
+            "LEFT JOIN FETCH c.deporte " +
+            "WHERE c.publica = true AND c.estado = 'ACTIVA'",
+            countQuery = "SELECT COUNT(c) FROM Competicion c " +
             "WHERE c.publica = true AND c.estado = 'ACTIVA'")
     Page<Competicion> findByPublicasActivas(Pageable pageable);
 
     /**
      * Obtiene todas las competiciones creadas por un usuario concreto.
+     * Incluye {@code JOIN FETCH c.deporte} para evitar el N+1 al mapear
+     * {@code deporteNombre} en el listado (cierra A-7).
      *
      * @param usuarioId identificador del usuario creador
      * @return lista de competiciones creadas por el usuario
      */
     @Query("SELECT c FROM Competicion c " +
+            "LEFT JOIN FETCH c.deporte " +
             "WHERE c.creador.id = :usuarioId")
     List<Competicion> findByCreadorId(
             @Param("usuarioId") long usuarioId
@@ -46,11 +52,13 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
 
     /**
      * Obtiene todas las competiciones en las que un usuario tiene algún rol asignado.
+     * Incluye {@code JOIN FETCH c.deporte} (cierra A-7).
      *
      * @param usuarioId identificador del usuario participante
      * @return lista de competiciones en las que el usuario participa
      */
     @Query("SELECT DISTINCT c FROM Competicion c " +
+            "LEFT JOIN FETCH c.deporte " +
             "JOIN c.usuariosRol ur " +
             "WHERE ur.usuario.id = :usuarioId")
     List<Competicion> findByUsuarioParticipante(
@@ -59,13 +67,15 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
 
     /**
      * Obtiene las competiciones en las que un usuario tiene un rol concreto
-     * (ADMIN_COMPETICION, MANAGER_EQUIPO, ARBITRO).
+     * (ADMIN_COMPETICION, MANAGER_EQUIPO, ARBITRO). Incluye
+     * {@code JOIN FETCH c.deporte} (cierra A-7).
      *
      * @param usuarioId identificador del usuario
      * @param rolNombre nombre del rol a filtrar
      * @return lista de competiciones donde el usuario tiene ese rol
      */
     @Query("SELECT DISTINCT c FROM Competicion c " +
+            "LEFT JOIN FETCH c.deporte " +
             "JOIN c.usuariosRol ur " +
             "WHERE ur.usuario.id = :usuarioId " +
             "AND ur.rol.nombre = :rolNombre")
@@ -79,11 +89,13 @@ public interface CompeticionRepository extends JpaRepository<Competicion, Long> 
      * alguno de los equipos inscritos (camino Usuario→Jugador→EquipoJugador→
      * Equipo→CompeticionEquipo→Competicion). Permite que el dashboard liste
      * competiciones de un jugador aunque no exista UsuarioRolCompeticion.
+     * Incluye {@code JOIN FETCH c.deporte} (cierra A-7).
      *
      * @param usuarioId identificador del usuario vinculado al jugador
      * @return lista de competiciones donde el usuario juega
      */
     @Query("SELECT DISTINCT c FROM Competicion c " +
+            "LEFT JOIN FETCH c.deporte " +
             "JOIN c.equipos ce " +
             "JOIN ce.equipo e " +
             "JOIN e.jugadores ej " +

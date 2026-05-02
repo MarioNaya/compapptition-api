@@ -278,8 +278,10 @@ public class ClasificacionService {
         // Calcular los resultados de cada evento finalizado.
         // Defensa: incluimos eventos cuya temporada coincide y también los que tengan
         // temporada nula (datos legacy), evitando que un null en BD descarte el partido.
+        // Variante con JOIN FETCH de equipos: el grafo llega hidratado y evita la
+        // query por evento dentro del bucle (cierra A-9).
         List<Evento> eventosFinalizados = eventoRepository
-                .findFinalizadosByCompeticionIdAndTemporada(competicionId, temporada);
+                .findFinalizadosByCompeticionIdAndTemporadaWithEquipos(competicionId, temporada);
 
         log.debug("Recalculo competición {}: temporada={}, equipos en clasificación={}, eventos finalizados={}",
                 competicionId, temporada, clasificacionMap.size(), eventosFinalizados.size());
@@ -292,12 +294,11 @@ public class ClasificacionService {
                 continue;
             }
 
-            List<EventoEquipo> equiposEvento = eventoEquipoRepository.findByEventoId(evento.getId());
-            EventoEquipo local = equiposEvento.stream()
+            EventoEquipo local = evento.getEquipos().stream()
                     .filter(EventoEquipo::isEsLocal)
                     .findFirst()
                     .orElse(null);
-            EventoEquipo visitante = equiposEvento.stream()
+            EventoEquipo visitante = evento.getEquipos().stream()
                     .filter(ee -> !ee.isEsLocal())
                     .findFirst()
                     .orElse(null);

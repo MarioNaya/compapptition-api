@@ -206,6 +206,24 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             @Param("temporada") Integer temporada);
 
     /**
+     * Variante de {@link #findFinalizadosByCompeticionIdAndTemporada} con
+     * {@code JOIN FETCH} sobre {@code equipos} y {@code equipo}: el grafo
+     * llega ya hidratado para que {@code ClasificacionService.recalcular}
+     * pueda iterar los participantes sin disparar una query por evento
+     * (cierra A-9). Usar siempre que el flujo necesite los equipos junto
+     * a cada evento finalizado.
+     */
+    @Query("SELECT DISTINCT e FROM Evento e " +
+            "LEFT JOIN FETCH e.equipos ee " +
+            "LEFT JOIN FETCH ee.equipo " +
+            "WHERE e.competicion.id = :competicionId " +
+            "AND e.estado = 'FINALIZADO' " +
+            "AND (e.temporada = :temporada OR (:temporada = 1 AND e.temporada IS NULL))")
+    List<Evento> findFinalizadosByCompeticionIdAndTemporadaWithEquipos(
+            @Param("competicionId") Long competicionId,
+            @Param("temporada") Integer temporada);
+
+    /**
      * Encuentra eventos de siguiente ronda que referencian el evento dado como local o visitante anterior.
      * Hace JOIN FETCH de los anteriores para evitar lazy-init al acceder a sus IDs.
      * Usado para avance automático del bracket.

@@ -156,8 +156,8 @@ public class CalendarioService {
             throw new BadRequestException("Se necesitan al menos 2 equipos para generar el calendario");
         }
 
-        if (diasJornada < 0) {
-            throw new BadRequestException("Los días entre jornadas no pueden ser negativos");
+        if (diasJornada == null || diasJornada < 0) {
+            throw new BadRequestException("Los días entre jornadas son obligatorios y no pueden ser negativos");
         }
 
         ConfiguracionCompeticion.FormatoCompeticion formato = config.getFormato();

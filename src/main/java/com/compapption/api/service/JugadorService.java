@@ -10,6 +10,7 @@ import com.compapption.api.service.log.LogService;
 import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.JugadorMapper;
+import com.compapption.api.repository.EquipoJugadorRepository;
 import com.compapption.api.repository.JugadorRepository;
 import com.compapption.api.repository.UsuarioRepository;
 import com.compapption.api.request.jugador.JugadorCreateRequest;
@@ -40,6 +41,7 @@ public class JugadorService {
 
     private final JugadorRepository jugadorRepository;
     private final UsuarioRepository usuarioRepository;
+    private final EquipoJugadorRepository equipoJugadorRepository;
     private final JugadorMapper jugadorMapper;
     private final LogService logService;
 
@@ -119,16 +121,6 @@ public class JugadorService {
                 .first(page.isFirst())
                 .last(page.isLast())
                 .build();
-    }
-
-    /**
-     * Devuelve la lista completa de jugadores registrados en el sistema.
-     *
-     * @return lista de {@link JugadorSimpleDTO} con todos los jugadores
-     */
-    @Transactional(readOnly = true)
-    public List<JugadorSimpleDTO> obtenerTodos() {
-        return jugadorMapper.toSimpleDTOList(jugadorRepository.findAll());
     }
 
     // === CREAR, ELIMINAR Y ACTUALIZAR JUGADOR === //
@@ -220,7 +212,8 @@ public class JugadorService {
         Jugador jugador = jugadorRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Jugador", "id", id));
 
-        if (!jugador.getEquipos().isEmpty()) {
+        // exists* en lugar de cargar la colección lazy completa (cierra A-11).
+        if (equipoJugadorRepository.existsByJugadorIdAndActivoTrue(id)) {
             throw new BadRequestException("No se puede eliminar un jugador que pertenece a un equipo");
         }
         logService.registrar("Jugador", id, LogModificacion.AccionLog.ELIMINAR, null, null, null);

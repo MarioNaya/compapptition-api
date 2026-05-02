@@ -35,9 +35,11 @@ class EquipoServiceTest {
     @Mock private EquipoJugadorRepository equipoJugadorRepository;
     @Mock private EquipoManagerRepository equipoManagerRepository;
     @Mock private UsuarioRepository usuarioRepository;
+    @Mock private CompeticionEquipoRepository competicionEquipoRepository;
     @Mock private EquipoMapper equipoMapper;
     @Mock private JugadorMapper jugadorMapper;
     @Mock private LogService logService;
+    @Mock private RbacService rbacService;
 
     @InjectMocks private EquipoService equipoService;
 
@@ -66,11 +68,8 @@ class EquipoServiceTest {
 
     @Test
     void eliminar_equipoInscritoEnCompeticion_lanzaBadRequest() {
-        Set<CompeticionEquipo> inscripciones = new HashSet<>();
-        inscripciones.add(CompeticionEquipo.builder().build());
-        Equipo equipoInscrito = Equipo.builder().id(1L).nombre("Inscrito").competiciones(inscripciones).build();
-
-        when(equipoRepository.findById(1L)).thenReturn(Optional.of(equipoInscrito));
+        when(equipoRepository.findById(1L)).thenReturn(Optional.of(equipo));
+        when(competicionEquipoRepository.existsByEquipoIdAndActivoTrue(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> equipoService.eliminar(1L))
                 .isInstanceOf(BadRequestException.class)
@@ -80,6 +79,7 @@ class EquipoServiceTest {
     @Test
     void eliminar_equipoSinCompeticiones_eliminaCorrectamente() {
         when(equipoRepository.findById(1L)).thenReturn(Optional.of(equipo));
+        when(competicionEquipoRepository.existsByEquipoIdAndActivoTrue(1L)).thenReturn(false);
 
         equipoService.eliminar(1L);
 

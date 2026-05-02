@@ -44,15 +44,6 @@ public class Evento {
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
 
-    @Column(name = "fecha_evento", nullable = false)
-    private LocalDateTime fechaEvento;
-
-    @PrePersist
-    @PreUpdate
-    private void sincronizarFechaEvento() {
-        this.fechaEvento = this.fechaHora;
-    }
-
     @Column(length = 255)
     private String lugar;
 

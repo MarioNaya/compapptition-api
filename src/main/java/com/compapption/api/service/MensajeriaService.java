@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Servicio de mensajería privada 1 a 1 entre usuarios. Gestiona la creación y reutilización
@@ -64,8 +65,29 @@ public class MensajeriaService {
     public List<ConversacionSimpleDTO> listarConversaciones(Long usuarioId) {
         List<Conversacion> conversaciones =
                 conversacionRepository.findAllByUsuarioAIdOrUsuarioBIdOrderByFechaUltimoMensajeDesc(usuarioId);
+        if (conversaciones.isEmpty()) {
+            return List.of();
+        }
+
+        // Bandeja agrupada en 3 queries fijas (cierra A-8): conversaciones +
+        // últimos mensajes por conversación + contadores de no leídos. Antes
+        // era 1+2N (51 conversaciones → 103 queries; ahora siempre 3).
+        List<Long> ids = conversaciones.stream().map(Conversacion::getId).toList();
+        Map<Long, String> ultimoPorConversacion = mensajeRepository.findUltimosByConversacionIds(ids).stream()
+                .collect(Collectors.toMap(
+                        m -> m.getConversacion().getId(),
+                        Mensaje::getContenido));
+        Map<Long, Long> unreadPorConversacion = mensajeRepository.countUnreadByConversacionIds(ids, usuarioId).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]));
+
         return conversaciones.stream()
-                .map(c -> toSimpleDTO(c, usuarioId))
+                .map(c -> toSimpleDTO(
+                        c,
+                        usuarioId,
+                        ultimoPorConversacion.get(c.getId()),
+                        unreadPorConversacion.getOrDefault(c.getId(), 0L)))
                 .toList();
     }
 
@@ -205,11 +227,12 @@ public class MensajeriaService {
         return Objects.equals(aId, usuarioId) ? bId : aId;
     }
 
+    /**
+     * Variante one-shot del helper para flujos que no son listado de bandeja
+     * (creación/reutilización de conversación). Tolera el coste de 2 queries
+     * adicionales porque solo se invoca una vez por petición.
+     */
     private ConversacionSimpleDTO toSimpleDTO(Conversacion c, Long usuarioId) {
-        Usuario otro = Objects.equals(c.getUsuarioA().getId(), usuarioId)
-                ? c.getUsuarioB()
-                : c.getUsuarioA();
-
         List<Mensaje> ultimos = mensajeRepository.findTopByConversacionId(
                 c.getId(), PageRequest.of(0, 1));
         String preview = ultimos.isEmpty() ? null : ultimos.get(0).getContenido();
@@ -217,13 +240,21 @@ public class MensajeriaService {
         long unread = mensajeRepository.countByConversacionIdAndAutorIdNotAndLeidoAtIsNull(
                 c.getId(), usuarioId);
 
+        return toSimpleDTO(c, usuarioId, preview, unread);
+    }
+
+    private ConversacionSimpleDTO toSimpleDTO(Conversacion c, Long usuarioId,
+                                              String preview, long unreadCount) {
+        Usuario otro = Objects.equals(c.getUsuarioA().getId(), usuarioId)
+                ? c.getUsuarioB()
+                : c.getUsuarioA();
         return ConversacionSimpleDTO.builder()
                 .id(c.getId())
                 .otroUsuarioId(otro.getId())
                 .otroUsuarioUsername(otro.getUsername())
                 .ultimoMensaje(preview)
                 .fechaUltimoMensaje(c.getFechaUltimoMensaje())
-                .unreadCount(unread)
+                .unreadCount(unreadCount)
                 .build();
     }
 }

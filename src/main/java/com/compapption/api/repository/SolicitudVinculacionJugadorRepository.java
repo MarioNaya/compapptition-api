@@ -53,6 +53,35 @@ public interface SolicitudVinculacionJugadorRepository
             @Param("equipoIds") List<Long> equipoIds);
 
     /**
+     * Solicitudes en {@code PENDIENTE_ADMIN} sobre cualquier equipo donde el
+     * usuario indicado tenga legitimidad de gestión: creador del equipo,
+     * manager registrado en {@code EquipoManager}, o admin de alguna
+     * competición donde el equipo participa. Resuelve la condición en SQL
+     * con dos {@code EXISTS} en lugar de cargar todas las solicitudes y
+     * filtrar en memoria (cierra A-3).
+     */
+    @Query("SELECT s FROM SolicitudVinculacionJugador s " +
+            "LEFT JOIN FETCH s.jugador " +
+            "LEFT JOIN FETCH s.usuario " +
+            "LEFT JOIN FETCH s.equipo eq " +
+            "WHERE s.estado = 'PENDIENTE_ADMIN' AND (" +
+            "  eq.creador.id = :usuarioId " +
+            "  OR EXISTS (" +
+            "    SELECT 1 FROM EquipoManager m " +
+            "    WHERE m.equipo = eq AND m.usuario.id = :usuarioId" +
+            "  ) " +
+            "  OR EXISTS (" +
+            "    SELECT 1 FROM UsuarioRolCompeticion urc " +
+            "    JOIN eq.competiciones ce " +
+            "    WHERE urc.usuario.id = :usuarioId " +
+            "    AND urc.competicion.id = ce.competicion.id " +
+            "    AND urc.rol.nombre = com.compapption.api.entity.Rol.RolNombre.ADMIN_COMPETICION" +
+            "  )" +
+            ")")
+    List<SolicitudVinculacionJugador> findPendientesAdminParaUsuario(
+            @Param("usuarioId") Long usuarioId);
+
+    /**
      * Marca como {@code EXPIRADA} todas las solicitudes pendientes con fecha de
      * expiración anterior a la indicada. Pensado para invocación periódica.
      */

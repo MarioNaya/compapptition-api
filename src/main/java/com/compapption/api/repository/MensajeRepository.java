@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -77,4 +78,37 @@ public interface MensajeRepository extends JpaRepository<Mensaje, Long> {
     int marcarComoLeidos(@Param("conversacionId") Long conversacionId,
                          @Param("usuarioId") Long usuarioId,
                          @Param("now") LocalDateTime now);
+
+    /**
+     * Devuelve, en una sola consulta, el último mensaje de cada una de las
+     * conversaciones indicadas. Sustituye al patrón "N llamadas a
+     * {@link #findTopByConversacionId}" para la bandeja de entrada
+     * (cierra A-8). Subquery agrupada con {@code MAX(id)} por conversación,
+     * portable a MySQL/H2/Postgres.
+     */
+    @Query("SELECT m FROM Mensaje m " +
+            "LEFT JOIN FETCH m.autor " +
+            "WHERE m.id IN (" +
+            "  SELECT MAX(m2.id) FROM Mensaje m2 " +
+            "  WHERE m2.conversacion.id IN :conversacionIds " +
+            "  GROUP BY m2.conversacion.id)")
+    List<Mensaje> findUltimosByConversacionIds(
+            @Param("conversacionIds") Collection<Long> conversacionIds);
+
+    /**
+     * Devuelve, en una sola consulta, el contador de mensajes no leídos por
+     * conversación dentro del set indicado, excluyendo los del propio usuario.
+     * Sustituye al patrón "N llamadas a
+     * {@link #countByConversacionIdAndAutorIdNotAndLeidoAtIsNull}" en la
+     * bandeja (cierra A-8). Cada fila contiene
+     * {@code [Long conversacionId, Long unreadCount]}.
+     */
+    @Query("SELECT m.conversacion.id, COUNT(m) FROM Mensaje m " +
+            "WHERE m.conversacion.id IN :conversacionIds " +
+            "AND m.autor.id <> :usuarioId " +
+            "AND m.leidoAt IS NULL " +
+            "GROUP BY m.conversacion.id")
+    List<Object[]> countUnreadByConversacionIds(
+            @Param("conversacionIds") Collection<Long> conversacionIds,
+            @Param("usuarioId") Long usuarioId);
 }

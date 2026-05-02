@@ -26,17 +26,11 @@ class CompeticionMapperTest {
     // =========================================================
 
     @Test
-    void toDetalleDTO_contaSoloEquiposActivos() {
-        CompeticionEquipo activo1 = CompeticionEquipo.builder().activo(true).build();
-        CompeticionEquipo activo2 = CompeticionEquipo.builder().activo(true).build();
-        CompeticionEquipo inactivo = CompeticionEquipo.builder().activo(false).build();
-
-        Set<CompeticionEquipo> equipos = new HashSet<>();
-        equipos.add(activo1);
-        equipos.add(activo2);
-        equipos.add(inactivo);
-
-        Competicion competicion = competicionBase().equipos(equipos).build();
+    void toDetalleDTO_usaNumEquiposActivosPrecalculado() {
+        // Tras A-10, numEquipos viene de @Formula (subquery en SELECT) y se
+        // expone como Competicion.numEquiposActivos. El mapper ya no inicializa
+        // la colección lazy `equipos` solo para contar.
+        Competicion competicion = competicionBase().numEquiposActivos(2).build();
 
         CompeticionDetalleDTO dto = mapper.toDetalleDTO(competicion);
 
@@ -44,8 +38,10 @@ class CompeticionMapperTest {
     }
 
     @Test
-    void toDetalleDTO_sinEquipos_numEquiposCero() {
-        Competicion competicion = competicionBase().build(); // equipos = empty set por defecto
+    void toDetalleDTO_sinNumEquiposActivos_devuelveCero() {
+        // numEquiposActivos null (entidad recién construida en memoria, sin
+        // pasar por SELECT) → defaultValue=0 del mapper.
+        Competicion competicion = competicionBase().build();
 
         CompeticionDetalleDTO dto = mapper.toDetalleDTO(competicion);
 

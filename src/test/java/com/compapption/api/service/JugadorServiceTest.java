@@ -6,6 +6,7 @@ import com.compapption.api.entity.Usuario;
 import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.JugadorMapper;
+import com.compapption.api.repository.EquipoJugadorRepository;
 import com.compapption.api.repository.JugadorRepository;
 import com.compapption.api.repository.UsuarioRepository;
 import com.compapption.api.service.log.LogService;
@@ -30,6 +31,7 @@ class JugadorServiceTest {
 
     @Mock private JugadorRepository jugadorRepository;
     @Mock private UsuarioRepository usuarioRepository;
+    @Mock private EquipoJugadorRepository equipoJugadorRepository;
     @Mock private JugadorMapper jugadorMapper;
     @Mock private LogService logService;
 
@@ -58,12 +60,8 @@ class JugadorServiceTest {
 
     @Test
     void eliminar_jugadorEnEquipo_lanzaBadRequest() {
-        // Jugador con equipos → no se puede eliminar
-        Set<EquipoJugador> equipos = new HashSet<>();
-        equipos.add(EquipoJugador.builder().build());
-        Jugador jugadorConEquipo = Jugador.builder().id(1L).nombre("Juan").equipos(equipos).build();
-
-        when(jugadorRepository.findById(1L)).thenReturn(Optional.of(jugadorConEquipo));
+        when(jugadorRepository.findById(1L)).thenReturn(Optional.of(jugador));
+        when(equipoJugadorRepository.existsByJugadorIdAndActivoTrue(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> jugadorService.eliminar(1L))
                 .isInstanceOf(BadRequestException.class)
@@ -72,8 +70,8 @@ class JugadorServiceTest {
 
     @Test
     void eliminar_jugadorSinEquipos_eliminaCorrectamente() {
-        // Jugador sin equipos (set vacío por defecto de @Builder.Default)
         when(jugadorRepository.findById(1L)).thenReturn(Optional.of(jugador));
+        when(equipoJugadorRepository.existsByJugadorIdAndActivoTrue(1L)).thenReturn(false);
 
         jugadorService.eliminar(1L);
 
