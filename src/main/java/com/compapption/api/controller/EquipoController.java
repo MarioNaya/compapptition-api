@@ -72,38 +72,41 @@ public class EquipoController {
     }
 
     /**
-     * GET /equipos/mis-equipos/manager — obtiene todos los equipos en los que el usuario es manager.
+     * GET /equipos/mis-equipos/manager — obtiene todos los equipos en los que el usuario autenticado es manager.
      *
-     * @param id identificador del usuario manager
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con la lista de EquipoSimpleDTO donde el usuario gestiona como manager
      */
     @GetMapping("mis-equipos/manager")
-    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposManager(@RequestParam long id) {
-        return ResponseEntity.ok(equipoService.obtenerPorManager(id));
+    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposManager(
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(equipoService.obtenerPorManager(principal.getId()));
     }
 
     /**
-     * GET /equipos/mis-equipos/jugador — obtiene todos los equipos en los que el usuario participa como jugador.
+     * GET /equipos/mis-equipos/jugador — obtiene todos los equipos en los que el usuario autenticado participa como jugador.
      *
-     * @param id identificador del usuario jugador
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con la lista de EquipoSimpleDTO donde el usuario está inscrito como jugador
      */
     @GetMapping("mis-equipos/jugador")
-    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposJugador(@RequestParam long id) {
-        return ResponseEntity.ok(equipoService.obtenerPorJugador(id));
+    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposJugador(
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(equipoService.obtenerPorJugador(principal.getId()));
     }
 
     /**
-     * GET /equipos/mis-equipos/creados — obtiene todos los equipos creados por el usuario,
+     * GET /equipos/mis-equipos/creados — obtiene todos los equipos creados por el usuario autenticado,
      * independientemente de si están inscritos o no en una competición. Alimenta la
      * bandeja "Mis equipos" del dashboard tras crear un equipo nuevo.
      *
-     * @param id identificador del usuario creador
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con la lista de EquipoSimpleDTO creados por el usuario
      */
     @GetMapping("mis-equipos/creados")
-    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposCreados(@RequestParam long id) {
-        return ResponseEntity.ok(equipoService.obtenerPorCreador(id));
+    public ResponseEntity<List<EquipoSimpleDTO>> buscarMisEquiposCreados(
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(equipoService.obtenerPorCreador(principal.getId()));
     }
 
     /**
@@ -119,13 +122,21 @@ public class EquipoController {
 
     /**
      * GET /equipos/{id}/detalle — obtiene la vista completa de un equipo incluyendo su plantilla y manager.
+     * El campo {@code codigoInvitacion} solo se devuelve a usuarios con permisos de
+     * gestión sobre el equipo (creador, manager o admin de competición). El resto
+     * recibe {@code null} aunque el equipo sea privado.
      *
      * @param id identificador único del equipo
+     * @param principal datos del usuario autenticado (puede ser anónimo en /publico)
      * @return ResponseEntity con el EquipoDetalleDTO del equipo solicitado
      */
     @GetMapping("/{id}/detalle")
-    public ResponseEntity<EquipoDetalleDTO> buscarPorIdDetalle(@PathVariable long id) {
-        return ResponseEntity.ok(equipoService.obtenerPorIdDetalle(id));
+    public ResponseEntity<EquipoDetalleDTO> buscarPorIdDetalle(
+            @PathVariable long id,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        Long usuarioId = principal != null ? principal.getId() : null;
+        boolean esAdminSistema = principal != null && principal.isEsAdminSistema();
+        return ResponseEntity.ok(equipoService.obtenerPorIdDetalle(id, usuarioId, esAdminSistema));
     }
 
     /**
@@ -145,13 +156,16 @@ public class EquipoController {
     }
 
     /**
-     * PUT /equipos/{id} — actualiza los datos de un equipo existente.
+     * PUT /equipos/{id} — actualiza los datos de un equipo existente. Reservado al
+     * creador, manager del equipo en alguna competición o admin de competición donde
+     * participa (verificado vía RBAC).
      *
      * @param id identificador único del equipo a actualizar
      * @param request cuerpo con los nuevos datos del equipo
      * @return ResponseEntity con el EquipoSimpleDTO actualizado
      */
     @PutMapping("{id}")
+    @PreAuthorize("@rbacService.puedeAdministrarEquipo(#id, authentication)")
     public ResponseEntity<EquipoSimpleDTO> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody EquipoUpdateRequest request) {
@@ -159,12 +173,14 @@ public class EquipoController {
     }
 
     /**
-     * DELETE /equipos/{id} — elimina un equipo del sistema.
+     * DELETE /equipos/{id} — elimina un equipo del sistema. Reservado al creador,
+     * manager del equipo o admin de competición (verificado vía RBAC).
      *
      * @param id identificador único del equipo a eliminar
      * @return ResponseEntity vacío con estado 204 No Content
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("@rbacService.puedeAdministrarEquipo(#id, authentication)")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         equipoService.eliminar(id);
         return ResponseEntity.noContent().build();
@@ -294,6 +310,7 @@ public class EquipoController {
 
     /**
      * POST /equipos/{id}/managers — asigna un usuario como manager de un equipo en una competición concreta.
+     * Reservado al admin de la competición (verificado vía RBAC).
      *
      * @param id identificador único del equipo
      * @param competicionId identificador de la competición en la que se asigna el rol de manager
@@ -301,6 +318,7 @@ public class EquipoController {
      * @return ResponseEntity con mensaje de confirmación de la asignación
      */
     @PostMapping("/{id}/managers")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#competicionId, authentication)")
     public ResponseEntity<Map<String,String>> asignarManager(
             @PathVariable Long id,
             @RequestParam Long competicionId,

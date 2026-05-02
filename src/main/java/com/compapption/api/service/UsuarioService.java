@@ -5,6 +5,7 @@ import com.compapption.api.entity.Usuario;
 import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.UsuarioMapper;
+import com.compapption.api.repository.RefreshTokenRepository;
 import com.compapption.api.repository.UsuarioRepository;
 import com.compapption.api.request.usuario.UsuarioUpdateRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,37 +31,45 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     /**
      * Obtiene un usuario por su identificador único.
      *
      * @param id identificador del usuario
+     * @param incluirAdminFlag si {@code false}, el campo {@code esAdminSistema}
+     *                         del DTO se devuelve nulo para no filtrar el rol
+     *                         del usuario consultado a terceros
      * @return {@link UsuarioDTO} con los datos del usuario
      * @throws ResourceNotFoundException si no existe ningún usuario con ese id
      */
     @Transactional(readOnly = true)
-    public UsuarioDTO obtenerPorId(Long id){
+    public UsuarioDTO obtenerPorId(Long id, boolean incluirAdminFlag) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Usuario", "id", id));
-        return usuarioMapper.toDTO(usuario);
+        return mapWithAdminFlag(usuario, incluirAdminFlag);
     }
 
     /**
      * Obtiene un usuario por su nombre de usuario.
      *
      * @param username nombre de usuario
+     * @param incluirAdminFlag si {@code false}, el campo {@code esAdminSistema}
+     *                         del DTO se devuelve nulo para no filtrar el rol
+     *                         del usuario consultado a terceros
      * @return {@link UsuarioDTO} con los datos del usuario
      * @throws ResourceNotFoundException si no existe ningún usuario con ese username
      */
     @Transactional(readOnly = true)
-    public UsuarioDTO obtenerPorUsername(String username){
+    public UsuarioDTO obtenerPorUsername(String username, boolean incluirAdminFlag) {
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(()-> new ResourceNotFoundException("Usuario", "username", username));
-        return usuarioMapper.toDTO(usuario);
+        return mapWithAdminFlag(usuario, incluirAdminFlag);
     }
 
     /**
-     * Devuelve la lista completa de usuarios registrados en el sistema.
+     * Devuelve la lista completa de usuarios registrados en el sistema. Reservado
+     * a uso administrativo: el flag {@code esAdminSistema} se incluye siempre.
      *
      * @return lista de {@link UsuarioDTO} con todos los usuarios
      */
@@ -100,11 +109,13 @@ public class UsuarioService {
         }
 
         usuario = usuarioRepository.save(usuario);
-        return usuarioMapper.toDTO(usuario);
+        return mapWithAdminFlag(usuario, true);
     }
 
     /**
      * Cambia la contraseña de un usuario verificando previamente la contraseña actual.
+     * Tras el cambio revoca todos los refresh tokens activos del usuario para
+     * forzar un nuevo inicio de sesión en el resto de dispositivos.
      *
      * @param id              identificador del usuario
      * @param passwordActual  contraseña actual en texto plano para verificación
@@ -123,6 +134,7 @@ public class UsuarioService {
 
         usuario.setPassword(passwordEncoder.encode(passwordNuevo));
         usuarioRepository.save(usuario);
+        refreshTokenRepository.revocarTodosPorUsuario(usuario);
     }
 
     /**
@@ -137,6 +149,7 @@ public class UsuarioService {
                 .orElseThrow(()-> new ResourceNotFoundException("Usuario", "id", id));
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
+        refreshTokenRepository.revocarTodosPorUsuario(usuario);
     }
 
     /**
@@ -151,5 +164,13 @@ public class UsuarioService {
                 .orElseThrow(()-> new ResourceNotFoundException("Usuario", "id", id));
         usuario.setActivo(true);
         usuarioRepository.save(usuario);
+    }
+
+    private UsuarioDTO mapWithAdminFlag(Usuario usuario, boolean incluirAdminFlag) {
+        UsuarioDTO dto = usuarioMapper.toDTO(usuario);
+        if (!incluirAdminFlag) {
+            dto.setEsAdminSistema(null);
+        }
+        return dto;
     }
 }

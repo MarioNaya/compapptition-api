@@ -49,6 +49,7 @@ public class EquipoService {
     private final EquipoMapper equipoMapper;
     private final JugadorMapper jugadorMapper;
     private final LogService logService;
+    private final RbacService rbacService;
 
     /**
      * Alfabeto del código de invitación: 32 caracteres legibles
@@ -88,6 +89,9 @@ public class EquipoService {
 
     /**
      * Obtiene un equipo en formato detalle (con jugadores) por su identificador.
+     * Versión interna que devuelve el código de invitación intacto: úsese
+     * únicamente desde flujos donde el llamante ya está autorizado (creación,
+     * regeneración de código, listas internas).
      *
      * @param id identificador del equipo
      * @return {@link EquipoDetalleDTO} con todos los datos del equipo
@@ -98,6 +102,33 @@ public class EquipoService {
         Equipo equipo = equipoRepository.findByIdWithJugadores(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Equipo", "id", id));
         return equipoMapper.toDetalleDTO(equipo);
+    }
+
+    /**
+     * Obtiene un equipo en formato detalle aplicando enmascaramiento del
+     * {@code codigoInvitacion}: solo se devuelve si el solicitante tiene
+     * permisos para gestionar la plantilla del equipo (creador, manager o
+     * admin de competición) o es administrador del sistema.
+     *
+     * @param id            identificador del equipo
+     * @param solicitanteId identificador del usuario autenticado (puede ser {@code null}
+     *                      en flujos públicos)
+     * @param esAdminSistema {@code true} si el solicitante tiene rol global de admin
+     * @return {@link EquipoDetalleDTO} con el código enmascarado si procede
+     * @throws ResourceNotFoundException si no existe ningún equipo con ese id
+     */
+    @Transactional(readOnly = true)
+    public EquipoDetalleDTO obtenerPorIdDetalle(Long id, Long solicitanteId, boolean esAdminSistema) {
+        Equipo equipo = equipoRepository.findByIdWithJugadores(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Equipo", "id", id));
+        EquipoDetalleDTO dto = equipoMapper.toDetalleDTO(equipo);
+        boolean puedeVerCodigo = esAdminSistema
+                || (solicitanteId != null
+                    && rbacService.puedeGestionarPlantillaParaUsuario(id, solicitanteId));
+        if (!puedeVerCodigo) {
+            dto.setCodigoInvitacion(null);
+        }
+        return dto;
     }
 
     /**

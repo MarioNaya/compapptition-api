@@ -58,6 +58,7 @@ public class CompeticionService {
     private final UsuarioRolCompeticionService usuarioRolCompeticionService;
     private final LogService logService;
     private final NotificacionService notificacionService;
+    private final RbacService rbacService;
 
     // === CRUD COMPETICIONES === //
 
@@ -453,7 +454,9 @@ public class CompeticionService {
 
     /**
      * Devuelve la lista de equipos actualmente inscritos y activos en una competición
-     * en formato detalle (todos los campos, incluidos jugadores).
+     * en formato detalle (todos los campos, incluidos jugadores). Versión interna sin
+     * enmascaramiento del {@code codigoInvitacion}: úsese únicamente desde flujos
+     * donde el llamante ya está autorizado a ver los códigos privados.
      *
      * @param competicionId identificador de la competición
      * @return lista de equipos inscritos en formato detalle
@@ -468,6 +471,42 @@ public class CompeticionService {
         return competicionEquipoRepository.findActivosByCompeticionId(competicionId)
                 .stream()
                 .map(ce -> equipoMapper.toDetalleDTO(ce.getEquipo()))
+                .toList();
+    }
+
+    /**
+     * Variante segura de {@link #obtenerInscritosDetalle(long)} que aplica
+     * enmascaramiento del {@code codigoInvitacion}: solo se devuelve si el
+     * solicitante puede gestionar la plantilla del equipo correspondiente
+     * (creador, manager o admin de competición) o es administrador del sistema.
+     * Cierra S-31 (bypass de S-12 vía listado de competición).
+     *
+     * @param competicionId  identificador de la competición
+     * @param solicitanteId  identificador del usuario autenticado (puede ser {@code null})
+     * @param esAdminSistema {@code true} si el solicitante tiene rol global de admin
+     * @return lista de equipos inscritos con códigos enmascarados según procede
+     * @throws ResourceNotFoundException si la competición no existe
+     */
+    @Transactional(readOnly = true)
+    public List<EquipoDetalleDTO> obtenerInscritosDetalle(long competicionId,
+                                                          Long solicitanteId,
+                                                          boolean esAdminSistema) {
+        if (!competicionRepository.existsById(competicionId)) {
+            throw new ResourceNotFoundException("Competición", "id", competicionId);
+        }
+        return competicionEquipoRepository.findActivosByCompeticionId(competicionId)
+                .stream()
+                .map(ce -> {
+                    EquipoDetalleDTO dto = equipoMapper.toDetalleDTO(ce.getEquipo());
+                    boolean puedeVerCodigo = esAdminSistema
+                            || (solicitanteId != null
+                                && rbacService.puedeGestionarPlantillaParaUsuario(
+                                        ce.getEquipo().getId(), solicitanteId));
+                    if (!puedeVerCodigo) {
+                        dto.setCodigoInvitacion(null);
+                    }
+                    return dto;
+                })
                 .toList();
     }
 

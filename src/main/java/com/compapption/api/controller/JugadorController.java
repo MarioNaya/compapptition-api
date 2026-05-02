@@ -86,13 +86,17 @@ public class JugadorController {
     }
 
     /**
-     * PUT /jugadores/{id} — actualiza los datos de un jugador existente.
+     * PUT /jugadores/{id} — actualiza los datos de un jugador existente. Reservado
+     * al propio usuario vinculado al jugador, a quien pueda gestionar la plantilla
+     * de alguno de sus equipos activos o al administrador del sistema (verificado
+     * vía RBAC).
      *
      * @param id identificador único del jugador a actualizar
      * @param request cuerpo con los nuevos datos del jugador
      * @return ResponseEntity con el JugadorDetalleDTO actualizado
      */
     @PutMapping("/{id}")
+    @PreAuthorize("@rbacService.puedeEditarJugador(#id, authentication)")
     public ResponseEntity<JugadorDetalleDTO> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody JugadorUpdateRequest request){

@@ -148,4 +148,19 @@ public interface EquipoRepository extends JpaRepository<Equipo, Long> {
     List<Equipo> findByCreadorId(
             @Param("usuarioId") Long usuarioId
     );
+
+    /**
+     * Obtiene los identificadores de los equipos en los que el jugador está
+     * inscrito de forma activa. Se utiliza desde {@code RbacService} para
+     * resolver permisos de edición sobre el jugador sin cargar entidades
+     * completas.
+     *
+     * @param jugadorId identificador del jugador
+     * @return lista de identificadores de equipos activos del jugador
+     */
+    @Query("SELECT ej.equipo.id FROM EquipoJugador ej " +
+            "WHERE ej.jugador.id = :jugadorId AND ej.activo = true")
+    List<Long> findEquiposActivosByJugadorId(
+            @Param("jugadorId") Long jugadorId
+    );
 }

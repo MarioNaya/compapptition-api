@@ -52,36 +52,38 @@ public class InvitacionController {
     }
 
     /**
-     * GET /invitaciones/pendientes — obtiene las invitaciones pendientes de respuesta para un usuario.
+     * GET /invitaciones/pendientes — obtiene las invitaciones pendientes de respuesta para el usuario autenticado.
      *
-     * @param usuarioId identificador del usuario destinatario
-     * @return ResponseEntity con la lista de InvitacionSimpleDTO pendientes de ese usuario
+     * @param principal datos del usuario autenticado (destinatario)
+     * @return ResponseEntity con la lista de InvitacionSimpleDTO pendientes del usuario
      */
     @GetMapping("/pendientes")
     public ResponseEntity<List<InvitacionSimpleDTO>> obtenerPendientes(
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(invitacionService.obtenerPendientes(usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(invitacionService.obtenerPendientes(principal.getId()));
     }
 
     /**
-     * GET /invitaciones/enviadas — obtiene las invitaciones enviadas por un usuario.
+     * GET /invitaciones/enviadas — obtiene las invitaciones enviadas por el usuario autenticado.
      *
-     * @param usuarioId identificador del usuario remitente
-     * @return ResponseEntity con la lista de InvitacionSimpleDTO enviadas por ese usuario
+     * @param principal datos del usuario autenticado (remitente)
+     * @return ResponseEntity con la lista de InvitacionSimpleDTO enviadas por el usuario
      */
     @GetMapping("/enviadas")
     public ResponseEntity<List<InvitacionSimpleDTO>> obtenerEnviadas(
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(invitacionService.obtenerEnviadas(usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(invitacionService.obtenerEnviadas(principal.getId()));
     }
 
     /**
      * GET /invitaciones/competicion/{competicionId} — obtiene todas las invitaciones asociadas a una competición.
+     * Reservado al admin de la competición.
      *
      * @param competicionId identificador único de la competición
      * @return ResponseEntity con la lista de InvitacionSimpleDTO de la competición
      */
     @GetMapping("/competicion/{competicionId}")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#competicionId, authentication)")
     public ResponseEntity<List<InvitacionSimpleDTO>> obtenerPorCompeticion(
             @PathVariable Long competicionId) {
         return ResponseEntity.ok(invitacionService.obtenerPorCompeticion(competicionId));
@@ -90,30 +92,33 @@ public class InvitacionController {
     /**
      * PUT /invitaciones/{token}/aceptar — acepta una invitación mediante su token único.
      * Asigna el rol correspondiente al usuario en la competición e invalida el token.
+     * El identificador del usuario se toma del JWT, impidiendo aceptar en nombre de
+     * un tercero (S-15 mitigado).
      *
      * @param token token UUID de la invitación a aceptar
-     * @param usuarioId identificador del usuario que acepta la invitación
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con el InvitacionDetalleDTO actualizado con estado ACEPTADA
      */
     @PutMapping("/{token}/aceptar")
     public ResponseEntity<InvitacionDetalleDTO> aceptar(
             @PathVariable String token,
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(invitacionService.aceptarPorToken(token, usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(invitacionService.aceptarPorToken(token, principal.getId()));
     }
 
     /**
      * PUT /invitaciones/{token}/rechazar — rechaza una invitación mediante su token único.
-     * Marca la invitación como rechazada e invalida el token.
+     * Marca la invitación como rechazada e invalida el token. El identificador del usuario
+     * se toma del JWT.
      *
      * @param token token UUID de la invitación a rechazar
-     * @param usuarioId identificador del usuario que rechaza la invitación
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con el InvitacionDetalleDTO actualizado con estado RECHAZADA
      */
     @PutMapping("/{token}/rechazar")
     public ResponseEntity<InvitacionDetalleDTO> rechazar(
             @PathVariable String token,
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(invitacionService.rechazarPorToken(token, usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(invitacionService.rechazarPorToken(token, principal.getId()));
     }
 }

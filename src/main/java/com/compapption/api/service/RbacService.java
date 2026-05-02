@@ -198,6 +198,59 @@ public class RbacService {
     }
 
     /**
+     * Comprueba si el usuario puede consultar o editar el perfil indicado.
+     * Lo permiten el propio usuario y el administrador del sistema.
+     *
+     * @param targetUserId identificador del usuario consultado/editado
+     * @param auth         objeto de autenticación de Spring Security
+     * @return {@code true} si {@code auth} es admin de sistema o coincide con {@code targetUserId}
+     */
+    public boolean esPropietarioOAdminSistema(Long targetUserId, Authentication auth) {
+        if (isAdminSistema(auth)) return true;
+        Long userId = extractUserId(auth);
+        return userId != null && userId.equals(targetUserId);
+    }
+
+    /**
+     * Comprueba si el usuario puede editar los datos personales de un jugador
+     * (nombre, apellidos, dorsal, posición, foto). Lo permiten:
+     * <ul>
+     *   <li>el administrador del sistema,</li>
+     *   <li>el propio usuario vinculado al jugador,</li>
+     *   <li>cualquiera con permisos de gestión sobre alguno de los equipos
+     *       activos en los que el jugador esté inscrito.</li>
+     * </ul>
+     *
+     * @param jugadorId identificador del jugador
+     * @param auth      objeto de autenticación de Spring Security
+     * @return {@code true} si el usuario puede editar al jugador
+     */
+    public boolean puedeEditarJugador(Long jugadorId, Authentication auth) {
+        if (isAdminSistema(auth)) return true;
+        Long userId = extractUserId(auth);
+        if (userId == null || jugadorId == null) return false;
+        return jugadorRepository.findById(jugadorId)
+                .map(j -> {
+                    if (j.getUsuario() != null && userId.equals(j.getUsuario().getId())) {
+                        return true;
+                    }
+                    return equipoRepository.findEquiposActivosByJugadorId(jugadorId).stream()
+                            .anyMatch(eqId -> puedeGestionarPlantillaParaUsuario(eqId, userId));
+                })
+                .orElse(false);
+    }
+
+    /**
+     * Alias semántico de {@link #puedeGestionarPlantilla(Long, Authentication)}
+     * para usar en endpoints de gestión administrativa del equipo
+     * (editar datos, eliminar). Conserva la misma política: creador, manager
+     * o admin de competición donde participa.
+     */
+    public boolean puedeAdministrarEquipo(Long equipoId, Authentication auth) {
+        return puedeGestionarPlantilla(equipoId, auth);
+    }
+
+    /**
      * Comprueba si el usuario autenticado puede emitir la invitación descrita en
      * el request, en función del rol ofrecido y del ámbito (competición/equipo):
      * <ul>

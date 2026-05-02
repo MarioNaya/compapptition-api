@@ -4,6 +4,7 @@ import com.compapption.api.entity.Usuario;
 import com.compapption.api.exception.BadRequestException;
 import com.compapption.api.exception.ResourceNotFoundException;
 import com.compapption.api.mapper.UsuarioMapper;
+import com.compapption.api.repository.RefreshTokenRepository;
 import com.compapption.api.repository.UsuarioRepository;
 import com.compapption.api.request.usuario.UsuarioUpdateRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ class UsuarioServiceTest {
     @Mock private UsuarioRepository usuarioRepository;
     @Mock private UsuarioMapper usuarioMapper;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private RefreshTokenRepository refreshTokenRepository;
 
     @InjectMocks private UsuarioService usuarioService;
 
@@ -112,5 +114,6 @@ class UsuarioServiceTest {
         usuarioService.cambiarPassword(1L, "correcta", "nueva");
 
         assertThat(usuario.getPassword()).isEqualTo("nueva-hash");
+        verify(refreshTokenRepository).revocarTodosPorUsuario(usuario);
     }
 }

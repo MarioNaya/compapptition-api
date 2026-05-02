@@ -108,43 +108,43 @@ public class CompeticionController {
     // ==================== CONSULTAS POR USUARIO ====================
 
     /**
-     * GET /competiciones/mis-competiciones/creador — obtiene todas las competiciones creadas por un usuario.
+     * GET /competiciones/mis-competiciones/creador — obtiene todas las competiciones creadas por el usuario autenticado.
      *
-     * @param usuarioId identificador del usuario creador
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con la lista de CompeticionSimpleDTO creadas por el usuario
      */
     @GetMapping("/mis-competiciones/creador")
     public ResponseEntity<List<CompeticionSimpleDTO>> obtenerPorCreador(
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(competicionService.obtenerPorCreador(usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(competicionService.obtenerPorCreador(principal.getId()));
     }
 
     /**
-     * GET /competiciones/mis-competiciones/participante — obtiene todas las competiciones en las que participa un usuario.
+     * GET /competiciones/mis-competiciones/participante — obtiene todas las competiciones en las que participa el usuario autenticado.
      *
-     * @param usuarioId identificador del usuario participante
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con la lista de CompeticionSimpleDTO en las que el usuario participa
      */
     @GetMapping("/mis-competiciones/participante")
     public ResponseEntity<List<CompeticionSimpleDTO>> obtenerPorParticipante(
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(competicionService.obtenerPorParticipante(usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(competicionService.obtenerPorParticipante(principal.getId()));
     }
 
     /**
      * GET /competiciones/mis-competiciones/por-rol — devuelve las competiciones
-     * del usuario agrupadas por rol (admin, manager, arbitro, jugador).
+     * del usuario autenticado agrupadas por rol (admin, manager, arbitro, jugador).
      * Permite que el dashboard muestre cuatro secciones separadas e incluye
      * las competiciones del usuario como jugador (no cubierto por
      * UsuarioRolCompeticion en el flujo de invitación actual).
      *
-     * @param usuarioId identificador del usuario
+     * @param principal datos del usuario autenticado
      * @return DTO con las cuatro listas de competiciones
      */
     @GetMapping("/mis-competiciones/por-rol")
     public ResponseEntity<MisCompeticionesPorRolDTO> obtenerMisCompeticionesPorRol(
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(competicionService.obtenerMisCompeticionesPorRol(usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(competicionService.obtenerMisCompeticionesPorRol(principal.getId()));
     }
 
     // ==================== CRUD ====================
@@ -167,34 +167,38 @@ public class CompeticionController {
 
     /**
      * PUT /competiciones/{id} — actualiza los datos de una competición existente.
+     * Reservado al admin de la competición (verificado vía RBAC). El identificador del
+     * usuario que opera se toma del JWT, no del cliente.
      *
      * @param id identificador único de la competición a actualizar
      * @param request cuerpo con los nuevos datos de la competición
-     * @param usuarioId identificador del usuario que realiza la operación (debe ser admin)
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con el CompeticionDetalleDTO actualizado
      */
     @PutMapping("/{id}")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
     public ResponseEntity<CompeticionDetalleDTO> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody CompeticionUpdateRequest request,
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(competicionService.actualizar(id, request, usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(competicionService.actualizar(id, request, principal.getId()));
     }
 
     /**
      * DELETE /competiciones/{id} — elimina una competición y todos sus datos asociados.
-     * Requiere rol de administrador de la competición (verificado via RBAC).
+     * Requiere rol de administrador de la competición (verificado via RBAC). El identificador
+     * del usuario que opera se toma del JWT.
      *
      * @param id identificador único de la competición a eliminar
-     * @param usuarioId identificador del usuario que solicita la eliminación
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity vacío con estado 204 No Content
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("@rbacService.isAdminCompeticion(#id, authentication)")
     public ResponseEntity<Void> eliminar(
             @PathVariable Long id,
-            @RequestParam Long usuarioId) {
-        competicionService.eliminar(id, usuarioId);
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        competicionService.eliminar(id, principal.getId());
         return ResponseEntity.noContent().build();
     }
 
@@ -206,7 +210,7 @@ public class CompeticionController {
      *
      * @param id identificador único de la competición
      * @param estado nuevo estado a asignar a la competición
-     * @param usuarioId identificador del usuario que realiza el cambio
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con el CompeticionDetalleDTO con el estado actualizado
      */
     @PatchMapping("/{id}/estado")
@@ -214,8 +218,8 @@ public class CompeticionController {
     public ResponseEntity<CompeticionDetalleDTO> cambiarEstado(
             @PathVariable Long id,
             @RequestParam Competicion.EstadoCompeticion estado,
-            @RequestParam Long usuarioId) {
-        return ResponseEntity.ok(competicionService.cambiarEstado(id, estado, usuarioId));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(competicionService.cambiarEstado(id, estado, principal.getId()));
     }
 
     // ==================== TEMPORADA ====================
@@ -226,7 +230,7 @@ public class CompeticionController {
      *
      * @param id identificador único de la competición
      * @param nuevaTemporada número de la nueva temporada a establecer
-     * @param usuarioId identificador del usuario que realiza el cambio
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con el CompeticionDetalleDTO con la temporada actualizada
      */
     @PostMapping("/{id}/temporada")
@@ -234,9 +238,9 @@ public class CompeticionController {
     public ResponseEntity<CompeticionDetalleDTO> cambiarTemporada(
             @PathVariable Long id,
             @RequestParam Integer nuevaTemporada,
-            @RequestParam Long usuarioId) {
+            @AuthenticationPrincipal CustomUserDetails principal) {
         return ResponseEntity.ok(competicionService.cambiarTemporada(id, nuevaTemporada,
-                usuarioId));
+                principal.getId()));
     }
 
     // ==================== GESTIÓN DE EQUIPOS ====================
@@ -255,14 +259,21 @@ public class CompeticionController {
 
     /**
      * GET /competiciones/{id}/equipos/detalle — lista los equipos inscritos en una competición en formato completo.
+     * El campo {@code codigoInvitacion} de los equipos privados solo se devuelve a
+     * usuarios con permisos de gestión sobre cada equipo (creador, manager o admin
+     * de competición); el resto recibe {@code null} aunque el equipo sea privado.
      *
      * @param id identificador único de la competición
+     * @param principal datos del usuario autenticado (puede ser {@code null} en flujos públicos)
      * @return ResponseEntity con la lista de EquipoDetalleDTO de los equipos inscritos
      */
     @GetMapping("/{id}/equipos/detalle")
-    public ResponseEntity<List<EquipoDetalleDTO>> listarEquiposDetalle(@PathVariable Long
-                                                                               id) {
-        return ResponseEntity.ok(competicionService.obtenerInscritosDetalle(id));
+    public ResponseEntity<List<EquipoDetalleDTO>> listarEquiposDetalle(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        Long usuarioId = principal != null ? principal.getId() : null;
+        boolean esAdminSistema = principal != null && principal.isEsAdminSistema();
+        return ResponseEntity.ok(competicionService.obtenerInscritosDetalle(id, usuarioId, esAdminSistema));
     }
 
     /**
@@ -271,7 +282,7 @@ public class CompeticionController {
      *
      * @param id identificador único de la competición
      * @param equipoId identificador del equipo a inscribir
-     * @param usuarioId identificador del usuario administrador que realiza la inscripción
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity con mensaje de confirmación y estado 201 Created
      */
     @PostMapping("/{id}/equipos/{equipoId}")
@@ -279,8 +290,8 @@ public class CompeticionController {
     public ResponseEntity<Map<String, String>> inscribirEquipo(
             @PathVariable Long id,
             @PathVariable Long equipoId,
-            @RequestParam Long usuarioId) {
-        competicionService.altaEquipo(id, equipoId, usuarioId);
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        competicionService.altaEquipo(id, equipoId, principal.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("message", "Equipo inscrito en la competición"));
     }
@@ -291,7 +302,7 @@ public class CompeticionController {
      *
      * @param id identificador único de la competición
      * @param equipoId identificador del equipo a retirar
-     * @param usuarioId identificador del usuario administrador que realiza la baja
+     * @param principal datos del usuario autenticado
      * @return ResponseEntity vacío con estado 204 No Content
      */
     @DeleteMapping("/{id}/equipos/{equipoId}")
@@ -299,8 +310,8 @@ public class CompeticionController {
     public ResponseEntity<Void> retirarEquipo(
             @PathVariable Long id,
             @PathVariable Long equipoId,
-            @RequestParam Long usuarioId) {
-        competicionService.bajaEquipo(id, equipoId, usuarioId);
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        competicionService.bajaEquipo(id, equipoId, principal.getId());
         return ResponseEntity.noContent().build();
     }
 
@@ -347,11 +358,12 @@ public class CompeticionController {
 
     /**
      * DELETE /competiciones/{id}/usuarios/{usuarioId} — elimina el rol de un usuario en una competición.
-     * Requiere rol de administrador de la competición (verificado via RBAC).
+     * Requiere rol de administrador de la competición (verificado via RBAC). El identificador
+     * del solicitante se toma del JWT.
      *
      * @param id identificador único de la competición
      * @param usuarioId identificador del usuario al que se le retira el rol
-     * @param solicitanteId identificador del administrador que solicita la operación
+     * @param principal datos del usuario autenticado (solicitante)
      * @return ResponseEntity vacío con estado 204 No Content
      */
     @DeleteMapping("/{id}/usuarios/{usuarioId}")
@@ -359,8 +371,8 @@ public class CompeticionController {
     public ResponseEntity<Void> quitarUsuario(
             @PathVariable Long id,
             @PathVariable Long usuarioId,
-            @RequestParam Long solicitanteId) {
-        competicionService.quitarUsuario(id, usuarioId, solicitanteId);
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        competicionService.quitarUsuario(id, usuarioId, principal.getId());
         return ResponseEntity.noContent().build();
     }
 }
