@@ -189,7 +189,21 @@ Roles definidos: `ADMIN_SISTEMA`, `ADMIN_COMPETICION`, `MANAGER_EQUIPO`, `JUGADO
 
 ## Configuración
 
-La aplicación se configura íntegramente por **variables de entorno** leídas de un fichero `.env` en la raíz del proyecto (o exportadas al shell).
+La aplicación se configura íntegramente por **variables de entorno** leídas de un fichero `.env` en la raíz del proyecto (o exportadas al shell). El fichero `.env` está cubierto por `.gitignore` y nunca se commitea; en su lugar el repositorio incluye `.env.example` con todas las claves esperadas y placeholders.
+
+### Instalación rápida (tribunal / nueva máquina)
+
+```bash
+# 1. Copiar la plantilla
+cp .env.example .env
+
+# 2. Rellenar los valores reales con un editor
+#    (DB local, JWT_SECRET propio, credenciales SMTP / Cloudinary)
+${EDITOR:-nano} .env
+
+# 3. Generar un JWT_SECRET de 64 bytes base64 (HS512 ≥ 256 bits)
+openssl rand -base64 64
+```
 
 ### Variables requeridas
 
@@ -212,19 +226,28 @@ MAIL_PORT=587
 MAIL_USERNAME=tu-correo@gmail.com
 MAIL_PASSWORD=<app-password>
 
-# CORS — origen del frontend de producción
+# CORS — origen del frontend
 FRONTEND_URL=http://localhost:4200
+
+# Cloudinary — almacenamiento de imágenes (escudos, fotos, iconos)
+CLOUDINARY_CLOUD_NAME=<tu-cloud-name>
+CLOUDINARY_API_KEY=<tu-api-key>
+CLOUDINARY_API_SECRET=<tu-api-secret>
+CLOUDINARY_FOLDER=compapption-dev
 ```
 
-> Generar un `JWT_SECRET` válido:
-> ```bash
-> openssl rand -base64 64
-> ```
+### Notas para el tribunal
+
+- Para una evaluación local **sin Cloudinary** basta con dejar las tres `CLOUDINARY_*` vacías; los endpoints de subida devolverán error pero el resto de la app funciona.
+- Para una evaluación local **sin SMTP** (sin envío real de emails de recuperación de contraseña) basta con dejar `MAIL_USERNAME` y `MAIL_PASSWORD` vacíos; el flujo de recuperación responderá igualmente con el mensaje genérico de seguridad.
+- La aplicación crea automáticamente las tablas en la BD al primer arranque (`spring.jpa.hibernate.ddl-auto=update`).
+- Para una BD limpia: `CREATE DATABASE compapption CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.
 
 ### Configuración adicional
 
 Ver `src/main/resources/application.properties` para:
 - Política `spring.jpa.hibernate.ddl-auto=update` (actualización automática del esquema).
+- CORS configurable vía `app.cors.allowed-origins` (CSV; sintaxis `host:*` para wildcard de puerto).
 - Nivel de logs (`compapption=DEBUG` en desarrollo).
 - Zona horaria Jackson (`UTC`).
 
