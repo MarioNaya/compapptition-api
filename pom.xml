@@ -186,6 +186,15 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<!--
+						excludeDevtools=true asegura que el JAR ejecutable de
+						producción NO contenga spring-boot-devtools, aunque
+						la dependencia esté declarada como optional+runtime
+						(se mantiene optional para que devtools siga
+						funcionando en `mvn spring-boot:run` durante dev).
+						Cierra S-10.
+					-->
+					<excludeDevtools>true</excludeDevtools>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>

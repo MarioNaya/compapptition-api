@@ -49,3 +49,10 @@ surefire-reports/
 *.log
 logs/postman/*.html
 postman/informe.html
+
+### JVM crash dumps (S-21) ###
+hs_err_pid*.log
+hs_err_pid*.mdmp
+replay_pid*.log
+replay_pid*.dump
+core.*
