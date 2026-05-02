@@ -62,15 +62,17 @@ public class LogController {
     }
 
     /**
-     * GET /logs/entidad/{entidad}/{entidadId} — obtiene todos los logs de auditoría de una entidad concreta.
-     * Requiere que el usuario esté autenticado.
+     * GET /logs/entidad/{entidad}/{entidadId} — obtiene todos los logs de auditoría
+     * de una entidad concreta. Reservado a administradores del sistema: la auditoría
+     * histórica expone IPs, userIds y fechas que no deben ser visibles a cualquier
+     * usuario autenticado (cierra S-7).
      *
      * @param entidad nombre de la entidad de dominio (p.ej. "Competicion", "Equipo", "Evento")
      * @param entidadId identificador único del registro de esa entidad
      * @return ResponseEntity con la lista de LogDTO de la entidad indicada
      */
     @GetMapping("/entidad/{entidad}/{entidadId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<List<LogDTO>> obtenerPorEntidad(
             @PathVariable String entidad,
             @PathVariable Long entidadId) {
