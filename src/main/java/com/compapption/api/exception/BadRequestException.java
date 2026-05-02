@@ -13,4 +13,9 @@ public class BadRequestException extends RuntimeException {
     public BadRequestException(String message) {
         super(message);
     }
+
+    /** Permite preservar la causa original al traducir excepciones técnicas (cierra A-20). */
+    public BadRequestException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

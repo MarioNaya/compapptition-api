@@ -13,4 +13,9 @@ public class InternalStateException extends RuntimeException {
     public InternalStateException(String message) {
         super(message);
     }
+
+    /** Permite preservar la causa original al traducir excepciones técnicas (cierra A-20). */
+    public InternalStateException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

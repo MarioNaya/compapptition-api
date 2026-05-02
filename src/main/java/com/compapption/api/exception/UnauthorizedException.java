@@ -13,4 +13,9 @@ public class UnauthorizedException extends RuntimeException {
     public UnauthorizedException(String message) {
         super(message);
     }
+
+    /** Permite preservar la causa original al traducir excepciones técnicas (cierra A-20). */
+    public UnauthorizedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -238,7 +238,7 @@ public class InvitacionService {
                 }
                 asignarRolEncompeticion(usuario, invitacion.getCompeticion(), Rol.RolNombre.ARBITRO);
             }
-            default -> throw new BadRequestException("Rol ogrecido desconocido: " + invitacion.getRolOfrecido());
+            default -> throw new BadRequestException("Rol ofrecido desconocido: " + invitacion.getRolOfrecido());
         }
 
         invitacion.setEstado(Invitacion.EstadoInvitacion.ACEPTADA);

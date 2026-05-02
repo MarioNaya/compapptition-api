@@ -58,6 +58,7 @@ public class EventoService {
     private final ClasificacionService clasificacionService;
     private final LogService logService;
     private final NotificacionService notificacionService;
+    private final PlayoffBloqueoChecker playoffBloqueoChecker;
 
     /// === CONSULTAS EVENTOS === ///
 
@@ -89,41 +90,8 @@ public class EventoService {
         Evento evento = eventoRepository.findByIdWithEquipos(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", id));
         EventoDetalleDTO dto = eventoMapper.toDetalleDTO(evento);
-        dto.setBloqueado(estaBloqueado(evento));
+        dto.setBloqueado(playoffBloqueoChecker.estaBloqueado(evento));
         return dto;
-    }
-
-    /**
-     * Determina si un evento de playoff tiene su edición bloqueada porque la
-     * fase de la que depende aún no ha terminado.
-     * <ul>
-     *   <li>Eventos de fase regular (numeroPartido == null) nunca están bloqueados.</li>
-     *   <li>Si depende de partidos anteriores del bracket, esos deben estar
-     *       FINALIZADOS para que el actual sea editable.</li>
-     *   <li>Si es un partido de primera ronda de playoff (sin partidos previos
-     *       del bracket), se bloquea hasta que cierre la fase regular de la
-     *       competición (liga o grupos).</li>
-     * </ul>
-     */
-    private boolean estaBloqueado(Evento e) {
-        if (e.getNumeroPartido() == null) return false;
-        Evento ant1 = e.getPartidoAnteriorLocal();
-        Evento ant2 = e.getPartidoAnteriorVisitante();
-        if (ant1 != null && ant1.getEstado() != Evento.EstadoEvento.FINALIZADO) return true;
-        if (ant2 != null && ant2.getEstado() != Evento.EstadoEvento.FINALIZADO) return true;
-        // Primera ronda de playoff: bloqueada hasta que termine la fase regular.
-        if (ant1 == null && ant2 == null) {
-            return eventoRepository.existsFaseRegularNoFinalizada(e.getCompeticion().getId());
-        }
-        return false;
-    }
-
-    /** Lanza excepción si el evento está bloqueado por dependencia de una fase anterior. */
-    private void asegurarNoBloqueado(Evento e) {
-        if (estaBloqueado(e)) {
-            throw new BadRequestException(
-                    "Este partido de playoff no se puede modificar hasta que termine la fase anterior");
-        }
     }
 
     // Por competición
@@ -403,7 +371,7 @@ public class EventoService {
         Evento evento = eventoRepository.findByIdWithEquipos(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", id));
 
-        asegurarNoBloqueado(evento);
+        playoffBloqueoChecker.asegurarNoBloqueado(evento);
 
         if (request.getJornada() != null) {
             evento.setJornada(request.getJornada());
@@ -424,7 +392,7 @@ public class EventoService {
         evento = eventoRepository.save(evento);
         logService.registrar("Evento", evento.getId(), LogModificacion.AccionLog.EDITAR, null, null, evento.getCompeticion().getId());
         EventoDetalleDTO dto = eventoMapper.toDetalleDTO(evento);
-        dto.setBloqueado(estaBloqueado(evento));
+        dto.setBloqueado(playoffBloqueoChecker.estaBloqueado(evento));
         return dto;
     }
 
@@ -445,7 +413,7 @@ public class EventoService {
         Evento evento = eventoRepository.findByIdWithEquipos(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Evento", "id", id));
 
-        asegurarNoBloqueado(evento);
+        playoffBloqueoChecker.asegurarNoBloqueado(evento);
 
         if (nuevoEstado == null) {
             throw new BadRequestException("El estado destino es obligatorio");
@@ -453,7 +421,7 @@ public class EventoService {
         if (evento.getEstado() == nuevoEstado) {
             // No-op: dejamos el estado tal cual.
             EventoDetalleDTO dto = eventoMapper.toDetalleDTO(evento);
-            dto.setBloqueado(estaBloqueado(evento));
+            dto.setBloqueado(playoffBloqueoChecker.estaBloqueado(evento));
             return dto;
         }
 
@@ -478,7 +446,7 @@ public class EventoService {
                 null, null, evento.getCompeticion().getId());
 
         EventoDetalleDTO dto = eventoMapper.toDetalleDTO(evento);
-        dto.setBloqueado(estaBloqueado(evento));
+        dto.setBloqueado(playoffBloqueoChecker.estaBloqueado(evento));
         return dto;
     }
 
@@ -502,7 +470,7 @@ public class EventoService {
         Evento evento = eventoRepository.findByIdWithEquipos(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", id));
 
-        asegurarNoBloqueado(evento);
+        playoffBloqueoChecker.asegurarNoBloqueado(evento);
 
         if (evento.getEstado() == Evento.EstadoEvento.FINALIZADO){
             throw new BadRequestException("El evento ya está finalizado. Cambia su estado primero para poder editar el resultado.");
@@ -695,9 +663,11 @@ public class EventoService {
 
         if (maxPartidos == 1) {
             if (finalizados.isEmpty()) return Optional.empty();
+            // orElseGet evita evaluar finalizados.get(0) cuando el Optional
+            // está presente (cierra A-18 — patrón aplicado de forma defensiva).
             return determinarGanadorPartidoUnico(
                     eventoRepository.findByIdWithEquipos(finalizados.get(0).getId())
-                            .orElse(finalizados.get(0)));
+                            .orElseGet(() -> finalizados.get(0)));
         }
 
         if (maxPartidos == 2) {
@@ -864,7 +834,7 @@ public class EventoService {
         Evento evento = eventoRepository.findById(eventoId)
                 .orElseThrow(()-> new ResourceNotFoundException("Evento", "id", eventoId));
 
-        asegurarNoBloqueado(evento);
+        playoffBloqueoChecker.asegurarNoBloqueado(evento);
 
         Jugador jugador = jugadorRepository.findById(request.getJugadorId())
                 .orElseThrow(()-> new ResourceNotFoundException("Jugador", "id", request.getJugadorId()));
@@ -872,10 +842,11 @@ public class EventoService {
         TipoEstadistica tipoEstadistica = tipoEstadisticaRepository.findById(request.getTipoEstadisticaId())
                 .orElseThrow(()-> new ResourceNotFoundException("Tipo estadística", "id", request.getTipoEstadisticaId()));
 
-        // Revisar si la estadística ya existe
+        // Revisar si la estadística ya existe. orElseGet evita construir el
+        // builder cuando ya hay registro (cierra A-18 — el caso más visible).
         EstadisticaJugadorEvento estadistica = estadisticaJugadorEventoRepository
                 .findByEventoIdAndJugadorIdAndTipoEstadisticaId(eventoId, request.getJugadorId(), request.getTipoEstadisticaId())
-                .orElse(EstadisticaJugadorEvento.builder()
+                .orElseGet(() -> EstadisticaJugadorEvento.builder()
                         .evento(evento)
                         .jugador(jugador)
                         .tipoEstadistica(tipoEstadistica)
@@ -906,7 +877,7 @@ public class EventoService {
         if (!estadistica.getEvento().getId().equals(eventoId)) {
             throw new BadRequestException("La estadistica no pertenece a este evento");
         }
-        asegurarNoBloqueado(estadistica.getEvento());
+        playoffBloqueoChecker.asegurarNoBloqueado(estadistica.getEvento());
         estadisticaJugadorEventoRepository.delete(estadistica);
     }
 }

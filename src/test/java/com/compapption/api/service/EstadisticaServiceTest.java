@@ -47,6 +47,7 @@ class EstadisticaServiceTest {
     @Mock private UsuarioRepository usuarioRepository;
     @Mock private EstadisticaMapper estadisticaMapper;
     @Mock private LogService logService;
+    @Mock private PlayoffBloqueoChecker playoffBloqueoChecker;
 
     @InjectMocks private EstadisticaService estadisticaService;
 

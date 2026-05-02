@@ -221,12 +221,6 @@ public class MensajeriaService {
         }
     }
 
-    private Long obtenerOtroUsuarioId(Conversacion conversacion, Long usuarioId) {
-        Long aId = conversacion.getUsuarioA().getId();
-        Long bId = conversacion.getUsuarioB().getId();
-        return Objects.equals(aId, usuarioId) ? bId : aId;
-    }
-
     /**
      * Variante one-shot del helper para flujos que no son listado de bandeja
      * (creación/reutilización de conversación). Tolera el coste de 2 queries

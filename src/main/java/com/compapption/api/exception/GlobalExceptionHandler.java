@@ -1,8 +1,10 @@
 package com.compapption.api.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -10,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -130,6 +133,59 @@ public class GlobalExceptionHandler {
                 .message("Acceso denegado")
                 .build();
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Maneja {@link MethodArgumentTypeMismatchException} y devuelve HTTP 400
+     * cuando un parámetro de path o query no se puede convertir al tipo esperado
+     * (ej. {@code /usuarios/foo} cuando se espera {@code Long}). Antes caía en
+     * el handler genérico y devolvía 500. Cierra A-17 (parte 1).
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String tipoEsperado = ex.getRequiredType() != null
+                ? ex.getRequiredType().getSimpleName()
+                : "valor compatible";
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message("Parámetro '" + ex.getName() + "' inválido: se esperaba " + tipoEsperado)
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Maneja {@link HttpMessageNotReadableException} y devuelve HTTP 400 cuando
+     * el body de la petición no es un JSON válido (malformado, vacío cuando es
+     * obligatorio, tipos incompatibles). Antes caía en 500. Cierra A-17 (parte 2).
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message("JSON inválido o cuerpo de petición ausente")
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Maneja {@link DataIntegrityViolationException} y devuelve HTTP 409 cuando
+     * una operación viola una restricción de la BD (FK, UNIQUE, NOT NULL).
+     * Antes caía en 500. Cierra A-17 (parte 3).
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Conflicto de integridad de datos: {}", ex.getMostSpecificCause().getMessage());
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Conflict")
+                .message("Conflicto de integridad de datos")
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     /**

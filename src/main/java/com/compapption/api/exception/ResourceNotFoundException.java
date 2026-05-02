@@ -15,6 +15,11 @@ public class ResourceNotFoundException extends RuntimeException{
         super(message);
     }
 
+    /** Permite preservar la causa original al traducir excepciones técnicas (cierra A-20). */
+    public ResourceNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public ResourceNotFoundException(String resourceName, String fieldName, Object fieldValue){
         super(String.format("%s no encontrado con %s '%s'", resourceName, fieldName, fieldValue));
     }

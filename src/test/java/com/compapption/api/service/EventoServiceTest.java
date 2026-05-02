@@ -47,6 +47,7 @@ class EventoServiceTest {
     @Mock private ClasificacionService clasificacionService;
     @Mock private LogService logService;
     @Mock private NotificacionService notificacionService;
+    @Mock private PlayoffBloqueoChecker playoffBloqueoChecker;
 
     @InjectMocks private EventoService eventoService;
 

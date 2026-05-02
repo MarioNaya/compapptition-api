@@ -143,8 +143,9 @@ public class JugadorService {
             usuario = usuarioRepository.findById(request.getUsuarioId())
                     .orElseThrow(()-> new ResourceNotFoundException("Usuario", "id", request.getUsuarioId()));
 
-            /// Revisa si el usuario tiene perfil de jugador ya.
-            /// Hay que revisar esto porque quiero que un usuario pueda ser jugador en varios equipos.
+            // Un usuario solo puede tener un perfil de jugador. La pertenencia
+            // a varios equipos se modela vía EquipoJugador (tabla puente), no
+            // duplicando la entidad Jugador.
             if (jugadorRepository.findByUsuarioId(request.getUsuarioId()).isPresent()) {
                 throw new BadRequestException("El usuario ya tiene un perfil de jugador");
             }
