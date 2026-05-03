@@ -70,14 +70,32 @@ class CloudinaryServiceTest {
                 .hasMessageContaining("tamaño máximo");
     }
 
+    @Test
+    void upload_contentTypeSpoofeado_phpDisfrazadoDeJpeg_lanzaBadRequest() {
+        // Atacante envía PHP renombrado a .jpg con Content-Type forzado a image/jpeg.
+        // La validación de magic bytes lo detecta y rechaza, aunque el header pase.
+        byte[] phpDisfrazado = "<?php system($_GET['cmd']); ?>".getBytes();
+        MultipartFile spoofeado = new MockMultipartFile(
+                "file", "shell.jpg", "image/jpeg", phpDisfrazado);
+
+        assertThatThrownBy(() -> cloudinaryService.upload(spoofeado, "escudos"))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("no coincide con un formato de imagen permitido");
+    }
+
     // =========================================================
     // upload() — flujo feliz
     // =========================================================
 
     @Test
     void upload_flujoFeliz_devuelveSecureUrl() throws Exception {
+        // Cabecera PNG válida: 89 50 4E 47 0D 0A 1A 0A + relleno
+        byte[] pngValido = new byte[]{
+                (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+                0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52
+        };
         MultipartFile imagen = new MockMultipartFile(
-                "file", "escudo.png", "image/png", new byte[]{1, 2, 3, 4, 5});
+                "file", "escudo.png", "image/png", pngValido);
 
         String urlEsperada = "https://res.cloudinary.com/compapption/image/upload/v1/compapption-test/escudos/abc.png";
 
