@@ -80,6 +80,18 @@ public class Evento {
     @Column(name = "numero_partido")
     private Integer numeroPartido;
 
+    /**
+     * Flag idempotente para la notificación automática del partido próximo.
+     * Lo marca {@code EventoService.notificarPartido} tras enviar los emails
+     * a los jugadores y evita que el {@code NotificacionPartidoScheduler}
+     * vuelva a notificar el mismo evento si cae en su ventana en ticks
+     * sucesivos. La notificación manual desde el admin de competición
+     * lo ignora (forzar=true) para soportar cambios de fecha.
+     */
+    @Builder.Default
+    @Column(name = "notificado_partido", nullable = false)
+    private boolean notificadoPartido = false;
+
     @Builder.Default
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EventoEquipo> equipos = new HashSet<>();

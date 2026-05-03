@@ -48,6 +48,7 @@ class EventoServiceTest {
     @Mock private LogService logService;
     @Mock private NotificacionService notificacionService;
     @Mock private PlayoffBloqueoChecker playoffBloqueoChecker;
+    @Mock private EmailService emailService;
 
     @InjectMocks private EventoService eventoService;
 
@@ -278,8 +279,96 @@ class EventoServiceTest {
     }
 
     // =========================================================
+    // notificarPartido() — validaciones y flujo feliz
+    // =========================================================
+
+    @Test
+    void notificarPartido_eventoNoExiste_lanzaResourceNotFound() {
+        when(eventoRepository.findByIdWithEquipos(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventoService.notificarPartido(99L, false))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void notificarPartido_eventoNoProgramado_lanzaBadRequest() {
+        Evento evento = eventoConEstado(10L, Evento.EstadoEvento.FINALIZADO);
+        when(eventoRepository.findByIdWithEquipos(10L)).thenReturn(Optional.of(evento));
+
+        assertThatThrownBy(() -> eventoService.notificarPartido(10L, false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("PROGRAMADO");
+    }
+
+    @Test
+    void notificarPartido_yaNotificadoSinForzar_devuelve0YNoEnvia() {
+        Evento evento = eventoConEquipos(10L, local, visitante);
+        evento.setNotificadoPartido(true);
+        evento.setFechaHora(LocalDateTime.now().plusHours(24));
+        when(eventoRepository.findByIdWithEquipos(10L)).thenReturn(Optional.of(evento));
+
+        int enviados = eventoService.notificarPartido(10L, false);
+
+        assertThat(enviados).isZero();
+        verifyNoInteractions(emailService);
+        verify(eventoRepository, never()).save(any());
+    }
+
+    @Test
+    void notificarPartido_flujoFeliz_enviaEmailsAJugadoresConCuentaYMarcaFlag() {
+        Evento evento = eventoConEquipos(10L, local, visitante);
+        evento.setFechaHora(LocalDateTime.of(2026, 8, 29, 19, 0));
+        evento.setLugar("Polideportivo Central");
+        when(eventoRepository.findByIdWithEquipos(10L)).thenReturn(Optional.of(evento));
+
+        // Local: 2 jugadores con cuenta + 1 fantasma sin Usuario.
+        // Visitante: 1 jugador con cuenta.
+        when(equipoJugadorRepository.findActivosByEquipoId(local.getId()))
+                .thenReturn(List.of(
+                        ejConUsuario("a@test.com"),
+                        ejConUsuario("b@test.com"),
+                        ejFantasma()));
+        when(equipoJugadorRepository.findActivosByEquipoId(visitante.getId()))
+                .thenReturn(List.of(ejConUsuario("c@test.com")));
+
+        int enviados = eventoService.notificarPartido(10L, false);
+
+        // 3 emails con cuenta válida, el fantasma se descarta.
+        assertThat(enviados).isEqualTo(3);
+        verify(emailService, times(3)).enviarNotificacionPartido(any(), any(), any(), any(), any());
+        assertThat(evento.isNotificadoPartido()).isTrue();
+        verify(eventoRepository).save(evento);
+    }
+
+    @Test
+    void notificarPartido_yaNotificadoConForzar_reenviaIgualmente() {
+        Evento evento = eventoConEquipos(10L, local, visitante);
+        evento.setNotificadoPartido(true);
+        evento.setFechaHora(LocalDateTime.now().plusHours(48));
+        when(eventoRepository.findByIdWithEquipos(10L)).thenReturn(Optional.of(evento));
+        when(equipoJugadorRepository.findActivosByEquipoId(anyLong()))
+                .thenReturn(List.of(ejConUsuario("x@test.com")));
+
+        int enviados = eventoService.notificarPartido(10L, true);
+
+        assertThat(enviados).isEqualTo(2); // un jugador por equipo
+        verify(emailService, times(2)).enviarNotificacionPartido(any(), any(), any(), any(), any());
+    }
+
+    // =========================================================
     // Helpers
     // =========================================================
+
+    private EquipoJugador ejConUsuario(String email) {
+        Usuario u = Usuario.builder().id((long) email.hashCode()).email(email).build();
+        Jugador j = Jugador.builder().id(u.getId()).usuario(u).build();
+        return EquipoJugador.builder().jugador(j).activo(true).build();
+    }
+
+    private EquipoJugador ejFantasma() {
+        Jugador j = Jugador.builder().id(999L).usuario(null).build();
+        return EquipoJugador.builder().jugador(j).activo(true).build();
+    }
 
     private Evento eventoConEstado(Long id, Evento.EstadoEvento estado) {
         return Evento.builder().id(id).estado(estado).competicion(competicion).build();

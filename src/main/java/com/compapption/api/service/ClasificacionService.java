@@ -77,44 +77,6 @@ public class ClasificacionService {
     }
 
     /**
-     * Obtiene la entrada de clasificación detallada de un equipo concreto en la temporada
-     * actual de una competición.
-     *
-     * @param competicionId identificador de la competición
-     * @param equipoId identificador del equipo
-     * @return DTO con todos los datos estadísticos del equipo en la clasificación
-     * @throws ResourceNotFoundException si la competición o la entrada de clasificación no existen
-     */
-    @Transactional(readOnly = true)
-    public ClasificacionDetalleDTO obtenerPorEquipoDetalle(Long competicionId, Long equipoId) {
-        Competicion competicion = competicionRepository.findById(competicionId)
-                .orElseThrow(()-> new ResourceNotFoundException("Competicion", "id", competicionId));
-        return clasificacionMapper.toDetalleDTO(
-                clasificacionRepository.findByCompeticionIdAndEquipoIdAndTemporada(
-                        competicionId, equipoId, competicion.getTemporadaActual())
-                        .orElseThrow(()-> new ResourceNotFoundException("Clasificación", "equipo", equipoId)));
-    }
-
-    /**
-     * Obtiene la entrada de clasificación en formato simple de un equipo concreto en la
-     * temporada actual de una competición.
-     *
-     * @param competicionId identificador de la competición
-     * @param equipoId identificador del equipo
-     * @return DTO simple con la posición y puntos del equipo
-     * @throws ResourceNotFoundException si la competición o la entrada de clasificación no existen
-     */
-    @Transactional(readOnly = true)
-    public ClasificacionSimpleDTO obtenerPorEquipoSimple(Long competicionId, Long equipoId) {
-        Competicion competicion = competicionRepository.findById(competicionId)
-                .orElseThrow(()-> new ResourceNotFoundException("Competicion", "id", competicionId));
-        return clasificacionMapper.toSimpleDTO(
-                clasificacionRepository.findByCompeticionIdAndEquipoIdAndTemporada(
-                                competicionId, equipoId, competicion.getTemporadaActual())
-                        .orElseThrow(()-> new ResourceNotFoundException("Clasificación", "equipo", equipoId)));
-    }
-
-    /**
      * Devuelve la tabla de clasificación detallada de una temporada histórica concreta.
      *
      * @param competicionId identificador de la competición

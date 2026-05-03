@@ -189,17 +189,6 @@ public class EquipoController {
     /// === END POINTS GESTIÓN PLANTILLA === ///
 
     /**
-     * GET /equipos/{id}/jugadores-simple — lista los jugadores de un equipo en formato resumido.
-     *
-     * @param id identificador único del equipo
-     * @return ResponseEntity con la lista de JugadorSimpleDTO de la plantilla del equipo
-     */
-    @GetMapping("/{id}/jugadores-simple")
-    public ResponseEntity<List<JugadorSimpleDTO>> listarJugadoresSimple(@PathVariable Long id) {
-        return ResponseEntity.ok(equipoService.obtenerJugadoresSimple(id));
-    }
-
-    /**
      * GET /equipos/{id}/jugadores-detalle — lista los jugadores de un equipo en formato completo.
      *
      * @param id identificador único del equipo

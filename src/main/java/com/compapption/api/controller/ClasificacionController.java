@@ -83,38 +83,6 @@ public class ClasificacionController {
 
     // Posición y estadísticas de un equipo
 
-    /**
-     * GET /clasificaciones/competiciondetalle/{competicionId}/equipo/{equipoId} — obtiene la clasificación de un equipo concreto en formato completo.
-     *
-     * @param competicionId identificador único de la competición
-     * @param equipoId identificador único del equipo
-     * @return ResponseEntity con el ClasificacionDetalleDTO del equipo en la competición
-     */
-    @GetMapping("/competiciondetalle/{competicionId}/equipo/{equipoId}")
-    public ResponseEntity<ClasificacionDetalleDTO> obtenerPorEquipoDetalle(
-            @PathVariable Long competicionId,
-            @PathVariable Long equipoId) {
-        return ResponseEntity.ok(clasificacionService.obtenerPorEquipoDetalle(
-                competicionId,
-                equipoId));
-    }
-
-    /**
-     * GET /clasificaciones/competicionsimple/{competicionId}/equipo/{equipoId} — obtiene la clasificación de un equipo concreto en formato resumido.
-     *
-     * @param competicionId identificador único de la competición
-     * @param equipoId identificador único del equipo
-     * @return ResponseEntity con el ClasificacionSimpleDTO del equipo en la competición
-     */
-    @GetMapping("/competicionsimple/{competicionId}/equipo/{equipoId}")
-    public ResponseEntity<ClasificacionSimpleDTO> obtenerPorEquipoSimple(
-            @PathVariable Long competicionId,
-            @PathVariable Long equipoId) {
-        return ResponseEntity.ok(clasificacionService.obtenerPorEquipoSimple(
-                competicionId,
-                equipoId));
-    }
-
     // Recalculo manual de clasificación
 
     /**

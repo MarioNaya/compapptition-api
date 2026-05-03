@@ -1642,35 +1642,6 @@
           }
         },
         {
-          "name": "GET Jugadores del equipo (simple)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/equipos/{{equipoId}}/jugadores-simple",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "equipos",
-                "{{equipoId}}",
-                "jugadores-simple"
-              ]
-            }
-          }
-        },
-        {
           "name": "GET Jugadores del equipo (detalle)",
           "event": [
             {
@@ -2199,36 +2170,6 @@
           }
         },
         {
-          "name": "GET Equipos inscritos (simple)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/competiciones/{{createdCompeticionId}}/equipos/simple",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "competiciones",
-                "{{createdCompeticionId}}",
-                "equipos",
-                "simple"
-              ]
-            }
-          }
-        },
-        {
           "name": "GET Equipos inscritos (detalle)",
           "event": [
             {
@@ -2633,38 +2574,6 @@
           }
         },
         {
-          "name": "GET Por jornada (simple)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/jornada/{{jornadaNum}}/simple",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "competiciones",
-                "{{competicionId}}",
-                "eventos",
-                "jornada",
-                "{{jornadaNum}}",
-                "simple"
-              ]
-            }
-          }
-        },
-        {
           "name": "GET Por jornada (detalle)",
           "event": [
             {
@@ -2692,46 +2601,6 @@
                 "jornada",
                 "{{jornadaNum}}",
                 "detalle"
-              ]
-            }
-          }
-        },
-        {
-          "name": "GET Por rango de fechas (simple)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/competiciones/{{competicionId}}/eventos/calendariosimple?inicio=2026-01-01T00:00:00&fin=2028-12-31T23:59:59",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "competiciones",
-                "{{competicionId}}",
-                "eventos",
-                "calendariosimple"
-              ],
-              "query": [
-                {
-                  "key": "inicio",
-                  "value": "2026-01-01T00:00:00"
-                },
-                {
-                  "key": "fin",
-                  "value": "2028-12-31T23:59:59"
-                }
               ]
             }
           }
@@ -3277,68 +3146,6 @@
                 "{{competicionId}}",
                 "temporada",
                 "{{temporada}}"
-              ]
-            }
-          }
-        },
-        {
-          "name": "GET Detalle por equipo",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/clasificaciones/competiciondetalle/{{competicionId}}/equipo/9",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "clasificaciones",
-                "competiciondetalle",
-                "{{competicionId}}",
-                "equipo",
-                "9"
-              ]
-            }
-          }
-        },
-        {
-          "name": "GET Simple por equipo",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/clasificaciones/competicionsimple/{{competicionId}}/equipo/9",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "clasificaciones",
-                "competicionsimple",
-                "{{competicionId}}",
-                "equipo",
-                "9"
               ]
             }
           }

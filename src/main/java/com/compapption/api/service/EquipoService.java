@@ -472,25 +472,6 @@ public class EquipoService {
     }
 
     /**
-     * Devuelve la lista de jugadores de un equipo en formato simple.
-     *
-     * @param equipoId identificador del equipo
-     * @return lista de {@link JugadorSimpleDTO} pertenecientes al equipo
-     * @throws ResourceNotFoundException si no existe ningún equipo con ese id
-     */
-    @Transactional(readOnly = true)
-    public List<JugadorSimpleDTO> obtenerJugadoresSimple(long equipoId){
-        if (!equipoRepository.existsById(equipoId)){
-            throw new ResourceNotFoundException("Equipo","id", equipoId);
-        }
-
-        return jugadorRepository.findByEquipoId(equipoId)
-                .stream()
-                .map(jugadorMapper::toSimpleDTO)
-                .toList();
-    }
-
-    /**
      * Devuelve la lista de jugadores de un equipo en formato detalle.
      *
      * @param equipoId identificador del equipo

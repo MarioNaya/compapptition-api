@@ -289,4 +289,25 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             "AND e.numeroPartido IS NULL " +
             "AND e.estado <> com.compapption.api.entity.Evento.EstadoEvento.FINALIZADO")
     boolean existsFaseRegularNoFinalizada(@Param("competicionId") Long competicionId);
+
+    /**
+     * Eventos PROGRAMADOS cuya {@code fechaHora} cae en la ventana indicada y
+     * todavía no se han notificado por email. La usa el scheduler de
+     * notificación automática que corre cada hora con ventana de ~24h
+     * adelante. Hace JOIN FETCH de equipos para que el service pueda
+     * iterar sin disparar N+1.
+     *
+     * @param inicio comienzo de la ventana (inclusive)
+     * @param fin    fin de la ventana (inclusive)
+     * @return eventos próximos pendientes de notificar
+     */
+    @Query("SELECT DISTINCT e FROM Evento e " +
+            "LEFT JOIN FETCH e.equipos ee " +
+            "LEFT JOIN FETCH ee.equipo " +
+            "WHERE e.fechaHora BETWEEN :inicio AND :fin " +
+            "AND e.estado = com.compapption.api.entity.Evento.EstadoEvento.PROGRAMADO " +
+            "AND e.notificadoPartido = false")
+    List<Evento> findProximosNoNotificados(
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fin") LocalDateTime fin);
 }

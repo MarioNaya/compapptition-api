@@ -246,18 +246,6 @@ public class CompeticionController {
     // ==================== GESTIÓN DE EQUIPOS ====================
 
     /**
-     * GET /competiciones/{id}/equipos/simple — lista los equipos inscritos en una competición en formato resumido.
-     *
-     * @param id identificador único de la competición
-     * @return ResponseEntity con la lista de EquipoSimpleDTO de los equipos inscritos
-     */
-    @GetMapping("/{id}/equipos/simple")
-    public ResponseEntity<List<EquipoSimpleDTO>> listarEquiposSimple(@PathVariable Long id)
-    {
-        return ResponseEntity.ok(competicionService.obtenerInscritosSimple(id));
-    }
-
-    /**
      * GET /competiciones/{id}/equipos/detalle — lista los equipos inscritos en una competición en formato completo.
      * El campo {@code codigoInvitacion} de los equipos privados solo se devuelve a
      * usuarios con permisos de gestión sobre cada equipo (creador, manager o admin

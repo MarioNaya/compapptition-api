@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controlador REST para la gestión de eventos (partidos). Expone endpoints bajo la ruta base
@@ -63,20 +64,6 @@ public class EventoController {
     }
 
     /**
-     * GET /competiciones/{competicionId}/eventos/jornada/{jornada}/simple — lista los eventos de una jornada concreta en formato resumido.
-     *
-     * @param competicionId identificador único de la competición
-     * @param jornada número de jornada o ronda a consultar
-     * @return ResponseEntity con la lista de EventoSimpleDTO de esa jornada
-     */
-    @GetMapping("/jornada/{jornada}/simple")
-    public ResponseEntity<List<EventoSimpleDTO>> listarPorJornadaSimple(
-            @PathVariable Long competicionId,
-            @PathVariable Integer jornada) {
-        return ResponseEntity.ok(eventoService.obtenerPorJornadaSimple(competicionId,jornada));
-    }
-
-    /**
      * GET /competiciones/{competicionId}/eventos/jornada/{jornada}/detalle — lista los eventos de una jornada concreta en formato completo.
      *
      * @param competicionId identificador único de la competición
@@ -88,22 +75,6 @@ public class EventoController {
             @PathVariable Long competicionId,
             @PathVariable Integer jornada) {
         return ResponseEntity.ok(eventoService.obtenerPorJornadaDetalle(competicionId,jornada));
-    }
-
-    /**
-     * GET /competiciones/{competicionId}/eventos/calendariosimple — obtiene los eventos dentro de un rango de fechas en formato resumido.
-     *
-     * @param competicionId identificador único de la competición
-     * @param inicio fecha y hora de inicio del rango (ISO 8601)
-     * @param fin fecha y hora de fin del rango (ISO 8601)
-     * @return ResponseEntity con la lista de EventoSimpleDTO en el rango especificado
-     */
-    @GetMapping("/calendariosimple")
-    public ResponseEntity<List<EventoSimpleDTO>> obtenerPorFechas(
-            @PathVariable Long competicionId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fin) {
-        return  ResponseEntity.ok(eventoService.obtenerPorRangoFechasSimple(competicionId, inicio, fin));
     }
 
     /**
@@ -236,6 +207,27 @@ public class EventoController {
             @PathVariable Long id){
         eventoService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * POST /competiciones/{competicionId}/eventos/{id}/notificar-jugadores —
+     * notifica vía email a todos los jugadores activos de los dos equipos
+     * del evento. Disparado manualmente por el admin de competición tras
+     * un cambio de fecha o lugar; ignora el flag de "ya notificado" para
+     * permitir re-envío. Para la notificación automática 24h antes existe
+     * un scheduler que invoca el mismo flujo con {@code forzar=false}.
+     *
+     * @param competicionId identificador de la competición (para autorización)
+     * @param id            identificador del evento a notificar
+     * @return mapa con la clave {@code emailsEnviados} y el número total de emails encolados
+     */
+    @PostMapping("/{id}/notificar-jugadores")
+    @PreAuthorize("@rbacService.isAdminCompeticion(#competicionId, authentication)")
+    public ResponseEntity<Map<String, Integer>> notificarJugadores(
+            @PathVariable Long competicionId,
+            @PathVariable Long id) {
+        int enviados = eventoService.notificarPartido(id, true);
+        return ResponseEntity.ok(Map.of("emailsEnviados", enviados));
     }
 
     /// === ENDPOINTS DE ESTADÍSTICAS === ///

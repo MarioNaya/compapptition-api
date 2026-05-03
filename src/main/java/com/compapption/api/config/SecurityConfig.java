@@ -110,6 +110,10 @@ public class SecurityConfig {
                         // Endpoints públicos de consulta
                         .requestMatchers(HttpMethod.GET, "/clasificaciones/publicas/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/deportes/**").permitAll()
+                        // Endpoints de soporte E2E. El controller existe SÓLO en
+                        // perfil `test` (@Profile("test")), por lo que en
+                        // producción el matcher no afecta a nada (no hay handler).
+                        .requestMatchers("/test-only/**").permitAll()
                         // Resto de endpoints requieren autenticación
                         .anyRequest().authenticated()
                 )

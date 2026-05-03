@@ -20,10 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -59,6 +61,15 @@ public class EventoService {
     private final LogService logService;
     private final NotificacionService notificacionService;
     private final PlayoffBloqueoChecker playoffBloqueoChecker;
+    private final EmailService emailService;
+
+    /**
+     * Formatter para la fecha del partido en el email. Ejemplo de salida:
+     * "Sáb 29 Ago, 19:00". Locale ES para que los nombres de día y mes
+     * salgan en español.
+     */
+    private static final DateTimeFormatter FECHA_PARTIDO_FORMATTER =
+            DateTimeFormatter.ofPattern("EEE d MMM, HH:mm", new Locale("es", "ES"));
 
     /// === CONSULTAS EVENTOS === ///
 
@@ -159,19 +170,6 @@ public class EventoService {
     // Por jornada
 
     /**
-     * Lista los eventos de una jornada concreta de una competición en formato simple.
-     *
-     * @param competicionId identificador de la competición
-     * @param jornada número de jornada a consultar
-     * @return lista de eventos de esa jornada en formato simple
-     */
-    @Transactional(readOnly = true)
-    public List<EventoSimpleDTO> obtenerPorJornadaSimple(Long competicionId, Integer jornada){
-        return eventoMapper.toSimpleDTOList(
-                eventoRepository.findByCompeticionIdAndJornada(competicionId, jornada));
-    }
-
-    /**
      * Lista los eventos de una jornada concreta de una competición en formato detalle.
      *
      * @param competicionId identificador de la competición
@@ -241,27 +239,6 @@ public class EventoService {
     }
 
     // Por fecha
-
-    /**
-     * Lista los eventos de una competición cuya fecha y hora se encuentran dentro de un
-     * rango determinado, en formato simple.
-     *
-     * @param competicionId identificador de la competición
-     * @param inicio inicio del rango de fechas (inclusivo)
-     * @param fin fin del rango de fechas (inclusivo)
-     * @return lista de eventos dentro del rango en formato simple
-     */
-    @Transactional(readOnly = true)
-    public List<EventoSimpleDTO> obtenerPorRangoFechasSimple(
-            Long competicionId,
-            LocalDateTime inicio,
-            LocalDateTime fin){
-        return eventoMapper.toSimpleDTOList(
-                eventoRepository.findByCompeticionIdAndFechaHoraBetween(
-                        competicionId,
-                        inicio,
-                        fin));
-    }
 
     /**
      * Lista los eventos de una competición cuya fecha y hora se encuentran dentro de un
@@ -879,6 +856,115 @@ public class EventoService {
         }
         playoffBloqueoChecker.asegurarNoBloqueado(estadistica.getEvento());
         estadisticaJugadorEventoRepository.delete(estadistica);
+    }
+
+    /// === NOTIFICACIÓN DE PARTIDO POR EMAIL === ///
+
+    /**
+     * Notifica vía email a los jugadores activos de los dos equipos del evento
+     * sobre el próximo partido. Cada jugador recibe el email con el nombre de
+     * SU equipo como local y el del rival, independientemente de quién juega
+     * en casa: el contenido del template es informativo, no de bracket.
+     *
+     * <p>Idempotencia: si {@code forzar = false} y el evento ya tiene
+     * {@code notificadoPartido = true}, no se envía nada (caso del scheduler
+     * automático en sucesivos ticks). Si {@code forzar = true}, ignora el flag
+     * (caso del endpoint manual tras un cambio de fecha).
+     *
+     * <p>Solo se notifican eventos en estado PROGRAMADO. Otros estados
+     * (FINALIZADO, SUSPENDIDO, etc.) no son notificables.
+     *
+     * @param eventoId identificador del evento a notificar
+     * @param forzar   si {@code true}, re-notifica aunque el evento ya estuviera marcado
+     * @return número de emails encolados (cuenta una llamada {@code @Async} por jugador)
+     * @throws ResourceNotFoundException si no existe el evento
+     * @throws BadRequestException si el evento no está PROGRAMADO
+     */
+    @Transactional
+    public int notificarPartido(Long eventoId, boolean forzar) {
+        Evento evento = eventoRepository.findByIdWithEquipos(eventoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento", "id", eventoId));
+
+        if (evento.getEstado() != Evento.EstadoEvento.PROGRAMADO) {
+            throw new BadRequestException(
+                    "Solo se pueden notificar partidos en estado PROGRAMADO");
+        }
+        if (evento.isNotificadoPartido() && !forzar) {
+            return 0;
+        }
+
+        String fechaFormateada = evento.getFechaHora().format(FECHA_PARTIDO_FORMATTER);
+        String lugar = evento.getLugar() != null && !evento.getLugar().isBlank()
+                ? evento.getLugar()
+                : "Por confirmar";
+
+        int enviados = 0;
+        for (EventoEquipo ee : evento.getEquipos()) {
+            Equipo propio = ee.getEquipo();
+            Equipo rival = otroEquipo(evento, propio);
+            if (rival == null) {
+                // Bracket de playoff sin rival aún definido: nada que notificar.
+                continue;
+            }
+
+            List<EquipoJugador> ejs = equipoJugadorRepository.findActivosByEquipoId(propio.getId());
+            for (EquipoJugador ej : ejs) {
+                Usuario u = ej.getJugador().getUsuario();
+                if (u == null || u.getEmail() == null || u.getEmail().isBlank()) {
+                    // Jugador fantasma sin cuenta: no se puede notificar por email.
+                    continue;
+                }
+                emailService.enviarNotificacionPartido(
+                        u.getEmail(),
+                        propio.getNombre(),
+                        rival.getNombre(),
+                        fechaFormateada,
+                        lugar);
+                enviados++;
+            }
+        }
+
+        evento.setNotificadoPartido(true);
+        eventoRepository.save(evento);
+        return enviados;
+    }
+
+    /**
+     * Devuelve el rival de {@code propio} dentro del evento. Si el evento
+     * todavía no tiene rival definido (bracket pendiente), devuelve {@code null}.
+     */
+    private Equipo otroEquipo(Evento evento, Equipo propio) {
+        return evento.getEquipos().stream()
+                .map(EventoEquipo::getEquipo)
+                .filter(e -> !e.getId().equals(propio.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Lanza la notificación automática para todos los partidos PROGRAMADOS
+     * cuya {@code fechaHora} cae en una ventana de [now+23h, now+25h] y
+     * todavía no se han notificado. La invoca {@code NotificacionPartidoScheduler}
+     * cada hora en punto.
+     *
+     * <p>Cada evento se notifica en su propia transacción (delegando a
+     * {@link #notificarPartido}) para que un fallo aislado no tumbe el
+     * resto del lote. La ventana de 2h da margen de error si el cron se
+     * salta una ejecución.
+     *
+     * @return total de emails encolados en este tick
+     */
+    public int notificarPartidosProximos() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime inicio = now.plusHours(23);
+        LocalDateTime fin = now.plusHours(25);
+
+        List<Evento> proximos = eventoRepository.findProximosNoNotificados(inicio, fin);
+        int total = 0;
+        for (Evento evento : proximos) {
+            total += notificarPartido(evento.getId(), false);
+        }
+        return total;
     }
 }
 

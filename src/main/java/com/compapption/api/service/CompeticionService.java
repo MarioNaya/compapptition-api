@@ -434,26 +434,6 @@ public class CompeticionService {
 
     /**
      * Devuelve la lista de equipos actualmente inscritos y activos en una competición
-     * en formato simple (campos mínimos para listado).
-     *
-     * @param competicionId identificador de la competición
-     * @return lista de equipos inscritos en formato simple
-     * @throws ResourceNotFoundException si la competición no existe
-     */
-    @Transactional(readOnly = true)
-    public List<EquipoSimpleDTO> obtenerInscritosSimple(long competicionId){
-        if (!competicionRepository.existsById(competicionId)){
-            throw new ResourceNotFoundException("Competición", "id", competicionId);
-        }
-
-        return competicionEquipoRepository.findActivosByCompeticionId(competicionId)
-                .stream()
-                .map(ce -> equipoMapper.toSimpleDTO(ce.getEquipo()))
-                .toList();
-    }
-
-    /**
-     * Devuelve la lista de equipos actualmente inscritos y activos en una competición
      * en formato detalle (todos los campos, incluidos jugadores). Versión interna sin
      * enmascaramiento del {@code codigoInvitacion}: úsese únicamente desde flujos
      * donde el llamante ya está autorizado a ver los códigos privados.
