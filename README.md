@@ -1,4 +1,4 @@
-# Compapption · API
+# Compapptition · API
 
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.2-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
@@ -8,7 +8,7 @@
 [![Tests](https://img.shields.io/badge/JUnit-200%2F200-brightgreen)](#tests)
 [![License](https://img.shields.io/badge/license-academic-blue)](#licencia)
 
-Backend REST de **Compapption**, app para la **gestión integral de competiciones deportivas**: ligas, playoffs y formatos mixtos, inscripción de equipos y jugadores, generación automática de calendarios, registro de resultados y estadísticas, clasificaciones en vivo, mensajería 1-a-1, notificaciones SSE, tickets de soporte y RBAC contextual por competición.
+Backend REST de **Compapptition**, app para la **gestión integral de competiciones deportivas**: ligas, playoffs y formatos mixtos, inscripción de equipos y jugadores, generación automática de calendarios, registro de resultados y estadísticas, clasificaciones en vivo, mensajería 1-a-1, notificaciones SSE, tickets de soporte y RBAC contextual por competición.
 
 Construido con **Spring Boot 4.0.2 + Java 21** sobre MySQL, autenticación JWT (access + refresh cookie HttpOnly), single-flight refresh, almacenamiento de imágenes en **Cloudinary** (server-side autenticado con validación de magic bytes), envío de emails SMTP y suite de tests **200 / 200** (unit + integración + Postman).
 
@@ -160,7 +160,7 @@ HTTP request
 | Vinculación jugadores | `/solicitudes-vinculacion` | flujo doble validación jugador/manager |
 | **Sólo tests** | `/test-only` | reset BD entre tests E2E (activo solo bajo perfil `test`) |
 
-Colección Postman canónica en `postman/compapption-api.postman_collection.json` con assertions por flujo.
+Colección Postman canónica en `postman/compapptition-api.postman_collection.json` con assertions por flujo.
 
 ---
 
@@ -233,8 +233,8 @@ openssl rand -base64 64
 # Base de datos
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=compapption
-DB_USER=compapption_user
+DB_NAME=compapptition
+DB_USER=compapptition_user
 DB_PASS=change-me
 
 # JWT
@@ -258,7 +258,7 @@ FRONTEND_URL=http://localhost:4200
 CLOUDINARY_CLOUD_NAME=<tu-cloud-name>
 CLOUDINARY_API_KEY=<tu-api-key>
 CLOUDINARY_API_SECRET=<tu-api-secret>
-CLOUDINARY_FOLDER=compapption-dev
+CLOUDINARY_FOLDER=compapptition-dev
 ```
 
 ### Notas para el tribunal
@@ -306,9 +306,9 @@ java -jar target/api-0.0.1-SNAPSHOT.jar
 ### Creación inicial
 
 ```sql
-CREATE DATABASE compapption CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'compapption_user'@'%' IDENTIFIED BY 'change-me';
-GRANT ALL PRIVILEGES ON compapption.* TO 'compapption_user'@'%';
+CREATE DATABASE compapptition CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'compapptition_user'@'%' IDENTIFIED BY 'change-me';
+GRANT ALL PRIVILEGES ON compapptition.* TO 'compapptition_user'@'%';
 FLUSH PRIVILEGES;
 ```
 
@@ -334,12 +334,12 @@ Cubre:
 
 ### 2. Postman / Newman
 
-Colección completa en `postman/compapption-api.postman_collection.json`:
+Colección completa en `postman/compapptition-api.postman_collection.json`:
 
 ```bash
 cd postman
-newman run compapption-api.postman_collection.json \
-  -e compapption-local.postman_environment.json
+newman run compapptition-api.postman_collection.json \
+  -e compapptition-local.postman_environment.json
 ```
 
 Reporte HTML opcional con `htmlextra`.
@@ -365,7 +365,7 @@ Salida en `target/reports/apidocs/` (~8 MB / 559 ficheros). Punto de entrada `in
 Configuración del plugin (`pom.xml`):
 - Source 21, doclint off, `failOnError=false`.
 - Visibilidad: `protected` y superior.
-- Window title "Compapption API · documentación técnica".
+- Window title "Compapptition API · documentación técnica".
 
 **Plan de publicación:** GitHub Pages del propio repo en cada release (`/javadoc/` o rama `gh-pages`). Manual técnico narrado y enlazado desde `compapptition-docs/docs/20-manual-tecnico/`.
 
@@ -384,7 +384,7 @@ Variante empaquetable como JAR (entregable offline al tribunal):
 api/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/compapption/api/
+│   │   ├── java/com/compapptition/api/
 │   │   │   ├── config/             # Security, CORS, JWT, Async, RateLimit, DataInitializer
 │   │   │   ├── controller/         # 18 REST controllers + TestOnlyController
 │   │   │   ├── service/            # 22 services + sub-paquetes calendario/, log/
@@ -401,7 +401,7 @@ api/
 │   │       ├── application-test.properties
 │   │       └── banner.txt
 │   └── test/
-│       └── java/com/compapption/api/
+│       └── java/com/compapptition/api/
 │           ├── it/                 # Integration tests con Testcontainers
 │           ├── mapper/             # Unit tests de mappers
 │           ├── service/            # Unit tests de servicios (incluye TicketServiceTest)
@@ -449,7 +449,7 @@ Detalle completo de despliegue: `compapptition-docs/docs/20-manual-tecnico/08-de
 
 ## Contexto
 
-Compapption es el proyecto de **Trabajo de Fin de Grado** del autor (curso 2025-26). Tres repos:
+Compapptition es el proyecto de **Trabajo de Fin de Grado** del autor (curso 2025-26). Tres repos:
 
 | Repo | Contenido | Licencia |
 |---|---|---|

@@ -1,0 +1,39 @@
+package com.compapptition.api.dto.invitacionDTO;
+
+import com.compapptition.api.entity.Invitacion;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+/**
+ * DTO con los datos completos de una invitación, incluyendo IDs de emisor, destinatario,
+ * competición y equipo, utilizado al crear una invitación o consultarla por token.
+ *
+ * @author Mario
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class InvitacionDetalleDTO {
+    private Long id;
+    private Long emisorId;
+    private String emisorUsername;
+    private String destinatarioUsername;
+    private Long destinatarioId;
+    private Long competicionId;
+    private String competicionNombre;
+    private Long equipoId;
+    private String equipoNombre;
+    private String rolOfrecido;
+    /**
+     * Token de un solo uso para aceptar o rechazar la invitación desde la UI.
+     */
+    private String token;
+    private Invitacion.EstadoInvitacion estado;
+    private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaExpiracion;
+}

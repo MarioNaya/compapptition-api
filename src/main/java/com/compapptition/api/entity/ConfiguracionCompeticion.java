@@ -1,0 +1,77 @@
+package com.compapptition.api.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+
+/**
+ * Almacena los parámetros de formato y puntuación específicos de una competición.
+ * Mapeada a la tabla {@code configuracion_competicion} con relación uno-a-uno con {@link Competicion},
+ * define el formato (LIGA, PLAYOFF, GRUPOS_PLAYOFF, etc.), los puntos por resultado,
+ * los días entre jornadas, el número de equipos en playoff y los partidos por eliminatoria.
+ *
+ * @author Mario
+ */
+@Entity
+@Table(name = "configuracion_competicion")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ConfiguracionCompeticion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "competicion_id", nullable = false, unique = true)
+    private Competicion competicion;
+
+    @Builder.Default
+    @Column(name = "puntos_victoria")
+    private Integer puntosVictoria = 3;
+
+    @Builder.Default
+    @Column(name = "puntos_empate")
+    private Integer puntosEmpate = 1;
+
+    @Builder.Default
+    @Column(name = "puntos_derrota")
+    private Integer puntosDerrota = 0;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private FormatoCompeticion formato = FormatoCompeticion.LIGA;
+
+    @Builder.Default
+    @Column(name = "dias_entre_jornadas")
+    private Integer diasEntreJornadas = 7;
+
+    @Builder.Default
+    @Column(name = "num_equipos_playoff")
+    private Integer numEquiposPlayoff = 8;
+
+    @Builder.Default
+    @Column(name = "partidos_eliminatoria")
+    private Integer partidosEliminatoria = 1;
+
+    /**
+     * Número de grupos en formato GRUPOS_PLAYOFF. Si es {@code null}, el generador
+     * calcula automáticamente un valor basado en el total de equipos inscritos y
+     * el tamaño del playoff. Null para otros formatos.
+     */
+    @Column(name = "num_grupos")
+    private Integer numGrupos;
+
+    public enum FormatoCompeticion {
+        EVENTO_UNICO,
+        LIGA,
+        LIGA_IDA_VUELTA,
+        PLAYOFF,
+        LIGA_PLAYOFF,
+        GRUPOS_PLAYOFF
+    }
+}

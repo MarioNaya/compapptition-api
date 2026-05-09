@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Select-String -Pattern \"\\\\.env\")",
+      "Bash(git check-ignore *)",
+      "Bash(findstr /i \"env\")",
+      "Bash(.\\\\mvnw.cmd *)",
+      "PowerShell(.\\\\mvnw.cmd -q -DskipTests compile)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git remote *)",
+      "WebSearch",
+      "WebFetch(domain:docs.railway.com)",
+      "mcp__Railway__check-railway-status",
+      "mcp__Railway__list-projects",
+      "mcp__Railway__list-services",
+      "Bash(railway status *)",
+      "Bash(railway link *)",
+      "mcp__Railway__list-variables",
+      "mcp__Railway__list-deployments"
+    ]
+  }
+}

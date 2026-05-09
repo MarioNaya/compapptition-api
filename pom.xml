@@ -8,7 +8,7 @@
 		<version>4.0.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.compapption</groupId>
+	<groupId>com.compapptition</groupId>
 	<artifactId>api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>api</name>
@@ -183,8 +183,8 @@
 					<failOnWarnings>false</failOnWarnings>
 					<quiet>true</quiet>
 					<show>protected</show>
-					<windowtitle>Compapption API · documentación técnica</windowtitle>
-					<doctitle>Compapption API · v${project.version}</doctitle>
+					<windowtitle>Compapptition API · documentación técnica</windowtitle>
+					<doctitle>Compapptition API · v${project.version}</doctitle>
 					<bottom>TFG · Mario Naya de Luis · 2026</bottom>
 				</configuration>
 			</plugin>

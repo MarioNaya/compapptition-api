@@ -1,4 +1,4 @@
-# PROYECTO REAL — Compapption API
+# PROYECTO REAL — Compapptition API
 
 ## Permisos de Claude en este proyecto
 
@@ -13,7 +13,7 @@ Solo portar al real código que ya funciona y ha pasado tests en la guía.
 
 - **Spring Boot:** 4.0.2
 - **Java:** 21
-- **Package raíz:** `com.compapption.api`
+- **Package raíz:** `com.compapptition.api`
 - **DB producción:** MySQL | **DB tests:** H2
 - **DTO pattern:** Simple + Detalle (dos clases por entidad)
 - **Imágenes:** `byte[]` BLOB (campo `foto`/`imagen` + campo `mimeType`)

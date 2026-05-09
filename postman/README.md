@@ -1,12 +1,12 @@
-# Colección Postman — Compapption API
+# Colección Postman — Compapptition API
 
 ## Archivos
-- `compapption-api.postman_collection.json` — 84 requests en 11 carpetas
-- `compapption-local.postman_environment.json` — Variables del entorno local
+- `compapptition-api.postman_collection.json` — 84 requests en 11 carpetas
+- `compapptition-local.postman_environment.json` — Variables del entorno local
 
 ## Importar en Postman
 1. Importar ambos archivos (File → Import)
-2. Seleccionar el environment "Compapption - Local" en la esquina superior derecha
+2. Seleccionar el environment "Compapptition - Local" en la esquina superior derecha
 
 ## Ejecutar con Newman (línea de comandos)
 
@@ -21,10 +21,10 @@ npm install -g newman-reporter-htmlextra   # informe HTML bonito (opcional)
 cd C:\Users\mario\Desktop\api\postman
 
 # Informe básico en consola
-newman run compapption-api.postman_collection.json -e compapption-local.postman_environment.json
+newman run compapptition-api.postman_collection.json -e compapptition-local.postman_environment.json
 
 # Informe HTML (requiere newman-reporter-htmlextra)
-newman run compapption-api.postman_collection.json -e compapption-local.postman_environment.json -r htmlextra --reporter-htmlextra-export informe.html
+newman run compapptition-api.postman_collection.json -e compapptition-local.postman_environment.json -r htmlextra --reporter-htmlextra-export informe.html
 ```
 
 ## Variables del environment
