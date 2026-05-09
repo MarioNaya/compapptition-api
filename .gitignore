@@ -34,6 +34,8 @@ build/
 
 ### Variables de Entorno ###
 .env
+.env.*
+!.env.example
 
 ### Autogenerados (HTML, reportes, documentación) ###
 site/
