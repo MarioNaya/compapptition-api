@@ -71,12 +71,17 @@ class CloudinaryServiceTest {
     }
 
     @Test
-    void upload_contentTypeSpoofeado_phpDisfrazadoDeJpeg_lanzaBadRequest() {
-        // Atacante envía PHP renombrado a .jpg con Content-Type forzado a image/jpeg.
-        // La validación de magic bytes lo detecta y rechaza, aunque el header pase.
-        byte[] phpDisfrazado = "<?php system($_GET['cmd']); ?>".getBytes();
+    void upload_contentTypeSpoofeadoConBytesNoImagen_lanzaBadRequest() {
+        // Vector clásico que se cierra con magic bytes: el atacante envía un payload
+        // arbitrario (típicamente una webshell con extensión .jpg) y fuerza el
+        // Content-Type a "image/jpeg" en la cabecera HTTP. La whitelist de
+        // Content-Type por sí sola lo aceptaría; la validación de magic bytes lo
+        // rechaza porque la firma binaria no coincide con ninguno de los formatos
+        // permitidos. Aquí usamos un payload ASCII inocuo (no se incluye un payload
+        // real de webshell para evitar falsos positivos del antivirus en el repo).
+        byte[] payloadNoImagen = "NOT_AN_IMAGE_PAYLOAD_FOR_TESTING".getBytes();
         MultipartFile spoofeado = new MockMultipartFile(
-                "file", "shell.jpg", "image/jpeg", phpDisfrazado);
+                "file", "documento.jpg", "image/jpeg", payloadNoImagen);
 
         assertThatThrownBy(() -> cloudinaryService.upload(spoofeado, "escudos"))
                 .isInstanceOf(BadRequestException.class)
