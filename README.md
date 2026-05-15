@@ -8,11 +8,13 @@
 [![Tests](https://img.shields.io/badge/JUnit-200%2F200-brightgreen)](#tests)
 [![License](https://img.shields.io/badge/license-academic-blue)](#licencia)
 
+> 🚀 **Pruébala en producción:** la _beta_ de Compapptition está desplegada y abierta a feedback en **[https://compapptition.com](https://compapptition.com)** (frontend en Hostinger, este backend en Railway sobre `https://api.compapptition.com`).
+
 Backend REST de **Compapptition**, app para la **gestión integral de competiciones deportivas**: ligas, playoffs y formatos mixtos, inscripción de equipos y jugadores, generación automática de calendarios, registro de resultados y estadísticas, clasificaciones en vivo, mensajería 1-a-1, notificaciones SSE, tickets de soporte y RBAC contextual por competición.
 
 Construido con **Spring Boot 4.0.2 + Java 21** sobre MySQL, autenticación JWT (access + refresh cookie HttpOnly), single-flight refresh, almacenamiento de imágenes en **Cloudinary** (server-side autenticado con validación de magic bytes), envío de emails SMTP y suite de tests **200 / 200** (unit + integración + Postman).
 
-> Repositorio de código del Trabajo de Fin de Grado del autor. La documentación pública (memoria, manual técnico, decisiones D01-D41, auditorías) vive en el repo separado **[`compapptition-docs`](https://github.com/MarioNaya/compapptition-docs)**.
+> Repositorio de código del Trabajo de Fin de Grado del autor. La documentación pública (memoria, manual técnico, decisiones D01-D45, auditorías) vive en el repo separado **[`compapptition-docs`](https://github.com/MarioNaya/compapptition-docs)**.
 
 ---
 
@@ -454,10 +456,10 @@ Compapptition es el proyecto de **Trabajo de Fin de Grado** del autor (curso 202
 | Repo | Contenido | Licencia |
 |---|---|---|
 | **`compapptition/api`** (este) | Backend Spring Boot 4.0.2 + Java 21 + MySQL | Académica |
-| [`compapptition/front-web`](https://github.com/MarioNaya/compapptition-front-web) | Frontend web Angular 21.2 + Tailwind 4 | Académica |
-| [`compapptition-docs`](https://github.com/MarioNaya/compapptition-docs) | Documentación pública (memoria, manual técnico, decisiones D01-D41, auditorías, sistema agéntico) | CC BY 4.0 (docs) + MIT (plantilla agéntica) |
+| [`compapptition/front-web`](https://github.com/MarioNaya/compapptition-front-web) | Frontend web Angular 21.2 + _design system_ propio en SCSS | Académica |
+| [`compapptition-docs`](https://github.com/MarioNaya/compapptition-docs) | Documentación pública (memoria, manual técnico, decisiones D01-D45, auditorías, sistema agéntico) | CC BY 4.0 (docs) + MIT (plantilla agéntica) |
 
-Para arquitectura completa, decisiones D01-D41, auditorías de seguridad, manual técnico narrado y estado de tests por release, consulta el repo `compapptition-docs`.
+Para arquitectura completa, decisiones D01-D45, auditorías de seguridad, manual técnico narrado y estado de tests por release, consulta el repo `compapptition-docs`.
 
 ---
 
