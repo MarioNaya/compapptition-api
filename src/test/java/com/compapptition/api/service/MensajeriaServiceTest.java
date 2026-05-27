@@ -120,11 +120,11 @@ class MensajeriaServiceTest {
     }
 
     // =========================================================
-    // enviarMensaje — actualiza fechaUltimoMensaje sin notificación bell
+    // enviarMensaje — actualiza fechaUltimoMensaje y emite SSE MENSAJE_RECIBIDO
     // =========================================================
 
     @Test
-    void enviarMensaje_flujoFeliz_actualizaFechaSinNotificacion() {
+    void enviarMensaje_flujoFeliz_actualizaFechaYEmiteMensajeRecibido() {
         Conversacion conv = Conversacion.builder().id(1L).usuarioA(alice).usuarioB(bob).build();
         MensajeCreateRequest req = new MensajeCreateRequest("Hola Bob!");
 
@@ -143,9 +143,20 @@ class MensajeriaServiceTest {
         assertThat(conv.getFechaUltimoMensaje()).isNotNull();
         verify(conversacionRepository).save(conv);
 
-        // Ya no se dispara notificación tipo MENSAJE_RECIBIDO: la bandeja de
-        // mensajería tiene su propio contador y duplicar el aviso confunde.
-        verify(notificacionService, never()).crear(anyLong(), any(), any());
+        // Se emite SSE MENSAJE_RECIBIDO al otro participante (bob, id=2). El
+        // frontend lo bifurca en NotificationService para que MensajeriaService
+        // refresque el badge global sin que entre al dropdown de la campana.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(notificacionService).crear(
+                eq(2L),
+                eq(Notificacion.TipoNotificacion.MENSAJE_RECIBIDO),
+                payloadCaptor.capture());
+        Map<String, Object> payload = payloadCaptor.getValue();
+        assertThat(payload).containsEntry("conversacionId", 1L);
+        assertThat(payload).containsEntry("autorId", 1L);
+        assertThat(payload).containsEntry("autorUsername", "alice");
+        assertThat(payload).containsEntry("preview", "Hola Bob!");
     }
 
     @Test

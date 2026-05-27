@@ -182,10 +182,22 @@ public class MensajeriaService {
         conversacion.setFechaUltimoMensaje(LocalDateTime.now());
         conversacionRepository.save(conversacion);
 
-        // No emitimos notificación tipo MENSAJE_RECIBIDO: la bandeja de
-        // mensajería ya muestra el contador y duplicar el aviso en la campana
-        // resulta confuso. Si en el futuro se quisiera reactivar, basta con
-        // llamar a notificacionService.crear con TipoNotificacion.MENSAJE_RECIBIDO.
+        // Emitimos MENSAJE_RECIBIDO al destinatario por el canal SSE del
+        // NotificacionService. El frontend lo intercepta antes del dropdown
+        // de la campana (lo bifurca a MensajeriaService para refrescar el
+        // badge global del mail), así no se duplica el aviso.
+        Usuario destinatario = Objects.equals(conversacion.getUsuarioA().getId(), autorId)
+                ? conversacion.getUsuarioB()
+                : conversacion.getUsuarioA();
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("conversacionId", conversacion.getId());
+        payload.put("autorId", autor.getId());
+        payload.put("autorUsername", autor.getUsername());
+        payload.put("preview", truncarPreview(req.getContenido()));
+        notificacionService.crear(
+                destinatario.getId(),
+                Notificacion.TipoNotificacion.MENSAJE_RECIBIDO,
+                payload);
 
         return mensajeMapper.toDTO(mensaje);
     }
@@ -212,6 +224,16 @@ public class MensajeriaService {
     }
 
     /// === HELPERS === ///
+
+    /** Cap del campo {@code preview} en el payload SSE de MENSAJE_RECIBIDO. */
+    private static final int PREVIEW_MAX_LENGTH = 80;
+
+    private String truncarPreview(String contenido) {
+        if (contenido == null) return "";
+        return contenido.length() > PREVIEW_MAX_LENGTH
+                ? contenido.substring(0, PREVIEW_MAX_LENGTH) + "…"
+                : contenido;
+    }
 
     private void verificarPertenencia(Conversacion conversacion, Long usuarioId) {
         Long aId = conversacion.getUsuarioA() != null ? conversacion.getUsuarioA().getId() : null;
