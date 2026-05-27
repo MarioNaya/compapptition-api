@@ -1,6 +1,7 @@
 package com.compapptition.api.service.calendario;
 
 import com.compapptition.api.entity.*;
+import com.compapptition.api.exception.BadRequestException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -45,6 +46,15 @@ public class GeneradorLiga implements GeneradorCalendario{
                                 LocalDateTime fechaInicio,
                                 Integer diasJornada,
                                 ConfiguracionCompeticion config) {
+        if (config.getFormato() == ConfiguracionCompeticion.FormatoCompeticion.LIGA_PLAYOFF) {
+            int numEquiposPlayoff = config.getNumEquiposPlayoff() != null ? config.getNumEquiposPlayoff() : 8;
+            if (equipos.size() < numEquiposPlayoff) {
+                throw new BadRequestException(
+                        "El formato Liga + Playoff requiere al menos " + numEquiposPlayoff
+                                + " equipos inscritos para llenar la fase eliminatoria (hay "
+                                + equipos.size() + ").");
+            }
+        }
         boolean idaYVuelta = config.getFormato() == ConfiguracionCompeticion.FormatoCompeticion.LIGA_IDA_VUELTA;
         return generarRoundRobin(competicion,equipos,fechaInicio, diasJornada,idaYVuelta);
     }

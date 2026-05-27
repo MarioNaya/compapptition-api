@@ -4,6 +4,7 @@ import com.compapptition.api.entity.Competicion;
 import com.compapptition.api.entity.ConfiguracionCompeticion;
 import com.compapptition.api.entity.Equipo;
 import com.compapptition.api.entity.Evento;
+import com.compapptition.api.exception.BadRequestException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -46,6 +47,15 @@ public class GeneradorPlayoff implements GeneradorCalendario {
                                 LocalDateTime fechaInicio,
                                 Integer diasJornada,
                                 ConfiguracionCompeticion config) {
+        int numEquiposPlayoff = config != null && config.getNumEquiposPlayoff() != null
+                ? config.getNumEquiposPlayoff() : 8;
+        if (equipos.size() != numEquiposPlayoff) {
+            throw new BadRequestException(
+                    "El playoff requiere exactamente " + numEquiposPlayoff
+                            + " equipos inscritos (hay " + equipos.size()
+                            + "). Ajusta el número de equipos del playoff en la configuración"
+                            + " o inscribe los equipos restantes antes de generar el calendario.");
+        }
         List<Equipo> barajados = new ArrayList<>(equipos);
         Collections.shuffle(barajados);
         int diasJornada_ = diasJornada != null ? diasJornada : (config != null && config.getDiasEntreJornadas() != null ? config.getDiasEntreJornadas() : 7);

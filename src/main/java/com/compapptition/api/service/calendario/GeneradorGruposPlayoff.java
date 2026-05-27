@@ -4,6 +4,7 @@ import com.compapptition.api.entity.Competicion;
 import com.compapptition.api.entity.ConfiguracionCompeticion;
 import com.compapptition.api.entity.Equipo;
 import com.compapptition.api.entity.Evento;
+import com.compapptition.api.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +55,13 @@ public class GeneradorGruposPlayoff implements GeneradorCalendario {
                                 LocalDateTime fechaInicio,
                                 Integer diasJornada,
                                 ConfiguracionCompeticion config) {
+        int numEquiposPlayoff = config.getNumEquiposPlayoff() != null ? config.getNumEquiposPlayoff() : 8;
+        if (equipos.size() < numEquiposPlayoff) {
+            throw new BadRequestException(
+                    "El formato Grupos + Playoff requiere al menos " + numEquiposPlayoff
+                            + " equipos inscritos para llenar la fase eliminatoria (hay "
+                            + equipos.size() + ").");
+        }
         // Si el usuario ha fijado el número de grupos en la configuración, se
         // respeta (validado contra mínimos). Si no, se calcula automáticamente.
         int numGrupos = (config.getNumGrupos() != null)
